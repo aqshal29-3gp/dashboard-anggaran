@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="./image-slot.js"></script>
 <style>
   :root{
     --navy:#0B2545; --navy-2:#12325C; --navy-3:#1B4079;
@@ -47,12 +48,14 @@
 </style>
 </helmet>
 
-<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--bg)">
+<div data-theme="{{ theme }}" style="min-height:100vh;color:var(--ink);background:var(--bg)">
 
   <header style="position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;box-shadow:0 8px 24px -16px rgba(0,0,0,.55)">
     <div style="max-width:1460px;margin:0 auto;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px">
       <div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 340px">
-        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;font-weight:800;font-size:12px;letter-spacing:.06em;flex:0 0 auto">IP</div>
+        <div style="width:52px;height:52px;flex:0 0 auto;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18)">
+          <image-slot id="logo-kemenimipas" shape="rounded" radius="10" fit="contain" placeholder="Logo"></image-slot>
+        </div>
         <div style="min-width:0">
           <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:600">{{ unit }}</div>
           <h1 style="margin:2px 0 0;font-size:19px;line-height:1.25;font-weight:800;letter-spacing:-.01em">Dashboard Monitoring Penyerapan Anggaran</h1>
@@ -63,7 +66,6 @@
           <span style="width:7px;height:7px;border-radius:50%;background:#34D399;box-shadow:0 0 0 3px rgba(52,211,153,.22)"></span>
           <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:rgba(255,255,255,.86)">Update: {{ lastUpdate }}</span>
         </div>
-        <a href="admin.html" style="height:38px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:13px;font-weight:600" style-hover="background:rgba(255,255,255,.18);text-decoration:none;color:#fff">Panel Admin</a>
         <button type="button" onClick="{{ refresh }}" style="height:38px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-family:Manrope;font-size:13px;font-weight:600;cursor:pointer;transition:all 200ms ease" style-hover="background:rgba(255,255,255,.18)">Muat Ulang</button>
         <button type="button" onClick="{{ toggleTheme }}" title="Mode gelap / terang" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer;transition:all 200ms ease" style-hover="background:rgba(255,255,255,.18)">{{ themeIcon }}</button>
       </div>
@@ -91,7 +93,7 @@
       <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">Sumber: {{ sourceLabel }} · {{ pencairanCount }} bukti pencairan</div>
     </section>
 
-    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:16px">
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px">
       <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
         <article style="position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow);animation:fadeUp 360ms ease both;transition:transform 220ms ease" style-hover="transform:translateY(-2px)">
           <div style="position:absolute;inset:0 auto 0 0;width:4px;background:{{ k.color }}"></div>
@@ -99,7 +101,7 @@
             <span style="font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">{{ k.label }}</span>
             <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 7px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap">{{ k.tag }}</span>
           </div>
-          <div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.1">{{ k.value }}</div>
+          <div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.1;color:var(--ink)">{{ k.value }}</div>
           <div style="margin-top:6px;font-size:12.5px;color:var(--ink-2)">{{ k.sub }}</div>
           <div style="margin-top:14px;height:6px;border-radius:99px;background:var(--line-2);overflow:hidden">
             <div style="height:100%;border-radius:99px;background:{{ k.color }};width:{{ k.bar }};transition:width 700ms cubic-bezier(.22,.61,.36,1)"></div>
@@ -111,8 +113,8 @@
     <section style="margin-top:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
       <div style="flex:2 1 560px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
         <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px">
-          <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Pagu vs Realisasi per Komponen Utama</h2>
-          <span style="font-size:11.5px;color:var(--ink-3);font-family:'IBM Plex Mono',monospace">dalam juta rupiah</span>
+          <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Persentase Penyerapan per Komponen Utama</h2>
+          <span style="font-size:11.5px;color:var(--ink-3);font-family:'IBM Plex Mono',monospace">% terhadap pagu masing-masing</span>
         </div>
         <div style="margin-top:14px;height:440px;position:relative">
           <canvas ref="{{ barRef }}"></canvas>
@@ -126,7 +128,7 @@
             <canvas ref="{{ donutRef }}"></canvas>
             <div style="position:absolute;inset:0;display:grid;place-items:center;pointer-events:none">
               <div style="text-align:center">
-                <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;letter-spacing:-.02em">{{ pctTotal }}</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;letter-spacing:-.02em;color:var(--ink)">{{ pctTotal }}</div>
                 <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-top:2px">terserap</div>
               </div>
             </div>
@@ -140,6 +142,26 @@
               </div>
             </sc-for>
           </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between">
+            <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Status Berkas Butir Kegiatan</h2>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ butirTotal }}</span>
+          </div>
+          <div style="margin-top:12px;display:grid;gap:9px">
+            <sc-for list="{{ berkasSummary }}" as="b" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:18px;height:18px;flex:0 0 auto;border-radius:6px;background:{{ b.color }};color:#fff;display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:700">{{ b.urut }}</span>
+                <span style="font-size:12px;font-weight:600;color:{{ b.color }};flex:0 0 auto;width:112px">{{ b.pendek }}</span>
+                <div style="flex:1;height:9px;border-radius:99px;background:var(--line-2);overflow:hidden">
+                  <div style="height:100%;background:{{ b.color }};width:{{ b.bar }};transition:width 700ms cubic-bezier(.22,.61,.36,1)"></div>
+                </div>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;width:22px;text-align:right">{{ b.jumlah }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:13px;padding:11px 13px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-2);font-size:11.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty">Alur berkas 3 tahap: Verifikasi Tim TU Pusdatin KP → Verifikasi Tim Keuangan → SP2D. <strong>Revisi</strong> bukan tahap wajib, melainkan penanda bagi berkas yang dikembalikan untuk diperbaiki.</div>
         </div>
 
         <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
@@ -163,7 +185,7 @@
       <div style="padding:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line-2)">
         <div style="min-width:0">
           <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Tabel Anggaran Hierarki</h2>
-          <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2)">Klik baris komponen utama untuk membuka rincian subkomponen · nilai dalam rupiah</div>
+          <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2)">Klik komponen utama untuk mengembangkan · klik subkomponen untuk membuka popup rincian anggaran &amp; butir kegiatan</div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px">
           <div style="position:relative">
@@ -188,21 +210,21 @@
 
       <sc-if value="{{ showTable }}" hint-placeholder-val="{{ true }}">
         <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-          <table style="width:100%;border-collapse:collapse;min-width:1000px">
+          <table style="width:100%;border-collapse:collapse;min-width:880px">
             <thead>
               <tr style="background:var(--surface-2)">
                 <th style="text-align:left;padding:11px 18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line)">Komponen / Subkomponen</th>
                 <th style="text-align:right;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Pagu</th>
                 <th style="text-align:right;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Realisasi</th>
                 <th style="text-align:right;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Sisa</th>
-                <th style="text-align:left;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);width:154px">Penyerapan</th>
+                <th style="text-align:left;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);width:132px">Penyerapan</th>
                 <th style="text-align:left;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Status</th>
-                <th style="text-align:right;padding:11px 18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Data Dukung</th>
+                <th style="text-align:right;padding:11px 18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Rincian</th>
               </tr>
             </thead>
             <tbody>
               <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
-                <tr style="border-bottom:1px solid var(--line-2);background:{{ r.rowBg }};transition:background 160ms ease" style-hover="background:var(--surface-3)">
+                <tr onClick="{{ r.onRowClick }}" title="{{ r.rowTitle }}" style="border-bottom:1px solid var(--line-2);background:{{ r.rowBg }};cursor:pointer;transition:background 160ms ease" style-hover="background:var(--surface-3)">
                   <td style="padding:0;vertical-align:middle">
                     <div style="display:flex;align-items:center;gap:10px;padding:10px 18px;padding-left:{{ r.indent }}">
                       <button type="button" onClick="{{ r.onToggle }}" aria-label="Buka / tutup rincian" style="width:24px;height:24px;flex:0 0 auto;border-radius:7px;border:1px solid {{ r.caretBorder }};background:{{ r.caretBg }};color:{{ r.caretColor }};font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1;cursor:{{ r.caretCursor }};display:grid;place-items:center;transition:all 180ms ease">{{ r.caret }}</button>
@@ -230,7 +252,7 @@
                     <span style="display:inline-block;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ r.badgeBg }};color:{{ r.color }};border:1px solid {{ r.color }}">{{ r.statusLabel }}</span>
                   </td>
                   <td style="padding:10px 18px;text-align:right;white-space:nowrap">
-                    <button type="button" onClick="{{ r.onDocs }}" title="Lihat riwayat pencairan &amp; dokumen bukti" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all 180ms ease" style-hover="border-color:var(--navy-3);background:var(--surface-2)">
+                    <button type="button" onClick="{{ r.onDocs }}" title="Buka popup rincian: status pencairan, sisa anggaran, dan butir kegiatan" style="height:32px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all 180ms ease" style-hover="border-color:var(--navy-3);background:var(--surface-2)">
                       <span style="font-size:12px">🗎</span>
                       <span>{{ r.docsLabel }}</span>
                     </button>
@@ -269,72 +291,7 @@
   </footer>
 
   <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
-    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:60;background:rgba(6,16,32,.62);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto">
-      <div onClick="{{ stop }}" role="dialog" aria-modal="true" style="width:100%;max-width:940px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);animation:pop 220ms cubic-bezier(.22,.61,.36,1) both;overflow:hidden">
-        <div style="padding:20px 22px;border-bottom:1px solid var(--line-2);display:flex;gap:16px;align-items:flex-start;justify-content:space-between;background:var(--surface-2)">
-          <div style="min-width:0">
-            <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">Data Dukung Pencairan</div>
-            <h3 style="margin:5px 0 0;font-size:17px;font-weight:800;letter-spacing:-.01em;text-wrap:pretty">{{ modalTitle }}</h3>
-            <div style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">{{ modalKode }}</div>
-          </div>
-          <button type="button" onClick="{{ closeModal }}" aria-label="Tutup" style="width:34px;height:34px;flex:0 0 auto;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:15px;cursor:pointer;transition:all 180ms ease" style-hover="border-color:var(--navy-3);color:var(--ink)">✕</button>
-        </div>
-
-        <div style="padding:16px 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;border-bottom:1px solid var(--line-2)">
-          <sc-for list="{{ modalStats }}" as="m" hint-placeholder-count="4">
-            <div style="padding:12px 14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line-2)">
-              <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">{{ m.label }}</div>
-              <div style="margin-top:5px;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:{{ m.color }}">{{ m.value }}</div>
-            </div>
-          </sc-for>
-        </div>
-
-        <sc-if value="{{ modalHasDocs }}" hint-placeholder-val="{{ true }}">
-          <div style="max-height:52vh;overflow:auto">
-            <table style="width:100%;border-collapse:collapse;min-width:720px">
-              <thead>
-                <tr style="background:var(--surface-2);position:sticky;top:0">
-                  <th style="text-align:left;padding:10px 22px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">ID</th>
-                  <th style="text-align:left;padding:10px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Tanggal Cair</th>
-                  <th style="text-align:right;padding:10px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Nominal</th>
-                  <th style="text-align:left;padding:10px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line)">Keterangan</th>
-                  <th style="text-align:right;padding:10px 22px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Bukti</th>
-                </tr>
-              </thead>
-              <tbody>
-                <sc-for list="{{ modalDocs }}" as="d" hint-placeholder-count="4">
-                  <tr style="border-bottom:1px solid var(--line-2)" style-hover="background:var(--surface-2)">
-                    <td style="padding:11px 22px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3);white-space:nowrap;vertical-align:top">{{ d.id }}</td>
-                    <td style="padding:11px 12px;font-size:12.5px;white-space:nowrap;vertical-align:top">{{ d.tanggal }}</td>
-                    <td style="padding:11px 12px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;white-space:nowrap;vertical-align:top">{{ d.nominal }}</td>
-                    <td style="padding:11px 12px;font-size:12.5px;color:var(--ink-2);vertical-align:top;max-width:280px;text-wrap:pretty">
-                      {{ d.keterangan }}
-                      <div style="margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-3)">{{ d.komponen }}</div>
-                    </td>
-                    <td style="padding:11px 22px;text-align:right;vertical-align:top">
-                      <a href="{{ d.dokumen }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:11.5px;font-weight:600;white-space:nowrap" style-hover="border-color:var(--blue);text-decoration:none">Buka ↗</a>
-                    </td>
-                  </tr>
-                </sc-for>
-              </tbody>
-            </table>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ modalNoDocs }}" hint-placeholder-val="{{ false }}">
-          <div style="padding:48px 24px;text-align:center">
-            <div style="width:44px;height:44px;margin:0 auto 12px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-size:17px;color:var(--ink-3)">🗎</div>
-            <div style="font-size:14.5px;font-weight:700">Belum ada data dukung pencairan</div>
-            <div style="margin-top:4px;font-size:13px;color:var(--ink-2);max-width:44ch;margin-left:auto;margin-right:auto;text-wrap:pretty">Komponen ini belum memiliki riwayat pencairan pada Sheet "Pencairan". Admin dapat menambahkannya melalui Panel Admin.</div>
-          </div>
-        </sc-if>
-
-        <div style="padding:14px 22px;border-top:1px solid var(--line-2);background:var(--surface-2);display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center">
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">{{ modalCount }}</span>
-          <button type="button" onClick="{{ closeModal }}" style="height:36px;padding:0 16px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:var(--navy-3)">Tutup</button>
-        </div>
-      </div>
-    </div>
+    <dc-import name="SubcomponentModal" node="{{ modalNode }}" parent="{{ modalParent }}" editable="{{ false }}" on-close="{{ closeModal }}" hint-size="100%,100%"></dc-import>
   </sc-if>
 </div>
 </x-dc>
@@ -342,8 +299,8 @@
 /* Konfigurasi & sumber data ada di data-source.js (satu tempat untuk kedua halaman). */
 class Component extends DCLogic {
   state = {
-    anggaran: [], pencairan: [], source: '—', isLoading: true, errorMsg: '', updated: null,
-    expanded: {}, allOpen: false, query: '', status: 'ALL', modal: null, theme: null
+    anggaran: [], pencairan: [], butir: [], source: '—', isLoading: true, errorMsg: '', updated: null,
+    expanded: {}, allOpen: false, query: '', status: 'ALL', modal: null, modalParent: null, theme: null
   };
 
   async componentDidMount() {
@@ -366,14 +323,16 @@ class Component extends DCLogic {
     if (!silent) this.setState({ isLoading: true, errorMsg: '' });
     try {
       const d = await this.ds.fetchAll();
-      this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, source: d.source, isLoading: false, errorMsg: '', updated: new Date() });
+      this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, butir: d.butir || [], source: d.source, isLoading: false, errorMsg: '', updated: new Date() });
     } catch (e) {
       const f = this.ds.seedFallback();
-      this.setState({ anggaran: f.anggaran, pencairan: f.pencairan, source: f.source, isLoading: false, updated: new Date(), errorMsg: (e && e.message) || String(e) });
+      this.setState({ anggaran: f.anggaran, pencairan: f.pencairan, butir: f.butir || [], source: f.source, isLoading: false, updated: new Date(), errorMsg: (e && e.message) || String(e) });
     }
+    // ⚡ REAL-TIME: ganti polling di componentDidMount dengan langganan WebSocket
+    // (mis. socket.on('anggaran:update', d => this.setState({...}))) bila backend siap.
   }
 
-  tree() { return this.ds ? this.ds.buildTree(this.state.anggaran, this.state.pencairan) : { utama: [], totals: { pagu: 0, realisasi: 0, sisa: 0, pct: 0, avg: 0, nKomponen: 0, nPencairan: 0 } }; }
+  tree() { return this.ds ? this.ds.buildTree(this.state.anggaran, this.state.pencairan, this.state.butir) : { utama: [], totals: { pagu: 0, realisasi: 0, sisa: 0, pct: 0, avg: 0, nKomponen: 0, nPencairan: 0, nButir: 0 } }; }
 
   visibleUtama() {
     const q = this.state.query.trim().toLowerCase();
@@ -401,31 +360,35 @@ class Component extends DCLogic {
     const grid = dark ? 'rgba(255,255,255,.08)' : 'rgba(11,37,69,.08)';
     const tick = dark ? '#A6B6CE' : '#4A5A72';
 
+    // Bar 100% bertumpuk: proporsi terserap vs belum terserap terhadap pagu.
+    const pctTerserap = utama.map(u => Math.min(100, u.pct));
     const barData = {
       labels: utama.map(u => u.nama.length > 32 ? u.nama.slice(0, 31) + '…' : u.nama),
       datasets: [
-        { label: 'Pagu', data: utama.map(u => u.pagu / 1e6), backgroundColor: dark ? '#3B6FB8' : '#1B4079', borderRadius: 4, barPercentage: .72, categoryPercentage: .74 },
-        { label: 'Realisasi', data: utama.map(u => u.realisasi / 1e6), backgroundColor: dark ? '#34D399' : '#0E9F6E', borderRadius: 4, barPercentage: .72, categoryPercentage: .74 }
+        { label: 'Terserap', data: pctTerserap, backgroundColor: dark ? '#34D399' : '#0E9F6E', borderRadius: { topLeft: 0, bottomLeft: 0, topRight: 4, bottomRight: 4 }, barPercentage: .78, categoryPercentage: .8 },
+        { label: 'Belum terserap', data: pctTerserap.map(p => 100 - p), backgroundColor: dark ? '#1E3050' : '#DCE4F0', borderRadius: 4, barPercentage: .78, categoryPercentage: .8 }
       ]
     };
     const barOpts = {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: { duration: 600 },
-      onClick: (evt, els) => { if (els && els.length) this.openDocs(utama[els[0].index]); },
+      onClick: (evt, els) => { if (els && els.length) this.openDocs(utama[els[0].index], null); },
       plugins: {
         legend: { position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle', color: tick, font: { family: 'Manrope', size: 12 } } },
         tooltip: {
           callbacks: {
-            label: (c) => c.dataset.label + ': Rp ' + fmt(c.raw * 1e6),
+            label: (c) => c.dataset.label + ': ' + c.raw.toFixed(2) + '%',
             afterBody: (items) => {
               const u = utama[items[0].dataIndex];
-              return 'Penyerapan: ' + u.pct.toFixed(2) + '%   Bukti: ' + u.docs.length + ' pencairan';
+              return ['Pagu:      Rp ' + fmt(u.pagu),
+                      'Realisasi: Rp ' + fmt(u.realisasi),
+                      'Sisa:      Rp ' + fmt(u.sisa)];
             }
           }
         }
       },
       scales: {
-        x: { grid: { color: grid }, border: { display: false }, ticks: { color: tick, font: { family: 'IBM Plex Mono', size: 10.5 }, callback: (v) => nf.format(v) } },
-        y: { grid: { display: false }, border: { display: false }, ticks: { color: tick, font: { family: 'Manrope', size: 11 }, autoSkip: false } }
+        x: { stacked: true, min: 0, max: 100, grid: { color: grid }, border: { display: false }, ticks: { color: tick, font: { family: 'IBM Plex Mono', size: 10.5 }, stepSize: 25, callback: (v) => v + '%' } },
+        y: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { color: tick, font: { family: 'Manrope', size: 11 }, autoSkip: false } }
       }
     };
     const donutData = {
@@ -445,7 +408,8 @@ class Component extends DCLogic {
 
   /* ------------------------------- aksi --------------------------------- */
   toggle = (id) => this.setState(s => ({ expanded: { ...s.expanded, [id]: !s.expanded[id] } }));
-  openDocs = (node) => this.setState({ modal: node });
+  /** Buka popup rincian. `parent` dipakai agar bar tingkat Komponen juga tampil. */
+  openDocs = (node, parent) => this.setState({ modal: node, modalParent: parent || null });
 
   exportCsv = () => {
     const { fmt } = this.ds;
@@ -483,20 +447,27 @@ class Component extends DCLogic {
         caretColor: hasKids ? '#fff' : 'var(--ink-3)',
         caretBorder: hasKids ? 'var(--navy)' : 'var(--line)',
         caretCursor: hasKids ? 'pointer' : 'default',
-        onToggle: hasKids ? () => this.toggle(u.id) : () => {},
+        onToggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); if (hasKids) this.toggle(u.id); },
+        onRowClick: () => (hasKids ? this.toggle(u.id) : this.openDocs(u, null)),
+        rowTitle: hasKids ? 'Klik untuk membuka/menutup subkomponen' : 'Klik untuk melihat rincian',
         pagu: fmt(u.pagu), realisasi: fmt(u.realisasi), sisa: fmt(u.sisa),
         pct: u.pct.toFixed(2) + '%', bar: Math.min(100, u.pct).toFixed(1) + '%',
         color: u.status.color, badgeBg: u.status.bg, statusLabel: u.status.label,
-        docsLabel: u.docs.length + ' bukti', onDocs: () => this.openDocs(u)
+        docsLabel: (u.butir || []).length + ' butir · ' + u.docs.length + ' bukti',
+        onDocs: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(u, null); }
       });
       if (open) u.children.forEach(c => rows.push({
         kode: c.id, nama: c.nama, tipeLabel: 'Subkomponen', weight: '500', indent: '54px',
         rowBg: 'transparent', caret: '›', caretBg: 'var(--surface)', caretColor: 'var(--ink-3)',
-        caretBorder: 'var(--line)', caretCursor: 'default', onToggle: () => {},
+        caretBorder: 'var(--line)', caretCursor: 'pointer',
+        onToggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(c, u); },
+        onRowClick: () => this.openDocs(c, u),
+        rowTitle: 'Klik untuk membuka popup rincian subkomponen',
         pagu: fmt(c.pagu), realisasi: fmt(c.realisasi), sisa: fmt(c.sisa),
         pct: c.pct.toFixed(2) + '%', bar: Math.min(100, c.pct).toFixed(1) + '%',
         color: c.status.color, badgeBg: c.status.bg, statusLabel: c.status.label,
-        docsLabel: c.docs.length + ' bukti', onDocs: () => this.openDocs(c)
+        docsLabel: (c.butir || []).length + ' butir · ' + c.docs.length + ' bukti',
+        onDocs: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(c, u); }
       }));
     });
 
@@ -542,6 +513,15 @@ class Component extends DCLogic {
         { label: 'Kritis <25%', count: counts.kritis, bar: (counts.kritis / maxCount * 100) + '%', color: 'var(--red)' },
         { label: 'Over budget', count: counts.over, bar: (counts.over / maxCount * 100) + '%', color: 'var(--red)' }
       ],
+      butirTotal: (totals.nButir || 0) + ' berkas',
+      berkasSummary: (() => {
+        const r = totals.ringkasButir || {};
+        const tahap = (this.ds ? this.ds.STATUS_BUTIR : []).map(t => ({ urut: String(t.urut), pendek: t.pendek, color: t.color, jumlah: r[t.key] || 0 }));
+        // Revisi ditampilkan terpisah: penanda kondisional, bukan tahap dalam alur.
+        tahap.push({ urut: '⚑', pendek: 'Perlu revisi', color: 'var(--red)', jumlah: r.REVISI || 0 });
+        const maxB = Math.max(1, ...tahap.map(t => t.jumlah));
+        return tahap.map(t => ({ ...t, bar: (t.jumlah / maxB * 100) + '%' }));
+      })(),
       barRef: (el) => { this.barEl = el; if (el) this.drawCharts(); },
       donutRef: (el) => { this.donutEl = el; if (el) this.drawCharts(); },
 
@@ -564,28 +544,13 @@ class Component extends DCLogic {
         this.setState({ expanded: next });
       },
       rows,
-      rowCountLabel: 'Menampilkan ' + list.length + ' komponen utama · ' + rows.length + ' baris tampil · ' + totals.nPencairan + ' bukti pencairan',
+      rowCountLabel: 'Menampilkan ' + list.length + ' komponen utama · ' + rows.length + ' baris tampil · ' + totals.nPencairan + ' bukti pencairan · ' + (totals.nButir || 0) + ' butir kegiatan',
       exportCsv: this.exportCsv,
 
       modalOpen: !!m,
-      stop: (e) => e.stopPropagation(),
-      closeModal: () => this.setState({ modal: null }),
-      modalTitle: m ? m.nama : '',
-      modalKode: m ? 'ID_Komponen: ' + m.id + (m.tipe === 'UTAMA' ? ' · agregat seluruh subkomponen' : ' · induk ' + m.parent) : '',
-      modalStats: m ? [
-        { label: 'Pagu', value: 'Rp ' + fmt(m.pagu), color: 'var(--ink)' },
-        { label: 'Realisasi', value: 'Rp ' + fmt(m.realisasi), color: 'var(--green)' },
-        { label: 'Sisa', value: 'Rp ' + fmt(m.sisa), color: 'var(--amber)' },
-        { label: 'Penyerapan', value: m.pct.toFixed(2) + '%', color: m.status.color }
-      ] : [],
-      modalHasDocs: !!m && m.docs.length > 0,
-      modalNoDocs: !!m && m.docs.length === 0,
-      modalCount: m ? m.docs.length + ' transaksi pencairan · total Rp ' + fmt(m.docs.reduce((t, d) => t + d.nominal, 0)) : '',
-      modalDocs: m ? m.docs.map(d => ({
-        id: d.id || '—', tanggal: tanggalID(d.tanggal), nominal: fmt(d.nominal),
-        keterangan: d.keterangan || '—', komponen: d.komponenId,
-        dokumen: d.dokumen || '#'
-      })) : []
+      modalNode: m,
+      modalParent: this.state.modalParent,
+      closeModal: () => this.setState({ modal: null, modalParent: null })
     };
   }
 }

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B2545; --navy-2:#12325C; --navy-3:#1B4079;
+    --surface:#FFFFFF; --surface-2:#F8FAFC; --surface-3:#EFF3F9;
+    --line:#E3E8F0; --line-2:#EDF1F7; --ink:#0B2545; --ink-2:#4A5A72; --ink-3:#7C8AA0;
+    --green:#0E9F6E; --green-bg:#E6F6EF; --amber:#C98A00; --amber-bg:#FDF4E1;
+    --red:#D93B3B; --red-bg:#FDECEC; --blue:#2563C9;
+    --shadow-lg:0 24px 64px -24px rgba(11,37,69,.45);
+  }
+  body{margin:0;font-family:Manrope,Helvetica,Arial,sans-serif}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{text-decoration:underline}
+  @keyframes popIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div onClick="{{ onClose }}" style="position:fixed;inset:0;z-index:70;background:rgba(6,16,32,.62);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto;font-family:Manrope,Helvetica,Arial,sans-serif;color:var(--ink)">
+  <div onClick="{{ stop }}" role="dialog" aria-modal="true" style="width:100%;max-width:1000px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);animation:popIn 220ms cubic-bezier(.22,.61,.36,1) both;overflow:hidden">
+
+    <div style="padding:20px 22px;border-bottom:1px solid var(--line-2);background:var(--surface-2);display:flex;gap:16px;align-items:flex-start;justify-content:space-between">
+      <div style="min-width:0">
+        <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">{{ tipeLabel }}</div>
+        <h3 style="margin:5px 0 0;font-size:18px;font-weight:800;letter-spacing:-.01em;text-wrap:pretty">{{ nama }}</h3>
+        <div style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">{{ kodeInfo }}</div>
+      </div>
+      <button type="button" onClick="{{ onClose }}" aria-label="Tutup" style="width:34px;height:34px;flex:0 0 auto;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:15px;cursor:pointer" style-hover="border-color:var(--navy-3);color:var(--ink)">✕</button>
+    </div>
+
+    <div style="padding:18px 22px;border-bottom:1px solid var(--line-2);display:grid;gap:14px">
+      <sc-for list="{{ bars }}" as="b" hint-placeholder-count="2">
+        <div style="padding:14px 16px;border-radius:14px;background:{{ b.wrapBg }};border:1px solid var(--line-2)">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between">
+            <div style="min-width:0">
+              <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">{{ b.scope }}</div>
+              <div style="margin-top:2px;font-size:13.5px;font-weight:700;text-wrap:pretty">{{ b.nama }}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;letter-spacing:-.02em;color:{{ b.color }}">{{ b.pctText }}</div>
+              <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">penyerapan</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;height:12px;border-radius:99px;background:var(--surface-3);overflow:hidden;border:1px solid var(--line-2)">
+            <div style="height:100%;border-radius:99px;background:{{ b.color }};width:{{ b.bar }};transition:width 700ms cubic-bezier(.22,.61,.36,1)"></div>
+          </div>
+          <div style="margin-top:11px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
+            <sc-for list="{{ b.angka }}" as="a" hint-placeholder-count="3">
+              <div>
+                <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">{{ a.label }}</div>
+                <div style="margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:{{ a.color }}">{{ a.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border-radius:99px;background:{{ b.badgeBg }};border:1px solid {{ b.color }}">
+            <span style="width:7px;height:7px;border-radius:50%;background:{{ b.color }}"></span>
+            <span style="font-size:11px;font-weight:700;color:{{ b.color }}">{{ b.statusText }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="padding:18px 22px;border-bottom:1px solid var(--line-2)">
+      <dc-import name="ActivityTable" items="{{ butir }}" editable="{{ editable }}" caption="{{ butirCaption }}" empty-text="{{ butirEmpty }}" on-status="{{ onStatus }}" on-edit="{{ onEdit }}" on-delete="{{ onDelete }}" hint-size="100%,320px"></dc-import>
+      <sc-if value="{{ editable }}" hint-placeholder-val="{{ false }}">
+        <button type="button" onClick="{{ onTambah }}" style="margin-top:12px;height:38px;padding:0 15px;border-radius:10px;border:1px dashed var(--navy-3);background:var(--surface-2);color:var(--navy-3);font-family:Manrope;font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:var(--surface-3)">+ Catat butir kegiatan untuk subkomponen ini</button>
+      </sc-if>
+    </div>
+
+    <div style="padding:14px 22px;background:var(--surface-2);display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ footerNote }}</span>
+      <button type="button" onClick="{{ onClose }}" style="height:36px;padding:0 16px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:var(--navy-3)">Tutup</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:760},&quot;node&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Subkomponen&quot;},&quot;parent&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;KomponenUtama | null&quot;},&quot;editable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onStatus&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(butir, statusBaru: string) =&gt; void&quot;},&quot;onEdit&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(butir) =&gt; void&quot;},&quot;onDelete&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(butir) =&gt; void&quot;},&quot;onTambah&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+/**
+ * SubcomponentModal — popup rincian subkomponen (atau komponen utama).
+ *
+ * Props:
+ *   node      : objek subkomponen/komponen {id, nama, tipe, parent, pagu, realisasi, sisa, pct, butir[]}
+ *   parent    : objek komponen utama induk (opsional) — untuk bar tingkat komponen
+ *   editable  : true → ActivityTable tampil dengan kontrol admin
+ *   onClose / onStatus(butir, statusBaru) / onEdit(butir) / onDelete(butir) / onTambah()
+ *
+ * ⚡ INTEGRASI REAL-TIME: modal ini render dari props. Saat data baru masuk
+ * (WebSocket/polling di parent), parent cukup mengirim `node` yang sudah diperbarui.
+ */
+const nf2 = new Intl.NumberFormat('id-ID');
+const rp = (n) => 'Rp ' + nf2.format(Math.round(Number(n) || 0));
+
+class Component extends DCLogic {
+  warna(pct) {
+    if (pct > 100) return 'var(--red)';
+    if (pct >= 75) return 'var(--green)';
+    if (pct >= 25) return 'var(--amber)';
+    return 'var(--red)';
+  }
+  teks(pct) {
+    if (pct > 100) return 'Over budget — realisasi melampaui pagu';
+    if (pct >= 75) return 'Aman — penyerapan sesuai target';
+    if (pct >= 25) return 'Waspada — penyerapan perlu dipacu';
+    return 'Kritis — penyerapan masih rendah';
+  }
+  bar(scope, o, wrapBg) {
+    const pct = o.pagu > 0 ? (o.realisasi / o.pagu) * 100 : 0;
+    const color = this.warna(pct);
+    return {
+      scope, nama: o.id + ' — ' + o.nama, wrapBg,
+      pctText: pct.toFixed(2) + '%',
+      bar: Math.min(100, pct).toFixed(1) + '%',
+      color,
+      badgeBg: pct >= 75 ? 'var(--green-bg)' : (pct >= 25 ? 'var(--amber-bg)' : 'var(--red-bg)'),
+      statusText: this.teks(pct),
+      angka: [
+        { label: 'Pagu', value: rp(o.pagu), color: 'var(--ink)' },
+        { label: 'Realisasi', value: rp(o.realisasi), color: 'var(--green)' },
+        { label: 'Sisa anggaran', value: rp(o.pagu - o.realisasi), color: 'var(--amber)' }
+      ]
+    };
+  }
+  renderVals() {
+    const n = this.props.node || { id: '', nama: '', pagu: 0, realisasi: 0, butir: [] };
+    const p = this.props.parent;
+    const isSub = n.tipe !== 'UTAMA';
+    const butir = n.butir || [];
+    const bars = [];
+    if (p && isSub) bars.push(this.bar('Komponen utama', p, 'var(--surface-3)'));
+    bars.push(this.bar(isSub ? 'Subkomponen ini' : 'Komponen utama ini', n, 'var(--surface-2)'));
+
+    const sp2d = butir.filter(b => String(b.status).toUpperCase() === 'SP2D').length;
+    const revisi = butir.filter(b => b.revisi === true || String(b.status).toUpperCase() === 'REVISI').length;
+
+    return {
+      stop: (e) => e.stopPropagation(),
+      onClose: this.props.onClose || (() => {}),
+      onStatus: this.props.onStatus,
+      onEdit: this.props.onEdit,
+      onDelete: this.props.onDelete,
+      onTambah: this.props.onTambah || (() => {}),
+      editable: !!this.props.editable,
+      tipeLabel: isSub ? 'Rincian Subkomponen' : 'Rincian Komponen Utama',
+      nama: n.nama,
+      kodeInfo: 'ID_Komponen: ' + n.id + (isSub && n.parent ? ' · induk ' + n.parent : ' · agregat seluruh subkomponen'),
+      bars,
+      butir,
+      butirCaption: butir.length + ' berkas · ' + sp2d + ' sudah SP2D' + (revisi ? ' · ⚑ ' + revisi + ' perlu revisi' : ''),
+      butirEmpty: this.props.editable
+        ? 'Klik tombol di bawah untuk mencatat berkas pertama dari Tim Kerja.'
+        : 'Admin/TU belum mencatat berkas untuk subkomponen ini.',
+      footerNote: butir.length + ' butir kegiatan · sisa anggaran ' + rp(n.pagu - n.realisasi)
+    };
+  }
+}
+</script>
+</body>
+</html>
