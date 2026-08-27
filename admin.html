@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B2545; --navy-2:#12325C; --navy-3:#1B4079;
+    --bg:#F3F5FA; --surface:#FFFFFF; --surface-2:#F8FAFC; --surface-3:#EFF3F9;
+    --line:#E3E8F0; --line-2:#EDF1F7;
+    --ink:#0B2545; --ink-2:#4A5A72; --ink-3:#7C8AA0;
+    --green:#0E9F6E; --green-bg:#E6F6EF;
+    --amber:#C98A00; --amber-bg:#FDF4E1;
+    --red:#D93B3B;  --red-bg:#FDECEC;
+    --blue:#2563C9;
+    --shadow:0 1px 2px rgba(11,37,69,.05), 0 8px 24px -12px rgba(11,37,69,.18);
+  }
+  [data-theme="dark"]{
+    --navy:#0A1526; --navy-2:#0F1F36; --navy-3:#1B3A66;
+    --bg:#070E1A; --surface:#0E1A2D; --surface-2:#13233B; --surface-3:#17293F;
+    --line:#1E3050; --line-2:#182842;
+    --ink:#EAF1FB; --ink-2:#A6B6CE; --ink-3:#7488A4;
+    --green:#34D399; --green-bg:#0C2A22;
+    --amber:#FBBF24; --amber-bg:#2C2310;
+    --red:#F87171;  --red-bg:#301617;
+    --blue:#60A5FA;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{color:var(--navy-3);text-decoration:underline}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--bg)">
+
+  <header style="background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff">
+    <div style="max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px">
+      <div style="display:flex;align-items:center;gap:14px;flex:1 1 300px;min-width:0">
+        <div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;font-weight:800;font-size:12px;flex:0 0 auto">IP</div>
+        <div style="min-width:0">
+          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:600">Panel Admin · Data Entry</div>
+          <h1 style="margin:2px 0 0;font-size:18px;font-weight:800;letter-spacing:-.01em">Input Data Dukung Pencairan</h1>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.86)">MODE: {{ modeLabel }}</span>
+        <a href="index.html" style="height:38px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:13px;font-weight:600" style-hover="background:rgba(255,255,255,.18);text-decoration:none;color:#fff">← Dashboard</a>
+        <sc-if value="{{ unlocked }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ logout }}" style="height:38px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-family:Manrope;font-size:13px;font-weight:600;cursor:pointer" style-hover="background:rgba(255,255,255,.18)">Keluar</button>
+        </sc-if>
+        <button type="button" onClick="{{ toggleTheme }}" title="Mode gelap / terang" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer">{{ themeIcon }}</button>
+      </div>
+    </div>
+  </header>
+
+  <sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
+    <main style="max-width:440px;margin:0 auto;padding:72px 24px">
+      <div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:28px;animation:fadeUp 320ms ease both">
+        <div style="width:44px;height:44px;border-radius:13px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:17px">🔒</div>
+        <h2 style="margin:16px 0 4px;font-size:18px;font-weight:800;letter-spacing:-.01em">Masuk sebagai Admin</h2>
+        <p style="margin:0 0 18px;font-size:13px;color:var(--ink-2);line-height:1.6;text-wrap:pretty">Masukkan token admin. Token tidak disimpan di dalam kode maupun repositori — hanya bertahan di tab ini, lalu diperiksa oleh Apps Script setiap kali data disimpan.</p>
+        <label style="display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Token Admin</label>
+        <input type="password" value="{{ tokenInput }}" onInput="{{ onToken }}" onKeyDown="{{ onTokenKey }}" placeholder="••••••••••" style="width:100%;height:44px;padding:0 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none" style-focus="border-color:var(--navy-3);box-shadow:0 0 0 3px rgba(27,64,121,.15)">
+        <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:10px;font-size:12.5px;color:var(--red);font-weight:600;line-height:1.55">Token ditolak server. Cocokkan dengan nilai <span style="font-family:'IBM Plex Mono',monospace">ADMIN_TOKEN</span> di Code.gs — bila token baru saja diubah, jalankan Deploy → Manage deployments → New version.</div>
+        </sc-if>
+        <button type="button" onClick="{{ unlock }}" style="margin-top:18px;width:100%;height:44px;border-radius:11px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;transition:transform 180ms ease" style-hover="transform:translateY(-1px)">Masuk</button>
+        <div style="margin-top:16px;padding:12px 14px;border-radius:11px;background:var(--amber-bg);border:1px solid var(--amber);font-size:11.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty"><strong>Catatan keamanan:</strong> token tidak disimpan di dalam kode maupun repositori. Nilainya hanya bertahan di tab ini sampai ditutup, dan divalidasi oleh Code.gs saat menyimpan — token salah akan ditolak server.</div>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ unlocked }}" hint-placeholder-val="{{ true }}">
+    <main style="max-width:1180px;margin:0 auto;padding:24px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+
+      <section style="flex:1 1 560px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden">
+        <div style="padding:20px 22px;border-bottom:1px solid var(--line-2)">
+          <h2 style="margin:0;font-size:16px;font-weight:800;letter-spacing:-.01em">Form Pencairan Baru</h2>
+          <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2)">Tersimpan ke Sheet "Pencairan" · Total_Realisasi di Sheet "Anggaran" diperbarui otomatis</div>
+        </div>
+
+        <div style="padding:22px;display:grid;gap:18px">
+
+          <div>
+            <label style="display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Komponen / Subkomponen <span style="color:var(--red)">*</span></label>
+            <select value="{{ fKomponen }}" onChange="{{ onKomponen }}" style="width:100%;height:44px;padding:0 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;cursor:pointer;outline:none" style-focus="border-color:var(--navy-3)">
+              <option value="">— Pilih komponen —</option>
+              <sc-for list="{{ komponenOptions }}" as="k" hint-placeholder-count="6">
+                <option value="{{ k.value }}">{{ k.label }}</option>
+              </sc-for>
+            </select>
+            <div style="margin-top:6px;font-size:11.5px;color:var(--ink-3)">Daftar diambil langsung dari Sheet "Anggaran". Disarankan memilih subkomponen agar rincian akurat.</div>
+          </div>
+
+          <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px 16px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line-2);display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
+              <sc-for list="{{ selStats }}" as="s" hint-placeholder-count="4">
+                <div>
+                  <div style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">{{ s.label }}</div>
+                  <div style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:600;color:{{ s.color }}">{{ s.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px">
+            <div>
+              <label style="display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Tanggal Cair <span style="color:var(--red)">*</span></label>
+              <input type="date" value="{{ fTanggal }}" onChange="{{ onTanggal }}" style="width:100%;height:44px;padding:0 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;outline:none" style-focus="border-color:var(--navy-3)">
+            </div>
+            <div>
+              <label style="display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Nominal Pencairan <span style="color:var(--red)">*</span></label>
+              <div style="position:relative">
+                <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Rp</span>
+                <input type="text" inputmode="numeric" value="{{ fNominal }}" onInput="{{ onNominal }}" placeholder="0" style="width:100%;height:44px;padding:0 12px 0 40px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;text-align:right;outline:none" style-focus="border-color:var(--navy-3)">
+              </div>
+              <div style="margin-top:6px;font-size:11.5px;color:{{ nominalHintColor }}">{{ nominalHint }}</div>
+            </div>
+          </div>
+
+          <div>
+            <label style="display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Keterangan</label>
+            <textarea value="{{ fKeterangan }}" onInput="{{ onKeterangan }}" rows="2" placeholder="Contoh: Pembayaran sewa infrastruktur TI tahap II" style="width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;line-height:1.55;resize:vertical;outline:none" style-focus="border-color:var(--navy-3)"></textarea>
+          </div>
+
+          <div>
+            <label style="display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Link Dokumen Bukti</label>
+            <input type="url" value="{{ fLink }}" onInput="{{ onLink }}" placeholder="https://drive.google.com/file/d/..." style="width:100%;height:44px;padding:0 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+            <div style="margin-top:6px;font-size:11.5px;color:var(--ink-3)">Unggah SPM/SP2D/kuitansi ke Google Drive, set akses "Anyone with the link → Viewer", lalu tempel URL-nya.</div>
+          </div>
+
+          <sc-if value="{{ hasFormError }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="padding:13px 15px;border-radius:12px;background:var(--red-bg);border:1px solid var(--red);font-size:13px;color:var(--ink);overflow-wrap:anywhere">{{ formError }}</div>
+          </sc-if>
+          <sc-if value="{{ hasSuccess }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="padding:13px 15px;border-radius:12px;background:var(--green-bg);border:1px solid var(--green);font-size:13px;color:var(--ink);overflow-wrap:anywhere">{{ successMsg }}</div>
+          </sc-if>
+
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+            <button type="button" onClick="{{ submit }}" disabled="{{ submitting }}" style="height:46px;padding:0 22px;border-radius:12px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:10px;opacity:{{ submitOpacity }};transition:transform 180ms ease" style-hover="transform:translateY(-1px)">
+              <sc-if value="{{ submitting }}" hint-placeholder-val="{{ false }}">
+                <span style="width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin 700ms linear infinite;display:inline-block"></span>
+              </sc-if>
+              <span>{{ submitLabel }}</span>
+            </button>
+            <button type="button" onClick="{{ reset }}" style="height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="border-color:var(--navy-3)">Bersihkan Form</button>
+            <span style="font-size:11.5px;color:var(--ink-3);font-family:'IBM Plex Mono',monospace">{{ endpointLabel }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px">
+          <h2 style="margin:0 0 4px;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Ringkasan Anggaran</h2>
+          <div style="font-size:12.5px;color:var(--ink-2);margin-bottom:14px">Sumber: {{ sourceLabel }}</div>
+          <div style="display:grid;gap:10px">
+            <sc-for list="{{ summary }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:11px 13px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-2)">
+                <span style="font-size:12.5px;color:var(--ink-2)">{{ s.label }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:600;color:{{ s.color }}">{{ s.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden">
+          <div style="padding:18px 20px;border-bottom:1px solid var(--line-2)">
+            <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Pencairan Terakhir</h2>
+            <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2)">10 entri terbaru dari Sheet "Pencairan"</div>
+          </div>
+          <sc-if value="{{ hasRecent }}" hint-placeholder-val="{{ true }}">
+            <div style="max-height:420px;overflow:auto">
+              <sc-for list="{{ recent }}" as="r" hint-placeholder-count="6">
+                <div style="padding:13px 20px;border-bottom:1px solid var(--line-2);display:flex;gap:12px;align-items:flex-start">
+                  <div style="min-width:0;flex:1">
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ r.id }}</span>
+                      <span style="font-size:11px;color:var(--ink-3)">{{ r.tanggal }}</span>
+                    </div>
+                    <div style="margin-top:2px;font-size:13px;font-weight:600;text-wrap:pretty">{{ r.keterangan }}</div>
+                    <div style="margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-3)">{{ r.komponen }}</div>
+                  </div>
+                  <div style="text-align:right;flex:0 0 auto">
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600">{{ r.nominal }}</div>
+                    <a href="{{ r.dokumen }}" target="_blank" rel="noopener" style="font-size:11px;font-weight:600">Bukti ↗</a>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noRecent }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:40px 20px;text-align:center;font-size:13px;color:var(--ink-2)">Belum ada pencairan tercatat.</div>
+          </sc-if>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px">
+          <h2 style="margin:0 0 10px;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Alur Input (SOP Singkat)</h2>
+          <div style="display:grid;gap:9px">
+            <sc-for list="{{ sop }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="width:20px;height:20px;flex:0 0 auto;border-radius:6px;background:var(--navy);color:#fff;display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px">{{ s.n }}</span>
+                <span style="font-size:12.5px;line-height:1.55;color:var(--ink-2);min-width:0;overflow-wrap:anywhere;text-wrap:pretty">{{ s.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </main>
+  </sc-if>
+
+  <footer style="background:var(--navy);color:rgba(255,255,255,.7)">
+    <div style="max-width:1180px;margin:0 auto;padding:22px 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;font-size:12px">
+      <span>Panel Admin — Dashboard Monitoring Penyerapan Anggaran</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px">Konfigurasi: data-source.js · Backend: Code.gs</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;defaultDark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tampilan&quot;}}">
+const KEY = 'anggaran_admin_ok';
+
+class Component extends DCLogic {
+  state = {
+    anggaran: [], pencairan: [], source: '—', loading: true,
+    locked: true, tokenInput: '', loginError: false,
+    fKomponen: '', fTanggal: new Date().toISOString().slice(0, 10), fNominal: '', fKeterangan: '', fLink: '',
+    submitting: false, formError: '', successMsg: '', theme: null
+  };
+
+  async componentDidMount() {
+    this.ds = await import('./data-source.js');
+    let ok = false;
+    try { ok = sessionStorage.getItem(KEY) === '1' && !!this.ds.getToken(); } catch (e) {}
+    this.setState({ locked: !ok });
+    await this.load();
+  }
+
+  async load() {
+    try {
+      const d = await this.ds.fetchAll();
+      this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, source: d.source, loading: false });
+    } catch (e) {
+      const f = this.ds.seedFallback();
+      this.setState({ anggaran: f.anggaran, pencairan: f.pencairan, source: f.source + ' (fetch gagal: ' + e.message + ')', loading: false });
+    }
+  }
+
+  /* Token tidak dicocokkan di browser (tidak ada nilai rahasia di kode saat
+     CONFIG.ADMIN_TOKEN kosong). Token disimpan di sessionStorage dan divalidasi
+     oleh Code.gs pada saat POST — bila salah, server menolak dan form kembali terkunci. */
+  unlock = () => {
+    if (!this.ds) return;
+    const t = this.state.tokenInput.trim();
+    const fixed = this.ds.CONFIG.ADMIN_TOKEN;
+    if (fixed && t !== fixed) return this.setState({ loginError: true });
+    if (!t && !fixed) return this.setState({ loginError: true });
+    this.ds.setToken(t);
+    try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+    this.setState({ locked: false, loginError: false, tokenInput: '' });
+  };
+
+  logout = () => {
+    this.ds.clearToken();
+    try { sessionStorage.removeItem(KEY); } catch (e) {}
+    this.setState({ locked: true, successMsg: '', formError: '' });
+  };
+
+  digits = (v) => String(v || '').replace(/\D/g, '');
+  nominalNum = () => Number(this.digits(this.state.fNominal)) || 0;
+
+  selected() {
+    return this.state.anggaran.find(r => r.id === this.state.fKomponen) || null;
+  }
+  /** sisa = pagu − realisasi (realisasi komponen utama diagregasi dari anak) */
+  sisaSelected() {
+    const s = this.selected();
+    if (!s) return 0;
+    if (s.tipe === 'SUB') return s.pagu - s.realisasi;
+    const kids = this.state.anggaran.filter(r => r.parent === s.id);
+    const real = kids.length ? kids.reduce((t, k) => t + k.realisasi, 0) : s.realisasi;
+    return s.pagu - real;
+  }
+
+  submit = async () => {
+    const s = this.selected();
+    const nominal = this.nominalNum();
+    if (!s) return this.setState({ formError: 'Komponen wajib dipilih.', successMsg: '' });
+    if (!this.state.fTanggal) return this.setState({ formError: 'Tanggal cair wajib diisi.', successMsg: '' });
+    if (nominal <= 0) return this.setState({ formError: 'Nominal pencairan harus lebih besar dari 0.', successMsg: '' });
+    if (nominal > this.sisaSelected()) return this.setState({ formError: 'Nominal melampaui sisa anggaran komponen ini (Rp ' + this.ds.fmt(this.sisaSelected()) + ').', successMsg: '' });
+    if (this.state.fLink && !/^https?:\/\//i.test(this.state.fLink)) return this.setState({ formError: 'Link dokumen harus diawali http:// atau https://', successMsg: '' });
+
+    this.setState({ submitting: true, formError: '', successMsg: '' });
+    try {
+      const res = await this.ds.postPencairan({
+        ID_Komponen: s.id,
+        Tanggal_Cair: this.state.fTanggal,
+        Nominal_Pencairan: nominal,
+        Keterangan: this.state.fKeterangan,
+        Link_Dokumen_Bukti: this.state.fLink
+      });
+      const id = res.id || 'PC-baru';
+      // optimistic update supaya daftar & ringkasan langsung mencerminkan input
+      const pencairan = [{
+        id, komponenId: s.id, tanggal: this.state.fTanggal, nominal,
+        keterangan: this.state.fKeterangan || '(tanpa keterangan)', dokumen: this.state.fLink
+      }].concat(this.state.pencairan);
+      const anggaran = this.state.anggaran.map(r => r.id === s.id ? { ...r, realisasi: r.realisasi + nominal } : r);
+      this.setState({
+        submitting: false, pencairan, anggaran,
+        fNominal: '', fKeterangan: '', fLink: '',
+        successMsg: res.simulated
+          ? 'MODE seed: input divalidasi dan ditampilkan lokal (' + id + '), belum tersimpan ke Google Sheets. Ubah CONFIG.MODE ke "appscript" untuk penyimpanan nyata.'
+          : 'Tersimpan sebagai ' + id + '. Total_Realisasi komponen ' + s.id + ' diperbarui otomatis di Google Sheets.'
+      });
+      if (!res.simulated) setTimeout(() => this.load(), 1200);
+    } catch (e) {
+      const msg = (e && e.message) || String(e);
+      if (/token/i.test(msg)) {
+        this.ds.clearToken();
+        try { sessionStorage.removeItem(KEY); } catch (ig) {}
+        return this.setState({ submitting: false, locked: true, loginError: true, formError: '' });
+      }
+      this.setState({ submitting: false, formError: 'Gagal menyimpan: ' + msg });
+    }
+  };
+
+  reset = () => this.setState({ fKomponen: '', fNominal: '', fKeterangan: '', fLink: '', formError: '', successMsg: '' });
+
+  renderVals() {
+    const ds = this.ds;
+    const fmt = ds ? ds.fmt : (n) => String(n);
+    const short = ds ? ds.short : (n) => String(n);
+    const tanggalID = ds ? ds.tanggalID : (v) => String(v);
+    const th = this.state.theme || (this.props.defaultDark ? 'dark' : 'light');
+    const mode = ds ? ds.CONFIG.MODE : 'seed';
+
+    const utama = this.state.anggaran.filter(r => r.tipe === 'UTAMA');
+    const options = [];
+    utama.forEach(u => {
+      options.push({ value: u.id, label: '▍ ' + u.id + ' — ' + u.nama });
+      this.state.anggaran.filter(r => r.parent === u.id)
+        .forEach(c => options.push({ value: c.id, label: '\u00A0\u00A0\u00A0\u00A0↳ ' + c.id + ' — ' + c.nama }));
+    });
+
+    const sel = this.selected();
+    const sisa = this.sisaSelected();
+    const nominal = this.nominalNum();
+    const pagu = utama.reduce((t, u) => {
+      const kids = this.state.anggaran.filter(r => r.parent === u.id);
+      return t + (kids.length ? kids.reduce((x, k) => x + k.pagu, 0) : u.pagu);
+    }, 0);
+    const real = utama.reduce((t, u) => {
+      const kids = this.state.anggaran.filter(r => r.parent === u.id);
+      return t + (kids.length ? kids.reduce((x, k) => x + k.realisasi, 0) : u.realisasi);
+    }, 0);
+
+    let hint = 'Ketik angka saja, pemisah ribuan otomatis.';
+    let hintColor = 'var(--ink-3)';
+    if (nominal > 0 && sel) {
+      if (nominal > sisa) { hint = 'Melampaui sisa anggaran (Rp ' + fmt(sisa) + ')'; hintColor = 'var(--red)'; }
+      else { hint = 'Rp ' + fmt(nominal) + ' · sisa setelah input: Rp ' + fmt(sisa - nominal); hintColor = 'var(--green)'; }
+    }
+
+    return {
+      theme: th,
+      themeIcon: th === 'dark' ? '☀' : '☾',
+      toggleTheme: () => this.setState({ theme: th === 'dark' ? 'light' : 'dark' }),
+      modeLabel: mode,
+      endpointLabel: mode === 'seed' ? 'Belum terhubung — MODE: seed' : 'POST → Apps Script Web App',
+      sourceLabel: this.state.source,
+
+      locked: this.state.locked,
+      unlocked: !this.state.locked,
+      tokenInput: this.state.tokenInput,
+      loginError: this.state.loginError,
+      onToken: (e) => this.setState({ tokenInput: e.target.value, loginError: false }),
+      onTokenKey: (e) => { if (e.key === 'Enter') this.unlock(); },
+      unlock: this.unlock,
+      logout: this.logout,
+
+      komponenOptions: options,
+      fKomponen: this.state.fKomponen,
+      fTanggal: this.state.fTanggal,
+      fNominal: this.state.fNominal,
+      fKeterangan: this.state.fKeterangan,
+      fLink: this.state.fLink,
+      onKomponen: (e) => this.setState({ fKomponen: e.target.value, formError: '' }),
+      onTanggal: (e) => this.setState({ fTanggal: e.target.value }),
+      onNominal: (e) => {
+        const d = this.digits(e.target.value);
+        this.setState({ fNominal: d ? new Intl.NumberFormat('id-ID').format(Number(d)) : '' });
+      },
+      onKeterangan: (e) => this.setState({ fKeterangan: e.target.value }),
+      onLink: (e) => this.setState({ fLink: e.target.value }),
+
+      hasSelection: !!sel,
+      selStats: sel ? [
+        { label: 'Tipe', value: sel.tipe === 'UTAMA' ? 'Komponen Utama' : 'Subkomponen', color: 'var(--ink)' },
+        { label: 'Pagu', value: 'Rp ' + fmt(sel.pagu), color: 'var(--ink)' },
+        { label: 'Realisasi', value: 'Rp ' + fmt(sel.pagu - sisa), color: 'var(--green)' },
+        { label: 'Sisa', value: 'Rp ' + fmt(sisa), color: 'var(--amber)' }
+      ] : [],
+      nominalHint: hint,
+      nominalHintColor: hintColor,
+
+      hasFormError: !!this.state.formError,
+      formError: this.state.formError,
+      hasSuccess: !!this.state.successMsg,
+      successMsg: this.state.successMsg,
+      submitting: this.state.submitting,
+      submitOpacity: this.state.submitting ? '.7' : '1',
+      submitLabel: this.state.submitting ? 'Menyimpan...' : 'Simpan Pencairan',
+      submit: this.submit,
+      reset: this.reset,
+
+      summary: [
+        { label: 'Total Pagu', value: short(pagu), color: 'var(--ink)' },
+        { label: 'Total Realisasi', value: short(real), color: 'var(--green)' },
+        { label: 'Sisa Anggaran', value: short(pagu - real), color: 'var(--amber)' },
+        { label: 'Jumlah Bukti Pencairan', value: this.state.pencairan.length + ' entri', color: 'var(--ink)' }
+      ],
+
+      hasRecent: this.state.pencairan.length > 0,
+      noRecent: !this.state.loading && this.state.pencairan.length === 0,
+      recent: this.state.pencairan.slice().sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1)).slice(0, 10).map(p => ({
+        id: p.id || '—', tanggal: tanggalID(p.tanggal), nominal: 'Rp ' + fmt(p.nominal),
+        keterangan: p.keterangan || '(tanpa keterangan)', komponen: p.komponenId, dokumen: p.dokumen || '#'
+      })),
+
+      sop: [
+        { n: '1', text: 'Unggah dokumen bukti (SPM/SP2D/kuitansi) ke folder Google Drive instansi, set akses "Anyone with the link → Viewer", copy URL-nya.' },
+        { n: '2', text: 'Pilih subkomponen yang sesuai, isi tanggal SP2D, nominal, keterangan singkat, dan tempel URL bukti.' },
+        { n: '3', text: 'Klik Simpan. Sistem menolak input bila nominal melampaui sisa anggaran komponen.' },
+        { n: '4', text: 'Buka dashboard publik dan pastikan angka serta modal "Data Dukung" sudah sesuai.' },
+        { n: '5', text: 'Darurat: boleh menambah baris langsung di Sheet "Pencairan", lalu jalankan fungsi recalcAll() di Apps Script agar agregat diperbarui.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
