@@ -73,11 +73,19 @@
         <p style="margin:0 0 18px;font-size:13px;color:var(--ink-2);line-height:1.6;text-wrap:pretty">Masukkan token admin. Token tidak disimpan di dalam kode maupun repositori — hanya bertahan di tab ini, lalu diperiksa oleh Apps Script setiap kali data disimpan.</p>
         <label style="display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Token Admin</label>
         <input type="password" value="{{ tokenInput }}" onInput="{{ onToken }}" onKeyDown="{{ onTokenKey }}" placeholder="••••••••••" style="width:100%;height:44px;padding:0 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:14px;outline:none" style-focus="border-color:var(--navy-3);box-shadow:0 0 0 3px rgba(27,64,121,.15)">
-        <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}">
-          <div style="margin-top:10px;font-size:12.5px;color:var(--red);font-weight:600;line-height:1.55">Token ditolak server. Cocokkan dengan nilai <span style="font-family:'IBM Plex Mono',monospace">ADMIN_TOKEN</span> di Code.gs — bila token baru saja diubah, jalankan Deploy → Manage deployments → New version.</div>
+        <sc-if value="{{ hasLoginError }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="margin-top:10px;font-size:12.5px;color:var(--red);font-weight:600;line-height:1.55;overflow-wrap:anywhere">{{ loginError }}</div>
         </sc-if>
-        <button type="button" onClick="{{ unlock }}" style="margin-top:18px;width:100%;height:44px;border-radius:11px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;transition:transform 180ms ease" style-hover="transform:translateY(-1px)">Masuk</button>
-        <div style="margin-top:16px;padding:12px 14px;border-radius:11px;background:var(--amber-bg);border:1px solid var(--amber);font-size:11.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty"><strong>Catatan keamanan:</strong> token tidak disimpan di dalam kode maupun repositori. Nilainya hanya bertahan di tab ini sampai ditutup, dan divalidasi oleh Code.gs saat menyimpan — token salah akan ditolak server.</div>
+        <button type="button" onClick="{{ unlock }}" disabled="{{ verifying }}" style="margin-top:18px;width:100%;height:44px;border-radius:11px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform 180ms ease" style-hover="transform:translateY(-1px)">
+          <sc-if value="{{ verifying }}" hint-placeholder-val="{{ false }}">
+            <span style="width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin 700ms linear infinite;display:inline-block"></span>
+          </sc-if>
+          <span>{{ loginLabel }}</span>
+        </button>
+        <sc-if value="{{ hasTokenWarning }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding:12px 14px;border-radius:11px;background:var(--red-bg);border:1px solid var(--red);font-size:11.5px;line-height:1.6;color:var(--ink-2);overflow-wrap:anywhere">{{ tokenWarning }}</div>
+        </sc-if>
+        <div style="margin-top:14px;padding:12px 14px;border-radius:11px;background:var(--amber-bg);border:1px solid var(--amber);font-size:11.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty"><strong>Catatan keamanan:</strong> pada MODE <span style="font-family:'IBM Plex Mono',monospace">appscript</span> token diverifikasi oleh server (Code.gs) sebelum panel terbuka, dan tidak pernah tersimpan di repositori — hanya di tab ini sampai ditutup. Setelah 5 kali gagal, login dijeda 60 detik.</div>
       </div>
     </main>
   </sc-if>
@@ -229,20 +237,27 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultDark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tampilan&quot;}}">
-const KEY = 'anggaran_admin_ok';
+const KEY = 'anggaran_admin_fp';   // menyimpan sidik jari token, bukan flag "sudah login"
+const MAKS_COBA = 5;               // percobaan gagal sebelum dijeda
+const JEDA_MS = 60000;
 
 class Component extends DCLogic {
   state = {
     anggaran: [], pencairan: [], source: '—', loading: true,
-    locked: true, tokenInput: '', loginError: false,
+    locked: true, tokenInput: '', loginError: '', verifying: false, gagal: 0, lockUntil: 0,
     fKomponen: '', fTanggal: new Date().toISOString().slice(0, 10), fNominal: '', fKeterangan: '', fLink: '',
     submitting: false, formError: '', successMsg: '', theme: null
   };
 
   async componentDidMount() {
     this.ds = await import('./data-source.js');
+    // Sesi hanya sah bila sidik jari yang tersimpan cocok dengan token yang
+    // benar-benar dipegang browser saat ini. Flag "sudah login" saja tidak cukup.
     let ok = false;
-    try { ok = sessionStorage.getItem(KEY) === '1' && !!this.ds.getToken(); } catch (e) {}
+    try {
+      const t = this.ds.getToken();
+      ok = !!t && sessionStorage.getItem(KEY) === this.ds.tokenFingerprint(t);
+    } catch (e) {}
     this.setState({ locked: !ok });
     await this.load();
   }
@@ -257,24 +272,47 @@ class Component extends DCLogic {
     }
   }
 
-  /* Token tidak dicocokkan di browser (tidak ada nilai rahasia di kode saat
-     CONFIG.ADMIN_TOKEN kosong). Token disimpan di sessionStorage dan divalidasi
-     oleh Code.gs pada saat POST — bila salah, server menolak dan form kembali terkunci. */
-  unlock = () => {
-    if (!this.ds) return;
+  /* Token WAJIB lolos verifikasi sebelum panel terbuka.
+     MODE 'appscript' → diverifikasi server (Code.gs action=verifyToken).
+     MODE demo        → dibandingkan dengan CONFIG.ADMIN_TOKEN.
+     Sesi ditandai dengan sidik jari token, bukan flag "sudah login". */
+  unlock = async () => {
+    if (!this.ds || this.state.verifying) return;
+    const sisaJeda = this.state.lockUntil - Date.now();
+    if (sisaJeda > 0) {
+      return this.setState({ loginError: 'Terlalu banyak percobaan. Coba lagi dalam ' + Math.ceil(sisaJeda / 1000) + ' detik.' });
+    }
     const t = this.state.tokenInput.trim();
-    const fixed = this.ds.CONFIG.ADMIN_TOKEN;
-    if (fixed && t !== fixed) return this.setState({ loginError: true });
-    if (!t && !fixed) return this.setState({ loginError: true });
-    this.ds.setToken(t);
-    try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
-    this.setState({ locked: false, loginError: false, tokenInput: '' });
+    if (!t) return this.setState({ loginError: 'Token wajib diisi.' });
+
+    this.setState({ verifying: true, loginError: '' });
+    try {
+      const ok = await this.ds.verifyToken(t);
+      if (!ok) {
+        const gagal = this.state.gagal + 1;
+        const kena = gagal >= MAKS_COBA;
+        this.ds.clearToken();
+        try { sessionStorage.removeItem(KEY); } catch (e) {}
+        return this.setState({
+          verifying: false, gagal: kena ? 0 : gagal,
+          lockUntil: kena ? Date.now() + JEDA_MS : 0,
+          loginError: kena
+            ? 'Token salah 5 kali. Login dijeda 60 detik.'
+            : 'Token salah (' + gagal + '/' + MAKS_COBA + '). Cocokkan dengan ADMIN_TOKEN di Code.gs.'
+        });
+      }
+      this.ds.setToken(t);
+      try { sessionStorage.setItem(KEY, this.ds.tokenFingerprint(t)); } catch (e) {}
+      this.setState({ locked: false, verifying: false, loginError: '', tokenInput: '', gagal: 0, lockUntil: 0 });
+    } catch (e) {
+      this.setState({ verifying: false, loginError: (e && e.message) || String(e) });
+    }
   };
 
   logout = () => {
     this.ds.clearToken();
     try { sessionStorage.removeItem(KEY); } catch (e) {}
-    this.setState({ locked: true, successMsg: '', formError: '' });
+    this.setState({ locked: true, successMsg: '', formError: '', tokenInput: '' });
   };
 
   digits = (v) => String(v || '').replace(/\D/g, '');
@@ -331,7 +369,7 @@ class Component extends DCLogic {
       if (/token/i.test(msg)) {
         this.ds.clearToken();
         try { sessionStorage.removeItem(KEY); } catch (ig) {}
-        return this.setState({ submitting: false, locked: true, loginError: true, formError: '' });
+        return this.setState({ submitting: false, locked: true, formError: '', loginError: 'Server menolak token. Silakan login ulang dengan token yang benar.' });
       }
       this.setState({ submitting: false, formError: 'Gagal menyimpan: ' + msg });
     }
@@ -385,8 +423,15 @@ class Component extends DCLogic {
       locked: this.state.locked,
       unlocked: !this.state.locked,
       tokenInput: this.state.tokenInput,
+      hasLoginError: !!this.state.loginError,
       loginError: this.state.loginError,
-      onToken: (e) => this.setState({ tokenInput: e.target.value, loginError: false }),
+      verifying: this.state.verifying,
+      loginLabel: this.state.verifying ? 'Memverifikasi...' : 'Masuk',
+      tokenWarning: this.ds && this.ds.tokenBelumDiset()
+        ? 'Token masih memakai nilai contoh. Ganti ADMIN_TOKEN di Code.gs dan data-source.js sebelum dipakai sungguhan.'
+        : '',
+      hasTokenWarning: !!(this.ds && this.ds.tokenBelumDiset()),
+      onToken: (e) => this.setState({ tokenInput: e.target.value, loginError: '' }),
       onTokenKey: (e) => { if (e.key === 'Enter') this.unlock(); },
       unlock: this.unlock,
       logout: this.logout,

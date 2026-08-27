@@ -27,10 +27,12 @@ export const CONFIG = {
   SHEET_ANGGARAN: 'Anggaran',
   SHEET_PENCAIRAN: 'Pencairan',
 
-  // Token admin untuk POST ke Apps Script.
-  // BIARKAN KOSONG '' bila di-hosting publik (GitHub Pages): admin mengetik token
-  // saat login, nilainya hanya hidup di sessionStorage browser dan TIDAK pernah
-  // ada di dalam repositori. Isi nilainya hanya untuk demo lokal/offline.
+  // Token admin.
+  // • MODE 'appscript' → BIARKAN KOSONG ''. Admin mengetik token saat login, token
+  //   diverifikasi SERVER (Code.gs), dan nilainya hanya hidup di sessionStorage
+  //   tab tersebut — tidak pernah ada di repositori. Ini setelan produksi.
+  // • MODE 'seed'/'gviz' (demo tanpa server) → isi di sini, karena tidak ada server
+  //   yang bisa memverifikasi. Bila kosong, login admin ditolak sama sekali.
   ADMIN_TOKEN: '',
 
   // Auto-refresh dashboard (ms). 0 = nonaktif
@@ -121,13 +123,14 @@ export const SEED_PENCAIRAN = [
 ];
 
 /* ------------------------------- token admin ------------------------------
-   Saat CONFIG.ADMIN_TOKEN kosong, tidak ada nilai rahasia di dalam kode: admin
-   mengetik token ketika login dan nilainya hanya hidup di sessionStorage (hilang
-   saat tab ditutup). Aman untuk hosting publik seperti GitHub Pages.
+   MODE 'appscript' (produksi): token SELALU diambil dari sessionStorage — nilai
+   yang diketik admin dan sudah diverifikasi server. CONFIG.ADMIN_TOKEN tidak
+   pernah dipakai di mode ini, sehingga tidak ada rahasia di dalam repositori.
+   MODE demo (seed/gviz): tidak ada server, jadi CONFIG.ADMIN_TOKEN yang dipakai.
 -------------------------------------------------------------------------- */
 const TOKEN_KEY = 'anggaran_admin_token';
 export function getToken() {
-  if (CONFIG.ADMIN_TOKEN) return CONFIG.ADMIN_TOKEN;
+  if (CONFIG.MODE !== 'appscript' && CONFIG.ADMIN_TOKEN) return CONFIG.ADMIN_TOKEN;
   try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
 }
 export function setToken(v) { try { sessionStorage.setItem(TOKEN_KEY, v); } catch (e) {} }
@@ -240,6 +243,62 @@ export function seedFallback() {
     pencairan: SEED_PENCAIRAN.map(rowPencairan),
     source: 'Fallback data contoh'
   };
+}
+
+/**
+ * Sidik jari token (djb2) — dipakai Admin Panel untuk menandai sesi login.
+ * Bila ADMIN_TOKEN diganti, sidik jari berubah sehingga semua sesi lama otomatis
+ * gugur dan admin wajib login ulang.
+ */
+export function tokenFingerprint(token) {
+  var h = 5381;
+  var s = String(token || '');
+  for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0;
+  return 'fp' + h.toString(36);
+}
+
+/** Token demo belum diisi/masih contoh? (hanya relevan di MODE demo) */
+export function tokenBelumDiset() {
+  if (CONFIG.MODE === 'appscript') return false;
+  return !CONFIG.ADMIN_TOKEN || CONFIG.ADMIN_TOKEN === 'GANTI_TOKEN_RAHASIA_ANDA';
+}
+
+/**
+ * Verifikasi token admin. SELALU dipanggil sebelum panel admin terbuka.
+ * MODE 'appscript' → diverifikasi SERVER (Code.gs action=verifyToken), sehingga
+ *                    token salah tidak pernah lolos meski kode halaman diubah.
+ * MODE lain (demo) → dibandingkan dengan CONFIG.ADMIN_TOKEN; bila CONFIG kosong,
+ *                    tidak ada acuan sah → login ditolak.
+ */
+export async function verifyToken(token) {
+  const t = String(token || '').trim();
+  if (!t) return false;
+  if (CONFIG.MODE !== 'appscript') {
+    if (!CONFIG.ADMIN_TOKEN) {
+      throw new Error('MODE ' + CONFIG.MODE + ' tanpa server: isi CONFIG.ADMIN_TOKEN di data-source.js terlebih dahulu.');
+    }
+    return t === CONFIG.ADMIN_TOKEN;
+  }
+  try {
+    const res = await fetch(CONFIG.APPSCRIPT_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'verifyToken', token: t })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.status === 'error' && /action tidak dikenal/i.test(json.message || '')) {
+      const err = new Error('Web App belum diperbarui: Code.gs versi lama belum mengenal verifyToken. ' +
+        'Tempel ulang Code.gs, lalu Deploy → Manage deployments → Edit → New version → Deploy.');
+      err.stale = true;
+      throw err;
+    }
+    return json.status === 'ok' && json.verified === true;
+  } catch (e) {
+    if (e && e.stale) throw e;
+    throw new Error('Tidak dapat memverifikasi token ke server: ' + e.message);
+  }
 }
 
 /**
