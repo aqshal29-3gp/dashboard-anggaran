@@ -516,7 +516,7 @@ class Component extends DCLogic {
       butirTotal: (totals.nButir || 0) + ' berkas',
       berkasSummary: (() => {
         const r = totals.ringkasButir || {};
-        const tahap = (this.ds ? this.ds.STATUS_BUTIR : []).map(t => ({ urut: String(t.urut), pendek: t.pendek, color: t.color, jumlah: r[t.key] || 0 }));
+        const tahap = ((this.ds && this.ds.STATUS_BUTIR) || []).map(t => ({ urut: String(t.urut), pendek: t.pendek, color: t.color, jumlah: r[t.key] || 0 }));
         // Revisi ditampilkan terpisah: penanda kondisional, bukan tahap dalam alur.
         tahap.push({ urut: '⚑', pendek: 'Perlu revisi', color: 'var(--red)', jumlah: r.REVISI || 0 });
         const maxB = Math.max(1, ...tahap.map(t => t.jumlah));

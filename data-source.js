@@ -26,6 +26,7 @@ export const CONFIG = {
   // Nama tab di spreadsheet (harus sama persis)
   SHEET_ANGGARAN: 'Anggaran',
   SHEET_PENCAIRAN: 'Pencairan',
+  SHEET_BUTIR: 'Butir',
 
   // Token admin.
   // • MODE 'appscript' → BIARKAN KOSONG ''. Admin mengetik token saat login, token
@@ -136,6 +137,60 @@ export function getToken() {
 export function setToken(v) { try { sessionStorage.setItem(TOKEN_KEY, v); } catch (e) {} }
 export function clearToken() { try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
 
+/* -----------------------------------------------------------------------------
+   SHEET 3 — Butir Kegiatan (berkas pertanggungjawaban per subkomponen)
+   Kolom: ID_Butir | ID_Komponen | Nama_Butir | Nominal | Tanggal_Terima |
+          Status | Catatan | Link_Berkas | Diperbarui | Revisi
+   ID_Komponen berelasi ke Sheet 1 (biasanya level SUB).
+
+   Status = 3 TAHAP LINIER: TU → KEUANGAN → SP2D
+   Revisi = PENANDA (bukan tahap). Berkas yang dikembalikan untuk diperbaiki
+            tetap berada di tahapnya, hanya ditandai 'YA' pada kolom Revisi.
+            Jadi tidak setiap berkas harus melewati revisi.
+   Format seed: [id, komponen, nama, nominal, tanggal, status, catatan, berkas, revisi]
+----------------------------------------------------------------------------- */
+export const SEED_BUTIR = [
+  ['BK-0001', '051.0M-522141', 'Tagihan sewa infrastruktur TI Juli', 3709999993, '2026-07-01', 'SP2D', 'SP2D terbit 02/07/2026', DOC],
+  ['BK-0002', '051.0E-522191', 'Produksi konten publikasi tahap III', 149749999, '2026-08-01', 'SP2D', 'Lengkap', DOC],
+  ['BK-0003', '051.0E-522191', 'Produksi konten publikasi tahap IV', 160000000, '2026-08-18', 'KEUANGAN', 'Menunggu verifikasi Tim Keuangan', DOC],
+  ['BK-0004', '051.0B-524111', 'SPPD monitoring wilayah IV', 42000000, '2026-08-20', 'TU', 'Berkas diterima dari Tim Kerja', DOC],
+  ['BK-0005', '051.0B-524113', 'Transport lokal Agustus', 1190000, '2026-08-11', 'SP2D', '', DOC],
+  ['BK-0006', '051.0J-522131', 'Audit keamanan informasi tahap II', 45000000, '2026-08-14', 'KEUANGAN', 'Lampiran SPK belum ditandatangani', DOC, true],
+  ['BK-0007', '051.0J-521211', 'Bahan rapat tata kelola TI', 9000000, '2026-08-19', 'TU', 'Kuitansi perlu dicek', DOC],
+  ['BK-0008', '051.0L-521211', 'Bahan statistik sektoral TW-III', 4050000, '2026-08-12', 'KEUANGAN', '', DOC],
+  ['BK-0009', '051.0L-524114', 'Paket meeting FGD statistik', 76900000, '2026-08-21', 'TU', 'RAB belum sesuai pagu', DOC, true],
+  ['BK-0010', '051.0A-521211', 'Bahan FGD data dan informasi', 3240000, '2026-06-16', 'SP2D', '', DOC],
+  ['BK-0011', '051.0A-522151', 'Honor narasumber pengelolaan data', 1800000, '2026-04-07', 'SP2D', '', DOC],
+  ['BK-0012', '051.0M-521211', 'Bahan pemeliharaan perangkat TW-III', 4050000, '2026-08-06', 'KEUANGAN', '', DOC],
+  ['BK-0013', '051.0I-536111', 'Termin I pengembangan aplikasi', 2000000000, '2026-08-25', 'TU', 'BAST menunggu tanda tangan', DOC],
+  ['BK-0014', '051.0N-521111', 'Pengadaan lisensi antivirus', 120000000, '2026-08-22', 'TU', 'Berkas baru masuk', DOC]
+];
+
+/* -----------------------------------------------------------------------------
+   Alur berkas: 3 TAHAP LINIER — setiap berkas pasti melewati ketiganya.
+       1 Verifikasi Tim TU Pusdatin KP → 2 Verifikasi Tim Keuangan → 3 SP2D
+   REVISI bukan tahap, melainkan PENANDA kondisional: berkas dikembalikan untuk
+   diperbaiki tetap berada di tahap saat itu, hanya ditandai revisi.
+----------------------------------------------------------------------------- */
+export const STATUS_BUTIR = [
+  { key: 'TU', urut: 1, label: 'Verifikasi Tim TU Pusdatin KP', pendek: 'Verifikasi TU', color: 'var(--blue)', bg: 'rgba(37,99,201,.12)' },
+  { key: 'KEUANGAN', urut: 2, label: 'Verifikasi Tim Keuangan', pendek: 'Verifikasi Keuangan', color: 'var(--navy-3)', bg: 'rgba(27,64,121,.12)' },
+  { key: 'SP2D', urut: 3, label: 'SP2D', pendek: 'SP2D', color: 'var(--green)', bg: 'var(--green-bg)' }
+];
+/** Tampilan penanda revisi (dipakai bila butir.revisi === true). */
+export const TANDA_REVISI = { label: 'Perlu revisi', color: 'var(--red)', bg: 'var(--red-bg)' };
+
+export function statusButir(key) {
+  const k = String(key || '').toUpperCase();
+  // Data lama memakai Status='REVISI' → dipetakan ke tahap TU + penanda revisi.
+  if (k === 'REVISI') return STATUS_BUTIR[0];
+  return STATUS_BUTIR.find(s => s.key === k) || STATUS_BUTIR[0];
+}
+/** Data lama: Status='REVISI' otomatis dianggap bertanda revisi. */
+export function adaRevisi(b) {
+  return b.revisi === true || String(b.status || '').toUpperCase() === 'REVISI';
+}
+
 /* ============================ util & normalisasi ========================== */
 export const nf = new Intl.NumberFormat('id-ID');
 export const fmt = (n) => nf.format(Math.round(Number(n) || 0));
@@ -183,11 +238,31 @@ const rowPencairan = (r) => ({
   dokumen: String(r[5] ?? '').trim()
 });
 
+const boolID = (v) => v === true || ['ya', 'true', '1', 'y'].indexOf(String(v ?? '').trim().toLowerCase()) >= 0;
+/** r[8] = penanda revisi (kolom J pada sheet; index 8 pada array seed). */
+const rowButir = (r) => {
+  const statusMentah = String(r[5] ?? 'TU').trim().toUpperCase();
+  return {
+    id: String(r[0] ?? '').trim(),
+    komponenId: String(r[1] ?? '').trim(),
+    nama: String(r[2] ?? '').trim(),
+    nominal: toNum(r[3]),
+    tanggal: r[4] instanceof Date ? r[4].toISOString().slice(0, 10) : String(r[4] ?? '').slice(0, 10),
+    status: statusMentah === 'REVISI' ? 'TU' : statusMentah,   // migrasi data lama
+    catatan: String(r[6] ?? '').trim(),
+    berkas: String(r[7] ?? '').trim(),
+    revisi: boolID(r[8]) || statusMentah === 'REVISI'
+  };
+};
+
 const objAnggaran = (o) => rowAnggaran([o.ID_Komponen ?? o.id, o.Tipe ?? o.tipe, o.Parent_ID ?? o.parent,
   o.Nama_Kegiatan ?? o.nama, o.Pagu_Anggaran ?? o.pagu, o.Total_Realisasi ?? o.realisasi]);
 const objPencairan = (o) => rowPencairan([o.ID_Pencairan ?? o.id, o.ID_Komponen ?? o.komponenId,
   o.Tanggal_Cair ?? o.tanggal, o.Nominal_Pencairan ?? o.nominal, o.Keterangan ?? o.keterangan,
   o.Link_Dokumen_Bukti ?? o.dokumen]);
+const objButir = (o) => rowButir([o.ID_Butir ?? o.id, o.ID_Komponen ?? o.komponenId, o.Nama_Butir ?? o.nama,
+  o.Nominal ?? o.nominal, o.Tanggal_Terima ?? o.tanggal, o.Status ?? o.status,
+  o.Catatan ?? o.catatan, o.Link_Berkas ?? o.berkas, o.Revisi ?? o.revisi]);
 
 /* ============================== pengambilan data ========================== */
 
@@ -199,9 +274,11 @@ async function getFromAppScript() {
   if (json.status === 'error') throw new Error(json.message || 'Apps Script mengembalikan error.');
   const a = json.anggaran || json.data?.anggaran || [];
   const p = json.pencairan || json.data?.pencairan || [];
+  const b = json.butir || json.data?.butir || [];
   return {
     anggaran: a.map(objAnggaran).filter(r => r.id),
     pencairan: p.map(objPencairan).filter(r => r.id || r.komponenId),
+    butir: b.map(objButir).filter(r => r.komponenId),
     source: 'Google Apps Script Web App'
   };
 }
@@ -217,10 +294,13 @@ async function getFromGViz() {
     const j = JSON.parse(t.substring(t.indexOf('{'), t.lastIndexOf('}') + 1));
     return (j.table.rows || []).map(r => (r.c || []).map(c => (c ? c.f ?? c.v : '')));
   };
-  const [a, p] = await Promise.all([one(CONFIG.SHEET_ANGGARAN), one(CONFIG.SHEET_PENCAIRAN)]);
+  const [a, p, b] = await Promise.all([
+    one(CONFIG.SHEET_ANGGARAN), one(CONFIG.SHEET_PENCAIRAN), one(CONFIG.SHEET_BUTIR).catch(() => [])
+  ]);
   return {
     anggaran: a.map(rowAnggaran).filter(r => r.id),
     pencairan: p.map(rowPencairan).filter(r => r.komponenId),
+    butir: b.map(r => rowButir([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[9]])).filter(r => r.komponenId),
     source: 'Google Sheets (GViz)'
   };
 }
@@ -232,6 +312,7 @@ export async function fetchAll() {
   return {
     anggaran: SEED_ANGGARAN.map(rowAnggaran),
     pencairan: SEED_PENCAIRAN.map(rowPencairan),
+    butir: SEED_BUTIR.map(rowButir),
     source: 'Data contoh (laporan TA 2026)'
   };
 }
@@ -241,6 +322,7 @@ export function seedFallback() {
   return {
     anggaran: SEED_ANGGARAN.map(rowAnggaran),
     pencairan: SEED_PENCAIRAN.map(rowPencairan),
+    butir: SEED_BUTIR.map(rowButir),
     source: 'Fallback data contoh'
   };
 }
@@ -324,23 +406,64 @@ export async function postPencairan(payload) {
   return json;
 }
 
+/* ------------------------- tulis Butir Kegiatan ---------------------------
+   Semua fungsi di bawah memakai pola POST yang sama (text/plain, tanpa preflight).
+   ⚡ REAL-TIME: bila ingin push langsung tanpa polling, ganti isi fungsi ini
+   dengan pengiriman lewat WebSocket / Firebase / Supabase channel Anda.
+-------------------------------------------------------------------------- */
+async function postAksi(action, payload, simulasi) {
+  if (CONFIG.MODE === 'seed') {
+    await new Promise(r => setTimeout(r, 500));
+    return { status: 'ok', simulated: true, ...simulasi };
+  }
+  const res = await fetch(CONFIG.APPSCRIPT_URL, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, token: getToken(), ...payload })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' saat menghubungi Google Sheets.');
+  const json = await res.json();
+  if (json.status !== 'ok') throw new Error(json.message || 'Permintaan ditolak server.');
+  return json;
+}
+
+/** Admin/TU menerima berkas dari Tim Kerja → catat butir kegiatan baru. */
+export function addButir(payload) {
+  return postAksi('addButir', payload, { id: 'BK-DEMO-' + Date.now().toString().slice(-4) });
+}
+/** Perbarui tahapan status / isi butir kegiatan. */
+export function updateButir(payload) {
+  return postAksi('updateButir', payload, { id: payload.ID_Butir });
+}
+/** Hapus butir kegiatan. */
+export function deleteButir(id) {
+  return postAksi('deleteButir', { ID_Butir: id }, { id });
+}
+
 /**
  * Susun struktur hierarki + agregasi.
  * Realisasi komponen utama = jumlah realisasi subkomponennya (bila ada),
  * sehingga angka induk selalu konsisten dengan rinciannya.
  */
-export function buildTree(anggaran, pencairan) {
+export function buildTree(anggaran, pencairan, butir) {
   const subs = anggaran.filter(r => r.tipe === 'SUB');
   const byKomponen = {};
   (pencairan || []).forEach(p => {
     (byKomponen[p.komponenId] = byKomponen[p.komponenId] || []).push(p);
   });
+  const butirBy = {};
+  (butir || []).forEach(b => {
+    (butirBy[b.komponenId] = butirBy[b.komponenId] || []).push(b);
+  });
+  const urutButir = (arr) => arr.slice().sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
 
   const utama = anggaran.filter(r => r.tipe === 'UTAMA').map(u => {
     const children = subs.filter(s => s.parent === u.id).map(s => {
       const pct = s.pagu > 0 ? (s.realisasi / s.pagu) * 100 : 0;
       const docs = (byKomponen[s.id] || []).slice().sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
-      return { ...s, sisa: s.pagu - s.realisasi, pct, status: statusOf(pct), docs };
+      const items = urutButir(butirBy[s.id] || []);
+      return { ...s, sisa: s.pagu - s.realisasi, pct, status: statusOf(pct), docs, butir: items, ringkas: ringkasButir(items) };
     });
     const pagu = children.length ? children.reduce((t, c) => t + c.pagu, 0) : u.pagu;
     const realisasi = children.length ? children.reduce((t, c) => t + c.realisasi, 0) : u.realisasi;
@@ -348,7 +471,8 @@ export function buildTree(anggaran, pencairan) {
     const ownDocs = (byKomponen[u.id] || []);
     const docs = children.reduce((all, c) => all.concat(c.docs), ownDocs.slice())
       .sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
-    return { ...u, pagu, realisasi, sisa: pagu - realisasi, pct, status: statusOf(pct), children, docs };
+    const items = urutButir(children.reduce((all, c) => all.concat(c.butir), (butirBy[u.id] || []).slice()));
+    return { ...u, pagu, realisasi, sisa: pagu - realisasi, pct, status: statusOf(pct), children, docs, butir: items, ringkas: ringkasButir(items) };
   });
 
   const pagu = utama.reduce((t, u) => t + u.pagu, 0);
@@ -358,7 +482,24 @@ export function buildTree(anggaran, pencairan) {
     pct: pagu ? (realisasi / pagu) * 100 : 0,
     avg: utama.length ? utama.reduce((t, u) => t + u.pct, 0) / utama.length : 0,
     nKomponen: utama.length,
-    nPencairan: (pencairan || []).length
+    nPencairan: (pencairan || []).length,
+    nButir: (butir || []).length,
+    ringkasButir: ringkasButir(butir || [])
   };
   return { utama, totals };
+}
+
+/** Hitung jumlah butir per tahapan status + nominal yang masih berproses. */
+export function ringkasButir(items) {
+  const out = { total: (items || []).length, nominalTotal: 0, nominalSelesai: 0, nominalProses: 0, REVISI: 0 };
+  STATUS_BUTIR.forEach(s => { out[s.key] = 0; });
+  (items || []).forEach(b => {
+    const k = statusButir(b.status).key;
+    out[k] = (out[k] || 0) + 1;
+    if (adaRevisi(b)) out.REVISI++;          // penanda, bukan tahap — bisa tumpang tindih
+    out.nominalTotal += b.nominal;
+    if (k === 'SP2D') out.nominalSelesai += b.nominal; else out.nominalProses += b.nominal;
+  });
+  out.pctSelesai = out.total ? (out.SP2D / out.total) * 100 : 0;
+  return out;
 }

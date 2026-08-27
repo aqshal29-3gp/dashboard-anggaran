@@ -238,6 +238,11 @@
  *   Untuk real-time, ganti polling (POLL_MS) dengan langganan WebSocket dan
  *   panggil this.terapkan(data) setiap ada pesan masuk.
  */
+const TAHAP_FALLBACK = [
+  { key: 'TU', urut: 1, label: 'Verifikasi Tim TU Pusdatin KP', pendek: 'Verifikasi TU', color: 'var(--blue)', bg: 'rgba(37,99,201,.12)' },
+  { key: 'KEUANGAN', urut: 2, label: 'Verifikasi Tim Keuangan', pendek: 'Verifikasi Keuangan', color: 'var(--navy-3)', bg: 'rgba(27,64,121,.12)' },
+  { key: 'SP2D', urut: 3, label: 'SP2D', pendek: 'SP2D', color: 'var(--green)', bg: 'var(--green-bg)' }
+];
 const POLL_MS = 60000;
 const KOSONG = { id: '', komponen: '', nama: '', nominal: '', tanggal: new Date().toISOString().slice(0, 10), status: 'TU', catatan: '', berkas: '', revisi: false };
 
@@ -433,9 +438,10 @@ class Component extends DCLogic {
     const ds = this.ds;
     const fmt = ds ? ds.fmt : (n) => String(n);
     const short = ds ? ds.short : (n) => String(n);
-    const TAHAP = ds ? ds.STATUS_BUTIR : [];
+    // Jaga-jaga bila browser masih memegang data-source.js versi lama (cache).
+    const TAHAP = (ds && ds.STATUS_BUTIR) || TAHAP_FALLBACK;
     const th = this.state.theme || (this.props.defaultDark ? 'dark' : 'light');
-    const mode = ds ? ds.CONFIG.MODE : 'seed';
+    const mode = (ds && ds.CONFIG && ds.CONFIG.MODE) || 'seed';
 
     const utama = this.state.anggaran.filter(r => r.tipe === 'UTAMA');
     const subOptions = [], semuaOptions = [];
