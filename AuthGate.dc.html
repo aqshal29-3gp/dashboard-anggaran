@@ -183,7 +183,7 @@ class Component extends DCLogic {
       judul = 'Masuk Panel Admin';
       subjudul = 'Gunakan akun staf TU Pusdatin KP yang sudah disetujui admin.';
       fields = [
-        this.field('email', 'Email dinas', { type: 'email', placeholder: 'nama@imipas.go.id', autocomplete: 'username' }),
+        this.field('email', 'Email dinas', { type: 'email', placeholder: 'nama@kemenimipas.go.id', autocomplete: 'username' }),
         this.field('password', 'Password', { type: 'password', placeholder: '••••••••', autocomplete: 'current-password' })
       ];
       tombolLabel = s.busy ? 'Memeriksa...' : 'Masuk';
@@ -194,7 +194,7 @@ class Component extends DCLogic {
       fields = [
         this.field('nama', 'Nama lengkap', { placeholder: 'Nama sesuai kepegawaian' }),
         this.field('unit', 'Unit / Tim kerja', { placeholder: 'mis. Tim TU Pusdatin KP' }),
-        this.field('email', 'Email dinas', { type: 'email', placeholder: 'nama@imipas.go.id', autocomplete: 'username',
+        this.field('email', 'Email dinas', { type: 'email', placeholder: 'nama@kemenimipas.go.id', autocomplete: 'username',
           hint: 'Hanya email berdomain instansi yang diterima.' }),
         this.field('password', 'Password', { type: 'password', placeholder: 'minimal 8 karakter', autocomplete: 'new-password' })
       ];
