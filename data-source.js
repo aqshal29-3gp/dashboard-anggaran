@@ -30,7 +30,7 @@ export const CONFIG = {
   SHEET_RPD: 'RPD',
 
   // Kontak Tim TU untuk tombol "Hubungi TU" (format internasional tanpa + dan spasi).
-  WA_TU: '628123456789',
+  WA_TU: '6282240281981',
   WA_TU_NAMA: 'Tim TU Pusdatin KP',
 
   // Token admin.
