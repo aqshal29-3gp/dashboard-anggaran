@@ -8,6 +8,7 @@
 <body>
 <x-dc>
 <helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -38,6 +39,12 @@
     --shadow-lg:0 30px 80px -30px rgba(0,0,0,.9);
   }
   *{box-sizing:border-box}
+  input,select,button,textarea{font-size:16px}          /* cegah zoom otomatis iOS */
+  @media (min-width:640px){input,select,button,textarea{font-size:inherit}}
+  @media (max-width:640px){
+    .om-pad{padding-left:14px !important;padding-right:14px !important}
+    .om-hide-sm{display:none !important}
+  }
   body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
   a{color:var(--blue);text-decoration:none}
   a:hover{color:var(--navy-3);text-decoration:underline}
@@ -50,11 +57,11 @@
 <div data-theme="{{ theme }}" style="min-height:100vh;color:var(--ink);background:var(--bg)">
 
   <header style="position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;box-shadow:0 8px 24px -16px rgba(0,0,0,.55)">
-    <div style="max-width:1460px;margin:0 auto;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px">
+    <div class="om-pad" style="max-width:1460px;margin:0 auto;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px">
       <div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 340px">
-        <div style="width:52px;height:52px;flex:0 0 auto;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center">
-          <img src="logo.png" alt="Logo Kementerian Imigrasi dan Pemasyarakatan" style="width:100%;height:100%;object-fit:contain;padding:5px" onError="{{ logoGagal }}">
-          <span style="display:none;font-weight:800;font-size:11px;letter-spacing:.06em">IMIPAS</span>
+        <div title="Logo Kementerian Imigrasi dan Pemasyarakatan" style="width:52px;height:52px;flex:0 0 auto;position:relative;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center">
+          <span style="font-weight:800;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.9)">IMIPAS</span>
+          <img src="logo.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:5px">
         </div>
         <div style="min-width:0">
           <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:600">{{ unit }}</div>
@@ -73,7 +80,7 @@
     <div style="height:3px;background:linear-gradient(90deg,var(--green) 0%,var(--green) {{ pctBar }},rgba(255,255,255,.14) {{ pctBar }},rgba(255,255,255,.14) 100%)"></div>
   </header>
 
-  <main style="max-width:1460px;margin:0 auto;padding:24px">
+  <main class="om-pad" style="max-width:1460px;margin:0 auto;padding:20px 24px 28px">
 
     <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
       <div role="alert" style="margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--red-bg);border:1px solid var(--red)">
@@ -93,7 +100,7 @@
       <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">Sumber: {{ sourceLabel }} · {{ pencairanCount }} bukti pencairan</div>
     </section>
 
-    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px">
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
       <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
         <article style="position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow);animation:fadeUp 360ms ease both;transition:transform 220ms ease" style-hover="transform:translateY(-2px)">
           <div style="position:absolute;inset:0 auto 0 0;width:4px;background:{{ k.color }}"></div>
@@ -111,12 +118,34 @@
     </section>
 
     <section style="margin-top:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
-      <div style="flex:2 1 560px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
-        <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px">
-          <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Persentase Penyerapan per Komponen Utama</h2>
-          <span style="font-size:11.5px;color:var(--ink-3);font-family:'IBM Plex Mono',monospace">% terhadap pagu masing-masing</span>
+      <div style="flex:2 1 560px;min-width:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px">
+          <div style="min-width:0">
+            <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Persentase Penyerapan per Komponen Utama</h2>
+            <div style="margin-top:3px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">{{ acuanKet }}</div>
+          </div>
+          <div style="display:flex;gap:4px;padding:3px;border-radius:10px;background:var(--surface-3);border:1px solid var(--line-2)">
+            <sc-for list="{{ acuanTabs }}" as="t" hint-placeholder-count="2">
+              <button type="button" onClick="{{ t.onClick }}" style="height:30px;padding:0 12px;border-radius:8px;border:none;background:{{ t.bg }};color:{{ t.color }};font-family:Manrope;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:{{ t.shadow }}">{{ t.label }}</button>
+            </sc-for>
+          </div>
         </div>
-        <div style="margin-top:14px;height:440px;position:relative">
+
+        <sc-if value="{{ modeRpd }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:12px;padding:11px 13px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line-2)">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">RPD kumulatif s.d. bulan</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-2)">{{ rpdRingkas }}</span>
+            </div>
+            <div style="margin-top:9px;display:flex;gap:4px;flex-wrap:wrap">
+              <sc-for list="{{ bulanTabs }}" as="b" hint-placeholder-count="12">
+                <button type="button" onClick="{{ b.onClick }}" style="width:38px;height:28px;border-radius:7px;border:1px solid {{ b.border }};background:{{ b.bg }};color:{{ b.color }};font-family:Manrope;font-size:11px;font-weight:700;cursor:pointer" style-hover="filter:brightness(.97)">{{ b.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="margin-top:14px;flex:1;min-height:430px;position:relative">
           <canvas ref="{{ barRef }}"></canvas>
         </div>
       </div>
@@ -281,7 +310,7 @@
   </main>
 
   <footer style="background:var(--navy);color:rgba(255,255,255,.72)">
-    <div style="max-width:1460px;margin:0 auto;padding:26px 24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
+    <div class="om-pad" style="max-width:1460px;margin:0 auto;padding:26px 24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
       <div style="font-size:12.5px;line-height:1.6">
         <strong style="color:#fff;display:block;font-size:13px">{{ instansi }}</strong>
         Laporan Ketersediaan Dana Detail TA 2026 &middot; Satuan Kerja {{ satker }}
@@ -291,7 +320,7 @@
   </footer>
 
   <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
-    <dc-import name="SubcomponentModal" node="{{ modalNode }}" parent="{{ modalParent }}" editable="{{ false }}" on-close="{{ closeModal }}" hint-size="100%,100%"></dc-import>
+    <dc-import name="SubcomponentModal" node="{{ modalNode }}" on-close="{{ closeModal }}" hint-size="100%,100%"></dc-import>
   </sc-if>
 </div>
 </x-dc>
@@ -299,7 +328,9 @@
 /* Konfigurasi & sumber data ada di data-source.js (satu tempat untuk kedua halaman). */
 class Component extends DCLogic {
   state = {
-    anggaran: [], pencairan: [], butir: [], source: '—', isLoading: true, errorMsg: '', updated: null,
+    anggaran: [], pencairan: [], butir: [], rpd: [], source: '—', isLoading: true, errorMsg: '', updated: null,
+    acuan: 'PAGU',            // 'PAGU' | 'RPD' — pembanding grafik batang
+    bulanRpd: new Date().getMonth(),   // 0-11, acuan RPD kumulatif
     expanded: {}, allOpen: false, query: '', status: 'ALL', modal: null, modalParent: null, theme: null
   };
 
@@ -323,16 +354,20 @@ class Component extends DCLogic {
     if (!silent) this.setState({ isLoading: true, errorMsg: '' });
     try {
       const d = await this.ds.fetchAll();
-      this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, butir: d.butir || [], source: d.source, isLoading: false, errorMsg: '', updated: new Date() });
+      this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, butir: d.butir || [], rpd: d.rpd || [], source: d.source, isLoading: false, errorMsg: '', updated: new Date() });
     } catch (e) {
       const f = this.ds.seedFallback();
-      this.setState({ anggaran: f.anggaran, pencairan: f.pencairan, butir: f.butir || [], source: f.source, isLoading: false, updated: new Date(), errorMsg: (e && e.message) || String(e) });
+      this.setState({ anggaran: f.anggaran, pencairan: f.pencairan, butir: f.butir || [], rpd: f.rpd || [], source: f.source, isLoading: false, updated: new Date(), errorMsg: (e && e.message) || String(e) });
     }
     // ⚡ REAL-TIME: ganti polling di componentDidMount dengan langganan WebSocket
     // (mis. socket.on('anggaran:update', d => this.setState({...}))) bila backend siap.
   }
 
-  tree() { return this.ds ? this.ds.buildTree(this.state.anggaran, this.state.pencairan, this.state.butir) : { utama: [], totals: { pagu: 0, realisasi: 0, sisa: 0, pct: 0, avg: 0, nKomponen: 0, nPencairan: 0, nButir: 0 } }; }
+  tree() {
+    return this.ds
+      ? this.ds.buildTree(this.state.anggaran, this.state.pencairan, this.state.butir, this.state.rpd)
+      : { utama: [], totals: { pagu: 0, realisasi: 0, sisa: 0, pct: 0, avg: 0, nKomponen: 0, nPencairan: 0, nButir: 0, kurvaRpd: [] } };
+  }
 
   visibleUtama() {
     const q = this.state.query.trim().toLowerCase();
@@ -356,17 +391,28 @@ class Component extends DCLogic {
     const { utama, totals } = this.tree();
     if (!utama.length) return;
     const { nf, fmt } = this.ds;
+    const BULAN = this.ds.BULAN || ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
     const dark = this.theme() === 'dark';
     const grid = dark ? 'rgba(255,255,255,.08)' : 'rgba(11,37,69,.08)';
     const tick = dark ? '#A6B6CE' : '#4A5A72';
 
-    // Bar 100% bertumpuk: proporsi terserap vs belum terserap terhadap pagu.
-    const pctTerserap = utama.map(u => Math.min(100, u.pct));
+    // Bar 100% bertumpuk: proporsi terserap terhadap PAGU atau terhadap RPD
+    // kumulatif s.d. bulan yang dipilih.
+    const modeRpd = this.state.acuan === 'RPD';
+    const bln = this.state.bulanRpd;
+    const acuanNilai = utama.map(u => modeRpd
+      ? (u.rpd || []).slice(0, bln + 1).reduce((t, v) => t + v, 0)
+      : u.pagu);
+    const pctTerserap = utama.map((u, i) => {
+      const dasar = acuanNilai[i];
+      if (dasar <= 0) return u.realisasi > 0 ? 100 : 0;
+      return Math.min(100, (u.realisasi / dasar) * 100);
+    });
     const barData = {
       labels: utama.map(u => u.nama.length > 32 ? u.nama.slice(0, 31) + '…' : u.nama),
       datasets: [
         { label: 'Terserap', data: pctTerserap, backgroundColor: dark ? '#34D399' : '#0E9F6E', borderRadius: { topLeft: 0, bottomLeft: 0, topRight: 4, bottomRight: 4 }, barPercentage: .78, categoryPercentage: .8 },
-        { label: 'Belum terserap', data: pctTerserap.map(p => 100 - p), backgroundColor: dark ? '#1E3050' : '#DCE4F0', borderRadius: 4, barPercentage: .78, categoryPercentage: .8 }
+        { label: modeRpd ? 'Belum ditarik' : 'Belum terserap', data: pctTerserap.map(p => 100 - p), backgroundColor: dark ? '#1E3050' : '#DCE4F0', borderRadius: 4, barPercentage: .78, categoryPercentage: .8 }
       ]
     };
     const barOpts = {
@@ -378,10 +424,15 @@ class Component extends DCLogic {
           callbacks: {
             label: (c) => c.dataset.label + ': ' + c.raw.toFixed(2) + '%',
             afterBody: (items) => {
-              const u = utama[items[0].dataIndex];
-              return ['Pagu:      Rp ' + fmt(u.pagu),
-                      'Realisasi: Rp ' + fmt(u.realisasi),
-                      'Sisa:      Rp ' + fmt(u.sisa)];
+              const i = items[0].dataIndex, u = utama[i];
+              const baris = ['Pagu:      Rp ' + fmt(u.pagu),
+                             'Realisasi: Rp ' + fmt(u.realisasi),
+                             'Sisa:      Rp ' + fmt(u.sisa)];
+              if (modeRpd) {
+                baris.push('RPD s.d. ' + BULAN[bln] + ': Rp ' + fmt(acuanNilai[i]));
+                baris.push('RPD setahun:   Rp ' + fmt(u.rpdTotal || 0));
+              }
+              return baris;
             }
           }
         }
@@ -408,8 +459,11 @@ class Component extends DCLogic {
 
   /* ------------------------------- aksi --------------------------------- */
   toggle = (id) => this.setState(s => ({ expanded: { ...s.expanded, [id]: !s.expanded[id] } }));
-  /** Buka popup rincian. `parent` dipakai agar bar tingkat Komponen juga tampil. */
-  openDocs = (node, parent) => this.setState({ modal: node, modalParent: parent || null });
+  /**
+   * Popup selalu menampilkan KOMPONEN UTAMA; bila yang diklik subkomponen,
+   * induknya yang dibuka (daftar subkomponen ada di dalam popup).
+   */
+  openDocs = (node, parent) => this.setState({ modal: parent || node, modalParent: null });
 
   exportCsv = () => {
     const { fmt } = this.ds;
@@ -432,6 +486,8 @@ class Component extends DCLogic {
     const fmt = ds ? ds.fmt : (n) => String(n);
     const short = ds ? ds.short : (n) => String(n);
     const tanggalID = ds ? ds.tanggalID : (v) => String(v);
+    const BLN = (ds && ds.BULAN) || ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+    const BLN_PANJANG = (ds && ds.BULAN_PANJANG) || BLN;
     const up = this.state.updated;
 
     const list = this.visibleUtama();
@@ -483,7 +539,6 @@ class Component extends DCLogic {
       toggleTheme: () => this.setState({ theme: th === 'dark' ? 'light' : 'dark' }),
       refresh: () => this.load(),
       // Bila logo.png belum diunggah, tampilkan teks pengganti agar header tidak kosong.
-      logoGagal: (e) => { e.target.style.display = 'none'; if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'block'; },
       instansi: this.props.instansi ?? 'Kementerian Imigrasi dan Pemasyarakatan',
       unit: this.props.unit ?? 'Pusat Data, Informasi dan Komunikasi Publik',
       satker: this.props.satker ?? '694677 — Sekretariat Jenderal',
@@ -523,6 +578,33 @@ class Component extends DCLogic {
         tahap.push({ urut: '⚑', pendek: 'Perlu revisi', color: 'var(--red)', jumlah: r.REVISI || 0 });
         const maxB = Math.max(1, ...tahap.map(t => t.jumlah));
         return tahap.map(t => ({ ...t, bar: (t.jumlah / maxB * 100) + '%' }));
+      })(),
+      modeRpd: this.state.acuan === 'RPD',
+      acuanKet: this.state.acuan === 'RPD'
+        ? '% realisasi terhadap Rencana Penarikan Dana kumulatif s.d. ' + BLN_PANJANG[this.state.bulanRpd]
+        : '% realisasi terhadap pagu masing-masing komponen',
+      acuanTabs: [
+        { key: 'PAGU', label: 'Terhadap Pagu' },
+        { key: 'RPD', label: 'Terhadap RPD' }
+      ].map(t => ({
+        label: t.label,
+        onClick: () => this.setState({ acuan: t.key }),
+        bg: this.state.acuan === t.key ? 'var(--surface)' : 'transparent',
+        color: this.state.acuan === t.key ? 'var(--navy)' : 'var(--ink-3)',
+        shadow: this.state.acuan === t.key ? '0 1px 3px rgba(11,37,69,.16)' : 'none'
+      })),
+      bulanTabs: BLN.map((b, i) => ({
+        label: b,
+        onClick: () => this.setState({ bulanRpd: i }),
+        bg: i === this.state.bulanRpd ? 'var(--navy)' : 'var(--surface)',
+        color: i === this.state.bulanRpd ? '#fff' : 'var(--ink-2)',
+        border: i === this.state.bulanRpd ? 'var(--navy)' : 'var(--line)'
+      })),
+      rpdRingkas: (() => {
+        const sd = utama.reduce((t, u) => t + (u.rpd || []).slice(0, this.state.bulanRpd + 1).reduce((x, v) => x + v, 0), 0);
+        const setahun = utama.reduce((t, u) => t + (u.rpdTotal || 0), 0);
+        const pct = sd ? (totals.realisasi / sd) * 100 : 0;
+        return short(sd) + ' dari ' + short(setahun) + ' · capaian ' + pct.toFixed(1) + '%';
       })(),
       barRef: (el) => { this.barEl = el; if (el) this.drawCharts(); },
       donutRef: (el) => { this.donutEl = el; if (el) this.drawCharts(); },

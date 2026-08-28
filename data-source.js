@@ -27,6 +27,11 @@ export const CONFIG = {
   SHEET_ANGGARAN: 'Anggaran',
   SHEET_PENCAIRAN: 'Pencairan',
   SHEET_BUTIR: 'Butir',
+  SHEET_RPD: 'RPD',
+
+  // Kontak Tim TU untuk tombol "Hubungi TU" (format internasional tanpa + dan spasi).
+  WA_TU: '628123456789',
+  WA_TU_NAMA: 'Tim TU Pusdatin KP',
 
   // Token admin.
   // • MODE 'appscript' → BIARKAN KOSONG ''. Admin mengetik token saat login, token
@@ -130,6 +135,60 @@ export const SEED_PENCAIRAN = [
    MODE demo (seed/gviz): tidak ada server, jadi CONFIG.ADMIN_TOKEN yang dipakai.
 -------------------------------------------------------------------------- */
 const TOKEN_KEY = 'anggaran_admin_token';
+const SESI_KEY = 'anggaran_sesi';
+
+/* --------------------------- Akun & sesi login ---------------------------
+   Sesi disimpan di sessionStorage: hilang saat tab ditutup, tidak dibagi
+   antar-tab lain, dan tidak pernah menyimpan password.
+------------------------------------------------------------------------- */
+export function getSesi() {
+  try { return JSON.parse(sessionStorage.getItem(SESI_KEY) || 'null'); } catch (e) { return null; }
+}
+export function setSesi(s) {
+  try { sessionStorage.setItem(SESI_KEY, JSON.stringify(s)); } catch (e) {}
+}
+export function clearSesi() {
+  try { sessionStorage.removeItem(SESI_KEY); } catch (e) {}
+}
+/** Sesi masih berlaku menurut cap waktu di sisi klien. */
+export function sesiAktif() {
+  const s = getSesi();
+  if (!s || !s.token) return false;
+  if (s.kedaluwarsa && new Date(s.kedaluwarsa) < new Date()) { clearSesi(); return false; }
+  return true;
+}
+
+async function postPublik(payload) {
+  if (CONFIG.MODE !== 'appscript') {
+    await new Promise(r => setTimeout(r, 500));
+    return { status: 'ok', simulated: true, token: 'DEMO-' + Date.now(), nama: 'Pengguna Demo',
+             peran: 'ADMIN', message: 'Mode demo: verifikasi email dilewati.' };
+  }
+  const res = await fetch(CONFIG.APPSCRIPT_URL, {
+    method: 'POST', redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' saat menghubungi server.');
+  const j = await res.json();
+  if (j.status !== 'ok') throw new Error(j.message || 'Permintaan ditolak server.');
+  return j;
+}
+
+export function daftarAkun(d) { return postPublik({ action: 'daftar', ...d }); }
+export function verifikasiEmail(d) { return postPublik({ action: 'verifikasiEmail', ...d }); }
+export async function loginAkun(d) {
+  const j = await postPublik({ action: 'login', ...d });
+  setSesi({ token: j.token, nama: j.nama, email: j.email || d.email, peran: j.peran, kedaluwarsa: j.kedaluwarsa });
+  return j;
+}
+export async function logoutAkun() {
+  const s = getSesi();
+  clearSesi();
+  if (s && s.token && CONFIG.MODE === 'appscript') {
+    try { await postPublik({ action: 'logout', token: s.token }); } catch (e) {}
+  }
+}
 export function getToken() {
   if (CONFIG.MODE !== 'appscript' && CONFIG.ADMIN_TOKEN) return CONFIG.ADMIN_TOKEN;
   try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
@@ -191,6 +250,31 @@ export function adaRevisi(b) {
   return b.revisi === true || String(b.status || '').toUpperCase() === 'REVISI';
 }
 
+/* -----------------------------------------------------------------------------
+   SHEET 4 — RPD (Rencana Penarikan Dana) per Komponen Utama per bulan
+   Sumber: "RENCANA PENARIKAN DANA (RDP) PUSDATIN KP TA 2026".
+   Kolom sheet: ID_Komponen | Jan | Feb | Mar | Apr | Mei | Jun | Jul | Ags | Sep | Okt | Nov | Des
+   Angka RPD adalah RENCANA penarikan; realisasi dibandingkan terhadap RPD
+   kumulatif s.d. bulan berjalan untuk melihat on-track / tertinggal.
+----------------------------------------------------------------------------- */
+export const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+export const BULAN_PANJANG = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+export const SEED_RPD = [
+  //  id          Jan Feb Mar Apr Mei Jun        Jul          Ags          Sep          Okt          Nov        Des
+  ['051.0A', 0, 0, 0, 0, 0, 0, 0, 28980000, 17550000, 15850000, 14121000, 0],
+  ['051.0B', 0, 0, 0, 0, 0, 0, 4250000, 94703800, 215988000, 317380000, 87458200, 0],
+  ['051.0E', 0, 0, 0, 0, 0, 0, 149850000, 540000000, 390000000, 390000000, 545150000, 90000000],
+  ['051.0H', 0, 0, 0, 0, 0, 0, 0, 0, 195492000, 0, 0, 0],
+  ['051.0I', 0, 0, 0, 0, 0, 0, 0, 0, 3939393000, 0, 5909089000, 0],
+  ['051.0J', 0, 0, 0, 0, 0, 0, 0, 54993000, 4155000, 9600000, 104380000, 0],
+  ['051.0K', 0, 0, 0, 0, 0, 0, 0, 21600000, 10800000, 10800000, 26460000, 0],
+  ['051.0L', 0, 0, 0, 0, 0, 0, 0, 15200000, 11650000, 179611000, 0, 0],
+  ['051.0M', 0, 0, 0, 0, 0, 0, 0, 7429090000, 10930000, 5080000, 0, 0],
+  ['051.0N', 0, 0, 0, 0, 0, 0, 0, 8000000, 0, 0, 400000000, 0]
+];
+
 /* ============================ util & normalisasi ========================== */
 export const nf = new Intl.NumberFormat('id-ID');
 export const fmt = (n) => nf.format(Math.round(Number(n) || 0));
@@ -251,8 +335,39 @@ const rowButir = (r) => {
     status: statusMentah === 'REVISI' ? 'TU' : statusMentah,   // migrasi data lama
     catatan: String(r[6] ?? '').trim(),
     berkas: String(r[7] ?? '').trim(),
-    revisi: boolID(r[8]) || statusMentah === 'REVISI'
+    revisi: boolID(r[8]) || statusMentah === 'REVISI',
+    picNama: String(r[9] ?? '').trim(),
+    picNip: String(r[10] ?? '').trim(),
+    picWa: normalWa(r[11])
   };
+};
+
+/** Rapikan nomor WA ke format internasional tanpa tanda baca (62812...). */
+export function normalWa(v) {
+  let t = String(v ?? '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
+  if (!t) return '';
+  if (t.charAt(0) === '0') t = '62' + t.slice(1);
+  else if (t.slice(0, 2) !== '62' && t.length <= 12) t = '62' + t;
+  return t;
+}
+/** Bangun tautan wa.me lengkap dengan pesan siap kirim. */
+export function linkWa(nomor, pesan) {
+  const n = normalWa(nomor);
+  if (!n) return '';
+  return 'https://wa.me/' + n + (pesan ? '?text=' + encodeURIComponent(pesan) : '');
+}
+
+const rowRPD = (r) => {
+  const out = { komponenId: String(r[0] ?? '').trim(), bulan: [] };
+  for (let i = 0; i < 12; i++) out.bulan.push(toNum(r[i + 1]));
+  out.total = out.bulan.reduce((t, v) => t + v, 0);
+  return out;
+};
+const objRPD = (o) => {
+  if (Array.isArray(o)) return rowRPD(o);
+  const arr = [o.ID_Komponen ?? o.komponenId];
+  for (let i = 0; i < 12; i++) arr.push(o.bulan ? o.bulan[i] : o[BULAN[i]]);
+  return rowRPD(arr);
 };
 
 const objAnggaran = (o) => rowAnggaran([o.ID_Komponen ?? o.id, o.Tipe ?? o.tipe, o.Parent_ID ?? o.parent,
@@ -262,7 +377,8 @@ const objPencairan = (o) => rowPencairan([o.ID_Pencairan ?? o.id, o.ID_Komponen 
   o.Link_Dokumen_Bukti ?? o.dokumen]);
 const objButir = (o) => rowButir([o.ID_Butir ?? o.id, o.ID_Komponen ?? o.komponenId, o.Nama_Butir ?? o.nama,
   o.Nominal ?? o.nominal, o.Tanggal_Terima ?? o.tanggal, o.Status ?? o.status,
-  o.Catatan ?? o.catatan, o.Link_Berkas ?? o.berkas, o.Revisi ?? o.revisi]);
+  o.Catatan ?? o.catatan, o.Link_Berkas ?? o.berkas, o.Revisi ?? o.revisi,
+  o.PIC_Nama ?? o.picNama, o.PIC_NIP ?? o.picNip, o.PIC_WA ?? o.picWa]);
 
 /* ============================== pengambilan data ========================== */
 
@@ -275,10 +391,12 @@ async function getFromAppScript() {
   const a = json.anggaran || json.data?.anggaran || [];
   const p = json.pencairan || json.data?.pencairan || [];
   const b = json.butir || json.data?.butir || [];
+  const rp = json.rpd || json.data?.rpd || [];
   return {
     anggaran: a.map(objAnggaran).filter(r => r.id),
     pencairan: p.map(objPencairan).filter(r => r.id || r.komponenId),
     butir: b.map(objButir).filter(r => r.komponenId),
+    rpd: rp.length ? rp.map(objRPD).filter(r => r.komponenId) : SEED_RPD.map(rowRPD),
     source: 'Google Apps Script Web App'
   };
 }
@@ -294,13 +412,15 @@ async function getFromGViz() {
     const j = JSON.parse(t.substring(t.indexOf('{'), t.lastIndexOf('}') + 1));
     return (j.table.rows || []).map(r => (r.c || []).map(c => (c ? c.f ?? c.v : '')));
   };
-  const [a, p, b] = await Promise.all([
-    one(CONFIG.SHEET_ANGGARAN), one(CONFIG.SHEET_PENCAIRAN), one(CONFIG.SHEET_BUTIR).catch(() => [])
+  const [a, p, b, rp] = await Promise.all([
+    one(CONFIG.SHEET_ANGGARAN), one(CONFIG.SHEET_PENCAIRAN),
+    one(CONFIG.SHEET_BUTIR).catch(() => []), one(CONFIG.SHEET_RPD).catch(() => [])
   ]);
   return {
     anggaran: a.map(rowAnggaran).filter(r => r.id),
     pencairan: p.map(rowPencairan).filter(r => r.komponenId),
-    butir: b.map(r => rowButir([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[9]])).filter(r => r.komponenId),
+    butir: b.map(r => rowButir([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[9], r[10], r[11], r[12]])).filter(r => r.komponenId),
+    rpd: rp.length ? rp.map(rowRPD).filter(r => r.komponenId) : SEED_RPD.map(rowRPD),
     source: 'Google Sheets (GViz)'
   };
 }
@@ -313,6 +433,7 @@ export async function fetchAll() {
     anggaran: SEED_ANGGARAN.map(rowAnggaran),
     pencairan: SEED_PENCAIRAN.map(rowPencairan),
     butir: SEED_BUTIR.map(rowButir),
+    rpd: SEED_RPD.map(rowRPD),
     source: 'Data contoh (laporan TA 2026)'
   };
 }
@@ -323,6 +444,7 @@ export function seedFallback() {
     anggaran: SEED_ANGGARAN.map(rowAnggaran),
     pencairan: SEED_PENCAIRAN.map(rowPencairan),
     butir: SEED_BUTIR.map(rowButir),
+    rpd: SEED_RPD.map(rowRPD),
     source: 'Fallback data contoh'
   };
 }
@@ -398,7 +520,7 @@ export async function postPencairan(payload) {
     method: 'POST',
     redirect: 'follow',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: 'addPencairan', token: getToken(), ...payload })
+    body: JSON.stringify({ action: 'addPencairan', token: (getSesi() || {}).token || getToken(), ...payload })
   });
   if (!res.ok) throw new Error('HTTP ' + res.status + ' saat menyimpan ke Google Sheets.');
   const json = await res.json();
@@ -420,7 +542,7 @@ async function postAksi(action, payload, simulasi) {
     method: 'POST',
     redirect: 'follow',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, token: getToken(), ...payload })
+    body: JSON.stringify({ action, token: (getSesi() || {}).token || getToken(), ...payload })
   });
   if (!res.ok) throw new Error('HTTP ' + res.status + ' saat menghubungi Google Sheets.');
   const json = await res.json();
@@ -441,12 +563,51 @@ export function deleteButir(id) {
   return postAksi('deleteButir', { ID_Butir: id }, { id });
 }
 
+/** Butir yang sudah SP2D = bukti pencairan (dana sudah dibayarkan). */
+export function sudahSP2D(b) {
+  return statusButir(b.status).key === 'SP2D';
+}
+
+/** Admin: tambah komponen utama / subkomponen baru. */
+export function addKomponen(payload) {
+  return postAksi('addKomponen', payload, { id: payload.ID_Komponen });
+}
+/** Admin: hapus komponen (beserta subkomponennya bila komponen utama). */
+export function deleteKomponen(id) {
+  return postAksi('deleteKomponen', { ID_Komponen: id }, { id });
+}
+/** Riwayat perubahan (sheet Log) — untuk panel History di Panel Admin. */
+export async function fetchLog(limit) {
+  if (CONFIG.MODE !== 'appscript') return [];
+  const url = CONFIG.APPSCRIPT_URL + '?action=getLog&limit=' + (limit || 40);
+  const res = await fetch(url, { redirect: 'follow' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const j = await res.json();
+  return j.log || [];
+}
+
+/** Admin: ubah nama / pagu komponen atau subkomponen (Revisi Pagu). */
+export function updateAnggaran(payload) {
+  return postAksi('updateAnggaran', payload, { id: payload.ID_Komponen });
+}
+/** Admin: ubah RPD satu komponen utama (array 12 bulan) — Revisi RPD. */
+export function updateRPD(payload) {
+  return postAksi('updateRPD', payload, { id: payload.ID_Komponen });
+}
+
 /**
  * Susun struktur hierarki + agregasi.
- * Realisasi komponen utama = jumlah realisasi subkomponennya (bila ada),
- * sehingga angka induk selalu konsisten dengan rinciannya.
+ *
+ * REALISASI berasal dari BUTIR KEGIATAN berstatus SP2D — tidak ada input
+ * pencairan terpisah. Begitu Admin menetapkan sebuah butir ke tahap SP2D,
+ * nominalnya otomatis masuk realisasi komponen tersebut.
+ * Kolom Total_Realisasi di Sheet 1 hanya dipakai sebagai cadangan untuk
+ * komponen yang belum punya butir sama sekali (data lama).
+ *
+ * RPD (Rencana Penarikan Dana) dilampirkan per komponen utama, lengkap dengan
+ * nilai kumulatif s.d. bulan berjalan untuk mengukur on-track/tertinggal.
  */
-export function buildTree(anggaran, pencairan, butir) {
+export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan) {
   const subs = anggaran.filter(r => r.tipe === 'SUB');
   const byKomponen = {};
   (pencairan || []).forEach(p => {
@@ -456,35 +617,58 @@ export function buildTree(anggaran, pencairan, butir) {
   (butir || []).forEach(b => {
     (butirBy[b.komponenId] = butirBy[b.komponenId] || []).push(b);
   });
+  const rpdBy = {};
+  (rpd && rpd.length ? rpd : SEED_RPD.map(rowRPD)).forEach(r => { rpdBy[r.komponenId] = r; });
+
   const urutButir = (arr) => arr.slice().sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
+  const bulanKini = Number.isInteger(bulanAcuan) ? bulanAcuan : new Date().getMonth();  // 0-11
 
   const utama = anggaran.filter(r => r.tipe === 'UTAMA').map(u => {
     const children = subs.filter(s => s.parent === u.id).map(s => {
-      const pct = s.pagu > 0 ? (s.realisasi / s.pagu) * 100 : 0;
-      const docs = (byKomponen[s.id] || []).slice().sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
       const items = urutButir(butirBy[s.id] || []);
-      return { ...s, sisa: s.pagu - s.realisasi, pct, status: statusOf(pct), docs, butir: items, ringkas: ringkasButir(items) };
+      // Realisasi = jumlah nominal butir yang sudah SP2D.
+      const realisasi = items.length ? items.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0) : s.realisasi;
+      const pct = s.pagu > 0 ? (realisasi / s.pagu) * 100 : 0;
+      const docs = items.filter(sudahSP2D);          // bukti pencairan = butir SP2D
+      return { ...s, realisasi, sisa: s.pagu - realisasi, pct, status: statusOf(pct), docs, butir: items, ringkas: ringkasButir(items) };
     });
     const pagu = children.length ? children.reduce((t, c) => t + c.pagu, 0) : u.pagu;
-    const realisasi = children.length ? children.reduce((t, c) => t + c.realisasi, 0) : u.realisasi;
-    const pct = pagu > 0 ? (realisasi / pagu) * 100 : 0;
-    const ownDocs = (byKomponen[u.id] || []);
-    const docs = children.reduce((all, c) => all.concat(c.docs), ownDocs.slice())
-      .sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
     const items = urutButir(children.reduce((all, c) => all.concat(c.butir), (butirBy[u.id] || []).slice()));
-    return { ...u, pagu, realisasi, sisa: pagu - realisasi, pct, status: statusOf(pct), children, docs, butir: items, ringkas: ringkasButir(items) };
+    const realisasi = children.length
+      ? children.reduce((t, c) => t + c.realisasi, 0)
+      : (items.length ? items.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0) : u.realisasi);
+    const pct = pagu > 0 ? (realisasi / pagu) * 100 : 0;
+    const docs = items.filter(sudahSP2D);
+
+    // --- RPD ---
+    const r = rpdBy[u.id] || { bulan: new Array(12).fill(0), total: 0 };
+    const rpdSd = r.bulan.slice(0, bulanKini + 1).reduce((t, v) => t + v, 0);
+    const pctRpd = rpdSd > 0 ? (realisasi / rpdSd) * 100 : (realisasi > 0 ? 100 : 0);
+
+    return {
+      ...u, pagu, realisasi, sisa: pagu - realisasi, pct, status: statusOf(pct),
+      children, docs, butir: items, ringkas: ringkasButir(items),
+      rpd: r.bulan, rpdTotal: r.total, rpdSd, pctRpd, adaRpd: r.total > 0
+    };
   });
 
   const pagu = utama.reduce((t, u) => t + u.pagu, 0);
   const realisasi = utama.reduce((t, u) => t + u.realisasi, 0);
+  const rpdSd = utama.reduce((t, u) => t + u.rpdSd, 0);
+  const rpdTotal = utama.reduce((t, u) => t + u.rpdTotal, 0);
+  const semuaButir = butir || [];
   const totals = {
     pagu, realisasi, sisa: pagu - realisasi,
     pct: pagu ? (realisasi / pagu) * 100 : 0,
     avg: utama.length ? utama.reduce((t, u) => t + u.pct, 0) / utama.length : 0,
+    rpdSd, rpdTotal, bulanKini,
+    pctRpd: rpdSd ? (realisasi / rpdSd) * 100 : 0,
     nKomponen: utama.length,
-    nPencairan: (pencairan || []).length,
-    nButir: (butir || []).length,
-    ringkasButir: ringkasButir(butir || [])
+    nPencairan: semuaButir.filter(sudahSP2D).length,   // bukti pencairan = butir SP2D
+    nButir: semuaButir.length,
+    ringkasButir: ringkasButir(semuaButir),
+    // Kurva RPD kumulatif untuk grafik bulanan.
+    kurvaRpd: BULAN.map((_, i) => utama.reduce((t, u) => t + u.rpd.slice(0, i + 1).reduce((x, v) => x + v, 0), 0))
   };
   return { utama, totals };
 }

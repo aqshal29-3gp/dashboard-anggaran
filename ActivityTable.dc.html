@@ -68,7 +68,20 @@
               <div style="margin-top:3px;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty;overflow-wrap:anywhere">{{ r.catatan }}</div>
             </sc-if>
 
-            <div style="margin-top:7px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <sc-if value="{{ r.adaPic }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:8px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:8px 10px;border-radius:9px;background:var(--surface-3);border:1px solid var(--line-2)">
+                <span style="width:24px;height:24px;flex:0 0 auto;border-radius:50%;background:var(--navy-3);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:800">{{ r.picInisial }}</span>
+                <span style="min-width:0;flex:1">
+                  <span style="display:block;font-size:12px;font-weight:700;overflow-wrap:anywhere">{{ r.picNama }}</span>
+                  <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-3);overflow-wrap:anywhere">{{ r.picMeta }}</span>
+                </span>
+                <sc-if value="{{ r.adaWa }}" hint-placeholder-val="{{ false }}">
+                  <a href="{{ r.waLink }}" target="_blank" rel="noopener" title="Kirim notifikasi status berkas via WhatsApp" style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:8px;background:#25D366;color:#08331C;font-size:11.5px;font-weight:800;text-decoration:none;white-space:nowrap;flex:0 0 auto" style-hover="filter:brightness(.95);text-decoration:none">✆ {{ r.waLabel }}</a>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
               <span style="font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:600">{{ r.nominal }}</span>
               <sc-if value="{{ r.hasBerkas }}" hint-placeholder-val="{{ false }}">
                 <a href="{{ r.berkas }}" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:600">Lihat berkas ↗</a>
@@ -159,13 +172,20 @@ class Component extends DCLogic {
   componentDidUpdate() { this.sinkron(); }
   /* <sc-for> menyisipkan <option> setelah commit → nilai <select> disinkronkan ulang. */
   sinkron() {
-    requestAnimationFrame(() => {
+    // <option> disisipkan beberapa frame setelah commit, jadi coba beberapa kali.
+    let sisa = 6;
+    const coba = () => {
+      let belum = false;
       (this.props.items || []).forEach(b => {
         const el = this.sel[b.id];
+        if (!el) return;
         const val = this.tahap(b.status).key;
-        if (el && el.options.length && el.value !== val) el.value = val;
+        if (!el.options.length) { belum = true; return; }
+        if (el.value !== val) el.value = val;
       });
-    });
+      if (belum && --sisa > 0) requestAnimationFrame(coba);
+    };
+    requestAnimationFrame(coba);
   }
 
   tahap(key) {
@@ -230,6 +250,21 @@ class Component extends DCLogic {
             dotInk: i <= idx ? '#fff' : 'var(--ink-3)',
             lineColor: i < idx ? cur.color : 'var(--line-2)'
           })),
+          adaPic: !!(b.picNama || b.picWa),
+          picNama: b.picNama || 'PIC belum dicatat',
+          picInisial: (b.picNama || '?').trim().split(/\s+/).slice(0, 2).map(x => x.charAt(0).toUpperCase()).join('') || '?',
+          picMeta: [b.picNip ? 'NIP ' + b.picNip : '', b.picWa ? '+' + b.picWa : ''].filter(Boolean).join(' · ') || 'kontak belum diisi',
+          adaWa: !!b.picWa,
+          waLabel: editable ? 'Beri tahu' : 'WhatsApp',
+          waLink: 'https://wa.me/' + (b.picWa || '') + '?text=' + encodeURIComponent(
+            'Halo ' + (b.picNama || 'Bapak/Ibu') + ', informasi status berkas:\n\n' +
+            '• Nomor dokumen: ' + (b.id || '-') + '\n' +
+            '• Kegiatan: ' + (b.nama || '-') + '\n' +
+            '• Nominal: Rp ' + nf.format(Math.round(b.nominal || 0)) + '\n' +
+            '• Tahap saat ini: ' + cur.urut + '. ' + cur.label + '\n' +
+            (rev ? '• PERLU REVISI: ' + (b.catatan || 'mohon perbaikan berkas') + '\n' : '') +
+            '\nTerima kasih.'
+          ),
           readOnly: !editable,
           editable,
           statusOptions: TAHAPAN.map(t => ({ value: t.key, label: t.urut + '. ' + t.label })),
