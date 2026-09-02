@@ -77,31 +77,33 @@
     </div>
 
     <div style="padding:13px 15px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line-2)">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">PIC Kegiatan (penanggung jawab) <span style="color:var(--red)">*</span></div>
-      <div style="margin-top:3px;font-size:11.5px;line-height:1.55;color:var(--ink-2);text-wrap:pretty">Nama dan nomor WA wajib diisi — dipakai admin untuk memberi tahu status berkas langsung dari daftar butir. NIP opsional bagi non-pegawai.</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">PIC Kegiatan (penanggung jawab) <span style="color:var(--red)">*</span></span>
+        <span title="Nama dan nomor WA wajib diisi — dipakai untuk memberi tahu status berkas langsung dari daftar butir. NIP opsional bagi non-pegawai." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+      </div>
       <div style="margin-top:11px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
         <div>
           <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">Nama PIC <span style="color:var(--red)">*</span></label>
           <input type="text" value="{{ vPicNama }}" onInput="{{ onPicNama }}" placeholder="Nama lengkap" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
         </div>
         <div>
-          <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">NIP <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--ink-3)">— opsional (non-pegawai boleh kosong)</span></label>
+          <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">NIP <span style="font-weight:600;text-transform:none;letter-spacing:0;opacity:.75">(opsional)</span></label>
           <input type="text" inputmode="numeric" value="{{ vPicNip }}" onInput="{{ onPicNip }}" placeholder="19xxxxxxxxxxxxxxxx" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12.5px;outline:none" style-focus="border-color:var(--navy-3)">
         </div>
         <div>
           <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">No. WhatsApp <span style="color:var(--red)">*</span></label>
           <input type="tel" inputmode="tel" value="{{ vPicWa }}" onInput="{{ onPicWa }}" placeholder="0812xxxxxxx" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12.5px;outline:none" style-focus="border-color:var(--navy-3)">
-          <div style="margin-top:5px;font-size:11px;color:{{ waHintColor }}">{{ waHint }}</div>
+          <sc-if value="{{ adaWaHint }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:5px;font-size:11px;color:var(--green)">{{ waHint }}</div>
+          </sc-if>
         </div>
       </div>
     </div>
 
-    <button type="button" onClick="{{ toggleRevisi }}" style="display:flex;gap:11px;align-items:flex-start;width:100%;text-align:left;padding:13px 15px;border-radius:12px;border:1px dashed {{ revisiBorder }};background:{{ revisiBg }};cursor:pointer;font-family:Manrope" style-hover="filter:brightness(.98)">
+    <button type="button" onClick="{{ toggleRevisi }}" title="Revisi bersifat kondisional — berkas tetap berada pada tahapnya, hanya diberi bendera ⚑. Berkas yang lancar tidak perlu melewati revisi sama sekali." style="display:flex;gap:11px;align-items:center;width:100%;text-align:left;padding:12px 15px;border-radius:12px;border:1px dashed {{ revisiBorder }};background:{{ revisiBg }};cursor:pointer;font-family:Manrope" style-hover="filter:brightness(.98)">
       <span style="width:20px;height:20px;flex:0 0 auto;border-radius:6px;border:2px solid {{ revisiInk }};background:{{ revisiBoxBg }};color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800">{{ revisiMark }}</span>
-      <span style="min-width:0">
-        <span style="display:block;font-size:12.5px;font-weight:800;color:{{ revisiInk }}">{{ revisiJudul }}</span>
-        <span style="display:block;margin-top:2px;font-size:11.5px;line-height:1.55;color:var(--ink-2);text-wrap:pretty">Revisi bersifat kondisional — berkas tetap berada pada tahapnya, hanya diberi bendera ⚑. Berkas yang lancar tidak perlu melewati revisi sama sekali.</span>
-      </span>
+      <span style="flex:1;min-width:0;font-size:12.5px;font-weight:800;color:{{ revisiInk }}">{{ revisiJudul }}</span>
+      <span style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800">i</span>
     </button>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
@@ -110,8 +112,14 @@
         <input type="text" value="{{ vCatatan }}" onInput="{{ onCatatan }}" placeholder="Contoh: berkas diterima dari Tim Kerja" style="width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
       </div>
       <div>
-        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Link Berkas (Drive/PDF)</label>
-        <input type="url" value="{{ vBerkas }}" onInput="{{ onBerkas }}" placeholder="https://drive.google.com/file/d/..." style="width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:12.5px;outline:none" style-focus="border-color:var(--navy-3)">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Link Berkas (PDF) <span style="color:var(--red)">*</span></label>
+          <span title="Wajib tautan FILE PDF, bukan folder Google Drive — agar previewnya bisa dibuka. Contoh: https://drive.google.com/file/d/XXXX/view (akses: siapa saja dengan tautan)." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+        </div>
+        <input type="url" value="{{ vBerkas }}" onInput="{{ onBerkas }}" placeholder="https://drive.google.com/file/d/.../view" style="width:100%;height:44px;padding:0 13px;border-radius:10px;border:1px solid {{ berkasBorder }};background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:12.5px;outline:none" style-focus="border-color:var(--navy-3)">
+        <sc-if value="{{ berkasSalah }}" hint-placeholder-val="{{ false }}">
+          <div role="alert" style="margin-top:6px;display:flex;gap:7px;align-items:flex-start;padding:8px 10px;border-radius:9px;background:var(--amber-bg);border:1px solid var(--amber);font-size:11.5px;line-height:1.5;color:var(--ink-2);text-wrap:pretty"><span style="color:var(--amber);font-weight:800">!</span><span>{{ berkasHint }}</span></div>
+        </sc-if>
       </div>
     </div>
 
@@ -159,6 +167,21 @@ const TAHAP_OPT = [
   { value: 'KEUANGAN', label: '2. Verifikasi Tim Keuangan' },
   { value: 'SP2D', label: '3. SP2D' }
 ];
+
+/**
+ * Periksa tautan berkas: harus menunjuk SATU file PDF agar previewnya bisa
+ * ditampilkan di dialog konfirmasi SP2D. Folder Drive tidak bisa dipratinjau.
+ */
+function cekBerkas(u) {
+  const t = String(u || '').trim();
+  if (!t) return { ok: null, pesan: 'Contoh benar: https://drive.google.com/file/d/XXXX/view — pastikan aksesnya "siapa saja dengan tautan".' };
+  if (/drive\.google\.com\/drive\/folders/.test(t) || /\/folders\//.test(t)) {
+    return { ok: false, pesan: 'Tautan ini adalah FOLDER — ganti dengan tautan file PDF di dalamnya.' };
+  }
+  if (/drive\.google\.com\/file\/d\//.test(t)) return { ok: true, pesan: 'Tautan file Drive terdeteksi — preview dokumen akan tampil saat konfirmasi SP2D.' };
+  if (/\.pdf($|[?#])/i.test(t)) return { ok: true, pesan: 'Tautan PDF langsung terdeteksi — preview dokumen akan tampil.' };
+  return { ok: false, pesan: 'Belum terdeteksi sebagai file PDF. Gunakan tautan file (…/file/d/…/view) atau URL berakhiran .pdf.' };
+}
 
 function rapikanWa(v) {
   let t = String(v ?? '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
@@ -220,9 +243,12 @@ class Component extends DCLogic {
       onPicNama: this.field('picNama'),
       onPicNip: this.field('picNip'),
       onPicWa: this.field('picWa'),
-      waHint: v.picWa ? 'Akan dikirim ke +' + rapikanWa(v.picWa) : 'Boleh 08… atau 62… — otomatis dirapikan.',
-      waHintColor: v.picWa ? 'var(--green)' : 'var(--ink-3)',
+      adaWaHint: !!v.picWa,
+      waHint: v.picWa ? '✓ akan dikirim ke +' + rapikanWa(v.picWa) : '',
       vCatatan: v.catatan ?? '',
+      berkasBorder: cekBerkas(v.berkas).ok === false ? 'var(--amber)' : 'var(--line)',
+      berkasSalah: cekBerkas(v.berkas).ok === false,
+      berkasHint: cekBerkas(v.berkas).pesan,
       labelCatatan: v.revisi ? 'Catatan / alasan revisi' : 'Catatan',
       revisiJudul: v.revisi ? 'Ditandai perlu revisi' : 'Tandai perlu revisi (opsional)',
       revisiMark: v.revisi ? '⚑' : '',

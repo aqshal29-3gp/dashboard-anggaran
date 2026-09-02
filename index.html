@@ -41,15 +41,31 @@
   *{box-sizing:border-box}
   input,select,button,textarea{font-size:16px}          /* cegah zoom otomatis iOS */
   @media (min-width:640px){input,select,button,textarea{font-size:inherit}}
-  @media (max-width:640px){
+  @media (max-width:720px){
     .om-pad{padding-left:14px !important;padding-right:14px !important}
     .om-hide-sm{display:none !important}
+    .om-only-sm{display:flex !important}
+    .om-app-title{font-size:15px !important;line-height:1.2 !important}
+    .om-app-unit{font-size:9.5px !important;letter-spacing:.1em !important}
+    .om-logo{width:38px !important;height:38px !important;border-radius:10px !important}
+    .om-card{padding:14px !important;border-radius:14px !important}
+    .om-kpi-val{font-size:20px !important}
+    .om-h2{font-size:14px !important}
+    .om-bottompad{padding-bottom:86px !important}
   }
+  .om-only-sm{display:none}
+  .om-nowrap-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .om-nowrap-scroll::-webkit-scrollbar{display:none}
+  @keyframes kedip{0%,100%{background:var(--amber-bg)}50%{background:transparent}}
+  mark{background:#FDE68A;color:inherit;border-radius:3px;padding:0 2px;font-weight:700}
+  [data-theme="dark"] mark{background:#7C5B00;color:#FFF6DA}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
   a{color:var(--blue);text-decoration:none}
   a:hover{color:var(--navy-3);text-decoration:underline}
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes tickerRun{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.35}}
   @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 </style>
 </helmet>
@@ -57,30 +73,54 @@
 <div data-theme="{{ theme }}" style="min-height:100vh;color:var(--ink);background:var(--bg)">
 
   <header style="position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff;box-shadow:0 8px 24px -16px rgba(0,0,0,.55)">
-    <div class="om-pad" style="max-width:1460px;margin:0 auto;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px">
-      <div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 340px">
-        <div title="Logo Kementerian Imigrasi dan Pemasyarakatan" style="width:52px;height:52px;flex:0 0 auto;position:relative;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center">
-          <span style="font-weight:800;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.9)">I</span>
-          <img src="logo.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:5px">
+    <div class="om-pad" style="max-width:1460px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:nowrap;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 auto">
+        <div class="om-logo" title="Logo Kementerian Imigrasi dan Pemasyarakatan" style="width:48px;height:48px;flex:0 0 auto;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center">
+          <img src="logo.png" alt="Logo Kementerian Imigrasi dan Pemasyarakatan" style="width:100%;height:100%;object-fit:contain;padding:5px">
         </div>
         <div style="min-width:0">
-          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:600">{{ unit }}</div>
-          <h1 style="margin:2px 0 0;font-size:19px;line-height:1.25;font-weight:800;letter-spacing:-.01em">Dashboard Monitoring Penyerapan Anggaran</h1>
+          <div class="om-app-unit" style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ unit }}</div>
+          <h1 class="om-app-title" style="margin:2px 0 0;font-size:18px;line-height:1.25;font-weight:800;letter-spacing:-.015em;text-wrap:pretty">{{ judulPendek }}</h1>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)">
-          <span style="width:7px;height:7px;border-radius:50%;background:#34D399;box-shadow:0 0 0 3px rgba(52,211,153,.22)"></span>
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:rgba(255,255,255,.86)">Update: {{ lastUpdate }}</span>
-        </div>
-        <button type="button" onClick="{{ refresh }}" style="height:38px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-family:Manrope;font-size:13px;font-weight:600;cursor:pointer;transition:all 200ms ease" style-hover="background:rgba(255,255,255,.18)">Muat Ulang</button>
-        <button type="button" onClick="{{ toggleTheme }}" title="Mode gelap / terang" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer;transition:all 200ms ease" style-hover="background:rgba(255,255,255,.18)">{{ themeIcon }}</button>
+
+      <div class="om-hide-sm" style="display:flex;align-items:center;gap:8px;flex:0 0 auto">
+        <span title="Data tersambung ke sumber: {{ sourceLabel }}" style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)">
+          <span style="width:8px;height:8px;border-radius:50%;background:{{ dotWarna }};box-shadow:0 0 0 3px {{ dotHalo }}"></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:rgba(255,255,255,.86);white-space:nowrap">{{ lastUpdate }}</span>
+        </span>
+        <button type="button" onClick="{{ bukaLaporan }}" title="Unduh laporan penyerapan (PDF)" style="height:38px;padding:0 14px;border-radius:10px;border:none;background:#fff;color:var(--navy);font-family:Manrope;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:7px" style-hover="filter:brightness(.94)">↓ Unduh Laporan</button>
+        <button type="button" onClick="{{ refresh }}" title="Muat ulang data" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer" style-hover="background:rgba(255,255,255,.18)">⟳</button>
+        <button type="button" onClick="{{ toggleTheme }}" title="Mode gelap / terang" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer" style-hover="background:rgba(255,255,255,.18)">{{ themeIcon }}</button>
+      </div>
+
+      <div class="om-only-sm" style="align-items:center;gap:7px;flex:0 0 auto">
+        <span title="Tersambung · {{ sourceLabel }}" style="width:11px;height:11px;border-radius:50%;background:{{ dotWarna }};box-shadow:0 0 0 3px {{ dotHalo }};flex:0 0 auto"></span>
+        <button type="button" onClick="{{ toggleTheme }}" aria-label="Mode gelap / terang" style="width:38px;height:38px;border-radius:11px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer">{{ themeIcon }}</button>
       </div>
     </div>
-    <div style="height:3px;background:linear-gradient(90deg,var(--green) 0%,var(--green) {{ pctBar }},rgba(255,255,255,.14) {{ pctBar }},rgba(255,255,255,.14) 100%)"></div>
   </header>
 
-  <main class="om-pad" style="max-width:1460px;margin:0 auto;padding:20px 24px 28px">
+  <div role="status" aria-live="polite" aria-label="Informasi berjalan" style="position:relative;background:var(--navy-2);border-bottom:1px solid rgba(255,255,255,.1);overflow:hidden;height:38px;display:flex;align-items:center">
+    <span style="flex:0 0 auto;z-index:2;height:100%;display:inline-flex;align-items:center;gap:7px;padding:0 13px;background:var(--navy);color:#fff;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;box-shadow:6px 0 12px -6px rgba(0,0,0,.5)">
+      <span style="width:7px;height:7px;border-radius:50%;background:#34D399;box-shadow:0 0 0 3px rgba(52,211,153,.22);animation:pulseDot 2s ease-in-out infinite"></span>
+      Info
+    </span>
+    <div style="flex:1;min-width:0;overflow:hidden;position:relative;height:100%">
+      <div style="position:absolute;top:0;left:0;height:100%;display:flex;align-items:center;gap:0;white-space:nowrap;animation:tickerRun {{ tickerDetik }}s linear infinite;will-change:transform">
+        <sc-for list="{{ ticker }}" as="t" hint-placeholder-count="4">
+          <span style="display:inline-flex;align-items:center;gap:8px;padding:0 20px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.9)">
+            <span style="width:17px;height:17px;flex:0 0 auto;border-radius:5px;background:{{ t.bg }};color:{{ t.ink }};display:grid;place-items:center;font-size:10px;font-weight:800">{{ t.ikon }}</span>
+            <span style="color:{{ t.warna }};font-weight:800">{{ t.label }}</span>
+            <span style="color:rgba(255,255,255,.55)">·</span>
+            <span>{{ t.teks }}</span>
+          </span>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <main class="om-pad om-bottompad" style="max-width:1460px;margin:0 auto;padding:20px 24px 28px">
 
     <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
       <div role="alert" style="margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:var(--red-bg);border:1px solid var(--red)">
@@ -102,16 +142,19 @@
 
     <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
       <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
-        <article style="position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow);animation:fadeUp 360ms ease both;transition:transform 220ms ease" style-hover="transform:translateY(-2px)">
+        <article onClick="{{ k.onClick }}" title="Klik untuk melihat rincian dan mengunduh PDF" class="om-card" style="position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px;box-shadow:var(--shadow);animation:fadeUp 360ms ease both;transition:transform 220ms ease,box-shadow 220ms ease;cursor:pointer" style-hover="transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:{{ k.color }}">
           <div style="position:absolute;inset:0 auto 0 0;width:4px;background:{{ k.color }}"></div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
             <span style="font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-3)">{{ k.label }}</span>
             <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:3px 7px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap">{{ k.tag }}</span>
           </div>
-          <div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.1;color:var(--ink)">{{ k.value }}</div>
+          <div class="om-kpi-val" style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--ink);overflow-wrap:anywhere">{{ k.value }}</div>
           <div style="margin-top:6px;font-size:12.5px;color:var(--ink-2)">{{ k.sub }}</div>
           <div style="margin-top:14px;height:6px;border-radius:99px;background:var(--line-2);overflow:hidden">
             <div style="height:100%;border-radius:99px;background:{{ k.color }};width:{{ k.bar }};transition:width 700ms cubic-bezier(.22,.61,.36,1)"></div>
+          </div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:{{ k.color }}">
+            <span>Lihat rincian</span><span style="font-size:12px">›</span>
           </div>
         </article>
       </sc-for>
@@ -121,8 +164,17 @@
       <div style="flex:2 1 560px;min-width:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
         <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px">
           <div style="min-width:0">
-            <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Persentase Penyerapan per Komponen Utama</h2>
+            <h2 class="om-h2" style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">{{ grafikJudul }}</h2>
             <div style="margin-top:3px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">{{ acuanKet }}</div>
+            <sc-if value="{{ adaRpdBolong }}" hint-placeholder-val="{{ false }}">
+              <div role="alert" style="margin-top:10px;display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:11px;background:var(--amber-bg);border:1px solid var(--amber);max-width:620px">
+                <span style="width:20px;height:20px;flex:0 0 auto;border-radius:6px;background:var(--amber);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1">!</span>
+                <span style="min-width:0">
+                  <span style="display:block;font-size:12px;font-weight:800;color:var(--amber);text-wrap:pretty">{{ rpdBolongJudul }}</span>
+                  <span style="display:block;margin-top:3px;font-size:11.5px;line-height:1.55;color:var(--ink-2);text-wrap:pretty">{{ rpdBolongKet }}</span>
+                </span>
+              </div>
+            </sc-if>
           </div>
           <div style="display:flex;gap:4px;padding:3px;border-radius:10px;background:var(--surface-3);border:1px solid var(--line-2)">
             <sc-for list="{{ acuanTabs }}" as="t" hint-placeholder-count="2">
@@ -152,13 +204,23 @@
 
       <div style="flex:1 1 320px;display:flex;flex-direction:column;gap:16px;min-width:0">
         <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
-          <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Penyerapan Keseluruhan</h2>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between">
+            <h2 class="om-h2" style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">{{ donutJudul }}</h2>
+            <span style="font-size:10.5px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:6px;background:{{ donutTagBg }};color:{{ donutTagInk }};white-space:nowrap">{{ donutTag }}</span>
+          </div>
+          <div style="margin-top:3px;font-size:11.5px;line-height:1.5;color:var(--ink-2);text-wrap:pretty">{{ donutSub }}</div>
+          <sc-if value="{{ adaCatatanRpd }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:7px;padding:8px 10px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line-2);font-size:11px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">{{ catatanRpd }}</div>
+          </sc-if>
           <div style="margin-top:6px;position:relative;height:236px">
             <canvas ref="{{ donutRef }}"></canvas>
             <div style="position:absolute;inset:0;display:grid;place-items:center;pointer-events:none">
               <div style="text-align:center">
-                <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;letter-spacing:-.02em;color:var(--ink)">{{ pctTotal }}</div>
-                <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-top:2px">terserap</div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;letter-spacing:-.02em;color:var(--ink)">{{ donutAngka }}</div>
+                <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-top:2px">{{ donutLabel }}</div>
+                <sc-if value="{{ modeRpd }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:{{ devWarna }}">{{ devTeks }}</div>
+                </sc-if>
               </div>
             </div>
           </div>
@@ -210,15 +272,61 @@
       </div>
     </section>
 
+    <section id="papan" style="margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden">
+      <div style="padding:18px;border-bottom:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between">
+        <div style="min-width:0">
+          <h2 class="om-h2" style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Papan Peringkat Penyerapan</h2>
+          <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty">Penyerapan masing-masing komponen terhadap pagunya · PIC diambil dari butir kegiatan terbaru</div>
+        </div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3);white-space:nowrap">{{ papanInfo }}</span>
+      </div>
+      <div style="padding:12px;display:grid;gap:7px">
+        <sc-for list="{{ papan }}" as="p" hint-placeholder-count="10">
+          <div onClick="{{ p.onClick }}" title="Klik untuk membuka rincian komponen" style="display:flex;gap:12px;align-items:center;padding:11px 13px;border-radius:13px;background:{{ p.bg }};border:1px solid {{ p.border }};cursor:pointer;transition:transform 180ms ease" style-hover="transform:translateX(3px)">
+            <span title="{{ p.rankTitle }}" style="width:36px;height:36px;flex:0 0 auto;border-radius:{{ p.rankRadius }};background:{{ p.rankBg }};color:{{ p.rankInk }};display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:{{ p.rankSize }};font-weight:800;box-shadow:{{ p.rankShadow }};border:{{ p.rankBorder }}">{{ p.rank }}</span>
+            <span style="min-width:0;flex:1 1 190px">
+              <span style="display:block;font-size:13px;font-weight:700;letter-spacing:-.01em;overflow-wrap:anywhere;text-wrap:pretty">{{ p.nama }}</span>
+              <span style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:3px">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-3)">{{ p.kode }}</span>
+                <span style="font-size:10.5px;font-weight:700;color:var(--ink-3);overflow-wrap:anywhere">PIC: {{ p.pic }}</span>
+              </span>
+            </span>
+            <span style="flex:1 1 120px;min-width:80px;display:flex;align-items:center;gap:8px">
+              <span style="flex:1;height:8px;border-radius:99px;background:var(--line-2);overflow:hidden;display:block">
+                <span style="display:block;height:100%;border-radius:99px;background:{{ p.warna }};width:{{ p.bar }};transition:width 700ms cubic-bezier(.22,.61,.36,1)"></span>
+              </span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:{{ p.warna }};width:56px;text-align:right;flex:0 0 auto">{{ p.pct }}</span>
+            </span>
+            <button type="button" onClick="{{ p.onApresiasi }}" title="{{ p.apresiasiJudul }}" style="flex:0 0 auto;height:36px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:10px;border:1px solid {{ p.apBorder }};background:{{ p.apBg }};color:{{ p.apInk }};font-family:Manrope;font-size:12.5px;font-weight:800;cursor:pointer;transition:transform 140ms ease" style-hover="transform:scale(1.06)" style-active="transform:scale(.94)">
+              <span style="font-size:14px;line-height:1">{{ p.apIkon }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace">{{ p.apJumlah }}</span>
+            </button>
+          </div>
+        </sc-for>
+        <sc-if value="{{ papanAdaPaging }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between">
+            <span style="font-size:11.5px;color:var(--ink-3)">{{ papanHalamanLabel }}</span>
+            <div style="display:flex;gap:5px;align-items:center">
+              <button type="button" onClick="{{ papanPrev }}" aria-label="Halaman sebelumnya" style="width:38px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;opacity:{{ papanPrevDim }}">‹</button>
+              <sc-for list="{{ papanTabs }}" as="h" hint-placeholder-count="2">
+                <button type="button" onClick="{{ h.onClick }}" style="min-width:36px;height:36px;border-radius:9px;border:1px solid {{ h.border }};background:{{ h.bg }};color:{{ h.color }};font-family:Manrope;font-size:12.5px;font-weight:700;cursor:pointer">{{ h.label }}</button>
+              </sc-for>
+              <button type="button" onClick="{{ papanNext }}" aria-label="Halaman berikutnya" style="width:38px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;opacity:{{ papanNextDim }}">›</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </section>
+
     <section style="margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden">
       <div style="padding:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line-2)">
         <div style="min-width:0">
-          <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Tabel Anggaran Hierarki</h2>
+          <h2 class="om-h2" style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Tabel Anggaran Hierarki</h2>
           <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2)">Klik komponen utama untuk mengembangkan · klik subkomponen untuk membuka popup rincian anggaran &amp; butir kegiatan</div>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px">
           <div style="position:relative">
-            <input type="search" value="{{ query }}" onInput="{{ onQuery }}" placeholder="Cari kode atau kegiatan..." aria-label="Cari" style="height:40px;width:236px;max-width:100%;padding:0 12px 0 34px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;outline:none;transition:box-shadow 200ms ease" style-focus="border-color:var(--navy-3);box-shadow:0 0 0 3px rgba(27,64,121,.15)">
+            <input type="search" value="{{ query }}" onInput="{{ onQuery }}" placeholder="Cari kode, kegiatan, butir, atau PIC..." aria-label="Cari" style="height:40px;width:236px;max-width:100%;padding:0 12px 0 34px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;outline:none;transition:box-shadow 200ms ease" style-focus="border-color:var(--navy-3);box-shadow:0 0 0 3px rgba(27,64,121,.15)">
             <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:13px">⌕</span>
           </div>
           <select value="{{ status }}" onChange="{{ onStatus }}" aria-label="Filter status" style="height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;cursor:pointer;outline:none">
@@ -253,10 +361,11 @@
             </thead>
             <tbody>
               <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
-                <tr onClick="{{ r.onRowClick }}" title="{{ r.rowTitle }}" style="border-bottom:1px solid var(--line-2);background:{{ r.rowBg }};cursor:pointer;transition:background 160ms ease" style-hover="background:var(--surface-3)">
+                <tr onClick="{{ r.onRowClick }}" title="{{ r.rowTitle }}" style="border-bottom:1px solid var(--line-2);background:{{ r.rowBg }};animation:{{ r.rowAnim }};cursor:pointer;transition:background 160ms ease" style-hover="background:var(--surface-3)">
                   <td style="padding:0;vertical-align:middle">
-                    <div style="display:flex;align-items:center;gap:10px;padding:10px 18px;padding-left:{{ r.indent }}">
+                    <div style="display:flex;align-items:center;gap:9px;padding:10px 18px;padding-left:{{ r.indent }};min-width:300px">
                       <button type="button" onClick="{{ r.onToggle }}" aria-label="Buka / tutup rincian" style="width:24px;height:24px;flex:0 0 auto;border-radius:7px;border:1px solid {{ r.caretBorder }};background:{{ r.caretBg }};color:{{ r.caretColor }};font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1;cursor:{{ r.caretCursor }};display:grid;place-items:center;transition:all 180ms ease">{{ r.caret }}</button>
+                      <span title="{{ r.lambangJudul }}" style="width:{{ r.lambangUk }};height:{{ r.lambangUk }};flex:0 0 auto;border-radius:9px;background:{{ r.lambangBg }};border:1px solid {{ r.lambangBorder }};display:grid;place-items:center;font-size:{{ r.lambangFont }};line-height:1">{{ r.lambang }}</span>
                       <div style="min-width:0">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
                           <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">{{ r.kode }}</span>
@@ -314,10 +423,135 @@
       <div style="font-size:12.5px;line-height:1.6">
         <strong style="color:#fff;display:block;font-size:13px">{{ instansi }}</strong>
         Laporan Ketersediaan Dana Detail TA 2026 &middot; Satuan Kerja {{ satker }}
+        <div style="margin-top:7px;font-size:11.5px;color:rgba(255,255,255,.62)">&copy; 2026 Tata Usaha Pusdatin KP &middot; pembuat &amp; pengelola aplikasi</div>
       </div>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">Sumber data: Google Sheets &middot; {{ lastUpdate }}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">Sumber data: Google Sheets &middot; {{ lastUpdate }}</div>
+        <a href="admin.html" title="Halaman masuk khusus staf TU" style="font-size:12.5px;font-weight:700;color:rgba(255,255,255,.62);text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.3);padding-bottom:1px" style-hover="color:#fff;border-bottom-color:#fff;text-decoration:none">Login Admin</a>
+      </div>
     </div>
   </footer>
+
+  <nav class="om-only-sm" style="position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -8px 28px -18px rgba(11,37,69,.55);padding:7px 8px calc(7px + env(safe-area-inset-bottom));gap:4px;justify-content:space-around">
+    <sc-for list="{{ navBawah }}" as="n" hint-placeholder-count="4">
+      <button type="button" onClick="{{ n.onClick }}" style="flex:1;min-width:0;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;border-radius:12px;background:{{ n.bg }};color:{{ n.color }};font-family:Manrope;cursor:pointer;padding:4px 2px">
+        <span style="font-size:17px;line-height:1">{{ n.ikon }}</span>
+        <span style="font-size:10px;font-weight:700;letter-spacing:.01em">{{ n.label }}</span>
+      </button>
+    </sc-for>
+  </nav>
+
+  <sc-if value="{{ laporanOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:60;background:rgba(6,14,26,.62);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px" onClick="{{ tutupLaporan }}">
+      <div onClick="{{ stop }}" style="width:100%;max-width:600px;max-height:88vh;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden;animation:pop 240ms cubic-bezier(.22,.61,.36,1) both">
+        <div style="padding:20px 22px 16px;border-bottom:1px solid var(--line-2);display:flex;gap:13px;align-items:center;background:var(--surface-2)">
+          <span style="width:40px;height:40px;flex:0 0 auto;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:17px;font-weight:800">↓</span>
+          <div style="min-width:0;flex:1">
+            <h2 class="om-h2" style="margin:0;font-size:17px;font-weight:800;letter-spacing:-.015em">Unduh Laporan Penyerapan</h2>
+            <div style="margin-top:2px;font-size:12px;color:var(--ink-2);text-wrap:pretty">Pilih cakupan, lalu simpan sebagai PDF</div>
+          </div>
+          <button type="button" onClick="{{ tutupLaporan }}" aria-label="Tutup" style="width:38px;height:38px;flex:0 0 auto;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:15px;cursor:pointer">✕</button>
+        </div>
+
+        <div style="padding:18px 22px;overflow-y:auto;flex:1;display:grid;gap:16px">
+          <div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">1 · Cakupan laporan</div>
+            <div style="display:grid;gap:7px">
+              <sc-for list="{{ lingkupOpsi }}" as="o" hint-placeholder-count="3">
+                <button type="button" onClick="{{ o.onClick }}" style="display:flex;gap:11px;align-items:flex-start;text-align:left;padding:13px 14px;border-radius:13px;border:1.5px solid {{ o.border }};background:{{ o.bg }};cursor:pointer;font-family:Manrope;width:100%">
+                  <span style="width:19px;height:19px;flex:0 0 auto;margin-top:1px;border-radius:50%;border:2px solid {{ o.dotBorder }};background:{{ o.dotBg }};display:grid;place-items:center">
+                    <span style="width:7px;height:7px;border-radius:50%;background:{{ o.dotInner }}"></span>
+                  </span>
+                  <span style="min-width:0">
+                    <span style="display:block;font-size:13.5px;font-weight:800;color:var(--ink)">{{ o.label }}</span>
+                    <span style="display:block;margin-top:2px;font-size:11.5px;line-height:1.5;color:var(--ink-2);text-wrap:pretty">{{ o.ket }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ lingkupBulan }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px">2 · Pilih bulan</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ bulanLaporan }}" as="b" hint-placeholder-count="12">
+                  <button type="button" onClick="{{ b.onClick }}" style="min-width:52px;height:40px;padding:0 10px;border-radius:10px;border:1px solid {{ b.border }};background:{{ b.bg }};color:{{ b.color }};font-family:Manrope;font-size:12.5px;font-weight:700;cursor:pointer">{{ b.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ lingkupPilih }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <span style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)">2 · Centang komponen</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ pilihJumlah }}</span>
+              </div>
+              <div style="max-height:260px;overflow-y:auto;display:grid;gap:5px;padding:4px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line-2)">
+                <sc-for list="{{ pilihDaftar }}" as="p" hint-placeholder-count="8">
+                  <button type="button" onClick="{{ p.onClick }}" style="display:flex;gap:10px;align-items:center;text-align:left;padding:9px 11px;border-radius:9px;border:1px solid {{ p.border }};background:{{ p.bg }};cursor:pointer;font-family:Manrope;width:100%;margin-left:{{ p.indent }}">
+                    <span style="width:17px;height:17px;flex:0 0 auto;border-radius:5px;border:1.5px solid {{ p.boxBorder }};background:{{ p.boxBg }};color:#fff;display:grid;place-items:center;font-size:10px;font-weight:800">{{ p.tanda }}</span>
+                    <span style="min-width:0;flex:1">
+                      <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-3)">{{ p.kode }}</span>
+                      <span style="display:block;font-size:12.5px;font-weight:{{ p.weight }};color:var(--ink);overflow-wrap:anywhere">{{ p.nama }}</span>
+                    </span>
+                    <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:700;color:{{ p.pctWarna }};flex:0 0 auto">{{ p.pct }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <div title="{{ laporanKet }}" style="padding:10px 13px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-2);display:flex;gap:9px;align-items:center">
+            <span style="width:20px;height:20px;flex:0 0 auto;border-radius:50%;background:var(--navy-3);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800">i</span>
+            <span style="font-size:11.5px;line-height:1.5;color:var(--ink-2);text-wrap:pretty">Terbuka di jendela cetak — pilih <strong>Simpan sebagai PDF</strong>.</span>
+          </div>
+        </div>
+
+        <div style="background:var(--surface-2);border-top:1px solid var(--line-2);padding:14px 22px calc(14px + env(safe-area-inset-bottom));display:flex;gap:9px">
+          <button type="button" onClick="{{ tutupLaporan }}" style="height:48px;padding:0 18px;border-radius:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:13.5px;font-weight:700;cursor:pointer">Batal</button>
+          <button type="button" onClick="{{ cetakLaporan }}" disabled="{{ laporanDisabled }}" style="flex:1;height:48px;border-radius:13px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:14px;font-weight:800;cursor:pointer;opacity:{{ laporanOpacity }}">{{ laporanTombol }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ kpiOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:60;background:rgba(6,14,26,.6);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px" onClick="{{ tutupKpi }}">
+      <div onClick="{{ stop }}" style="width:100%;max-width:660px;max-height:90vh;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden;animation:pop 240ms cubic-bezier(.22,.61,.36,1) both">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--line-2);display:flex;gap:12px;align-items:flex-start;background:{{ kpiHeadBg }}">
+          <div style="min-width:0;flex:1">
+            <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:800">Rincian KPI</div>
+            <h2 class="om-h2" style="margin:3px 0 0;font-size:17px;font-weight:800;letter-spacing:-.015em">{{ kpiJudul }}</h2>
+            <div style="margin-top:5px;font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;color:{{ kpiWarna }}">{{ kpiNilai }}</div>
+          </div>
+          <button type="button" onClick="{{ tutupKpi }}" aria-label="Tutup" style="width:38px;height:38px;flex:0 0 auto;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-size:15px;cursor:pointer">✕</button>
+        </div>
+        <div style="padding:16px 20px;overflow-y:auto;flex:1">
+          <div style="font-size:12px;line-height:1.6;color:var(--ink-2);text-wrap:pretty;margin-bottom:14px">{{ kpiKet }}</div>
+          <div style="display:grid;gap:6px">
+            <sc-for list="{{ kpiRincian }}" as="r" hint-placeholder-count="8">
+              <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-2)">
+                <span style="min-width:0;flex:1">
+                  <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-3)">{{ r.kode }}</span>
+                  <span style="display:block;font-size:12.5px;font-weight:700;overflow-wrap:anywhere">{{ r.nama }}</span>
+                </span>
+                <span style="text-align:right;flex:0 0 auto">
+                  <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:700">{{ r.nilai }}</span>
+                  <span style="display:block;font-size:10.5px;color:{{ r.warna }};font-weight:700">{{ r.tanda }}</span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--line-2);display:flex;gap:9px;background:var(--surface-2)">
+          <button type="button" onClick="{{ tutupKpi }}" style="height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:13px;font-weight:700;cursor:pointer">Tutup</button>
+          <button type="button" onClick="{{ kpiCetak }}" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:13.5px;font-weight:800;cursor:pointer">↓ Unduh rincian (PDF)</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
 
   <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
     <dc-import name="SubcomponentModal" node="{{ modalNode }}" on-close="{{ closeModal }}" hint-size="100%,100%"></dc-import>
@@ -326,17 +560,31 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;instansi&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Kementerian Imigrasi dan Pemasyarakatan&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Identitas&quot;},&quot;unit&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Pusat Data, Informasi dan Komunikasi Publik&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Identitas&quot;},&quot;satker&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;694677 — Sekretariat Jenderal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Identitas&quot;},&quot;defaultDark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tampilan&quot;}}">
 /* Konfigurasi & sumber data ada di data-source.js (satu tempat untuk kedua halaman). */
+const BLN_LENGKAP = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+const nfx = new Intl.NumberFormat('id-ID');
+
 class Component extends DCLogic {
   state = {
     anggaran: [], pencairan: [], butir: [], rpd: [], source: '—', isLoading: true, errorMsg: '', updated: null,
     acuan: 'PAGU',            // 'PAGU' | 'RPD' — pembanding grafik batang
-    bulanRpd: new Date().getMonth(),   // 0-11, acuan RPD kumulatif
-    expanded: {}, allOpen: false, query: '', status: 'ALL', modal: null, modalParent: null, theme: null
+    // Acuan RPD kumulatif: bulan terakhir yang sudah SELESAI, karena target bulan
+    // berjalan belum sepenuhnya jatuh tempo (menghindari deviasi yang menyesatkan).
+    bulanRpd: Math.max(0, new Date().getMonth() - 1),
+    expanded: {}, allOpen: false, query: '', status: 'ALL', modal: null, modalParent: null, theme: null,
+    papanHal: 1,              // halaman papan peringkat (5 baris per halaman)
+    sorotan: null,            // id baris yang berkedip setelah dicari/diklik
+    laporan: null,            // { lingkup, bulan, pilih:{} } saat dialog laporan terbuka
+    kpi: null                 // indeks KPI yang dibuka rinciannya
   };
 
   async componentDidMount() {
     this.ds = await import('./data-source.js');
-    await this.load();
+    // Tampilkan cache terakhir lebih dulu supaya layar tidak kosong menunggu jaringan.
+    const c = this.ds.cacheAmbil && this.ds.cacheAmbil();
+    if (c) this.setState({ anggaran: c.anggaran, pencairan: c.pencairan, butir: c.butir || [],
+                           rpd: c.rpd || [], source: c.source, isLoading: false, updated: new Date(c.t || Date.now()) });
+    await this.load(!!c);
     const ms = this.ds.CONFIG.REFRESH_MS;
     if (ms > 0) this.timer = setInterval(() => this.load(true), ms);
     this.waitChart();
@@ -369,13 +617,34 @@ class Component extends DCLogic {
       : { utama: [], totals: { pagu: 0, realisasi: 0, sisa: 0, pct: 0, avg: 0, nKomponen: 0, nPencairan: 0, nButir: 0, kurvaRpd: [] } };
   }
 
+  /**
+   * Pencarian menyapu semua unsur: kode, nama kegiatan, nama & nomor butir,
+   * PIC (nama/NIP/WA), catatan, dan keterangan bukti pencairan.
+   * Mengembalikan '' bila tidak cocok, atau label alasan kecocokan.
+   */
+  alasanCocok(n, q) {
+    if (!q) return '';
+    const ada = (v) => String(v || '').toLowerCase().includes(q);
+    if (ada(n.id)) return 'kode komponen';
+    if (ada(n.nama)) return 'nama kegiatan';
+    const b = (n.butir || []).find(x => ada(x.id) || ada(x.nama));
+    if (b) return 'butir: ' + b.id;
+    const p = (n.butir || []).find(x => ada(x.picNama) || ada(x.picNip) || ada(x.picWa));
+    if (p) return 'PIC: ' + (p.picNama || p.picNip);
+    const c = (n.butir || []).find(x => ada(x.catatan));
+    if (c) return 'catatan butir';
+    const dk = (n.docs || []).find(x => ada(x.keterangan) || ada(x.id));
+    if (dk) return 'bukti: ' + dk.id;
+    return '';
+  }
+
   visibleUtama() {
     const q = this.state.query.trim().toLowerCase();
     return this.tree().utama.filter(u => {
       if (this.state.status !== 'ALL' && u.status.key !== this.state.status) return false;
       if (!q) return true;
-      if (u.id.toLowerCase().includes(q) || u.nama.toLowerCase().includes(q)) return true;
-      return u.children.some(c => c.id.toLowerCase().includes(q) || c.nama.toLowerCase().includes(q));
+      if (this.alasanCocok(u, q)) return true;
+      return u.children.some(c => !!this.alasanCocok(c, q));
     });
   }
 
@@ -392,69 +661,339 @@ class Component extends DCLogic {
     if (!utama.length) return;
     const { nf, fmt } = this.ds;
     const BULAN = this.ds.BULAN || ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+    const BLN_PANJANG = this.ds.BULAN_PANJANG || BULAN;
     const dark = this.theme() === 'dark';
     const grid = dark ? 'rgba(255,255,255,.08)' : 'rgba(11,37,69,.08)';
     const tick = dark ? '#A6B6CE' : '#4A5A72';
 
-    // Bar 100% bertumpuk: proporsi terserap terhadap PAGU atau terhadap RPD
-    // kumulatif s.d. bulan yang dipilih.
     const modeRpd = this.state.acuan === 'RPD';
     const bln = this.state.bulanRpd;
-    const acuanNilai = utama.map(u => modeRpd
-      ? (u.rpd || []).slice(0, bln + 1).reduce((t, v) => t + v, 0)
-      : u.pagu);
-    const pctTerserap = utama.map((u, i) => {
-      const dasar = acuanNilai[i];
-      if (dasar <= 0) return u.realisasi > 0 ? 100 : 0;
-      return Math.min(100, (u.realisasi / dasar) * 100);
-    });
-    const barData = {
-      labels: utama.map(u => u.nama.length > 32 ? u.nama.slice(0, 31) + '…' : u.nama),
-      datasets: [
-        { label: 'Terserap', data: pctTerserap, backgroundColor: dark ? '#34D399' : '#0E9F6E', borderRadius: { topLeft: 0, bottomLeft: 0, topRight: 4, bottomRight: 4 }, barPercentage: .78, categoryPercentage: .8 },
-        { label: modeRpd ? 'Belum ditarik' : 'Belum terserap', data: pctTerserap.map(p => 100 - p), backgroundColor: dark ? '#1E3050' : '#DCE4F0', borderRadius: 4, barPercentage: .78, categoryPercentage: .8 }
-      ]
-    };
-    const barOpts = {
-      indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: { duration: 600 },
-      onClick: (evt, els) => { if (els && els.length) this.openDocs(utama[els[0].index], null); },
-      plugins: {
-        legend: { position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle', color: tick, font: { family: 'Manrope', size: 12 } } },
-        tooltip: {
-          callbacks: {
-            label: (c) => c.dataset.label + ': ' + c.raw.toFixed(2) + '%',
-            afterBody: (items) => {
-              const i = items[0].dataIndex, u = utama[i];
-              const baris = ['Pagu:      Rp ' + fmt(u.pagu),
-                             'Realisasi: Rp ' + fmt(u.realisasi),
-                             'Sisa:      Rp ' + fmt(u.sisa)];
-              if (modeRpd) {
-                baris.push('RPD s.d. ' + BULAN[bln] + ': Rp ' + fmt(acuanNilai[i]));
-                baris.push('RPD setahun:   Rp ' + fmt(u.rpdTotal || 0));
+
+    /* ---------------------------------------------------------------------
+       Dua mode grafik: terhadap PAGU (per komponen) atau terhadap RPD
+       (deviasi kumulatif per bulan — definisinya ada di bulananRpd()).
+       Ambang deviasi: ≤5% baik · ≤10% waspada · >10% bermasalah.
+    --------------------------------------------------------------------- */
+    let barData, barOpts;
+    if (modeRpd) {
+      const m = this.bulananRpd();
+      /* ------------------------------------------------------------------
+         Grafik deviasi BULANAN terhadap RPD (definisi tunggal — bulananRpd()).
+         Bar berpusat di 0; pita ±5% = toleransi baik.
+         Bulan yang belum dapat dinilai dikirim sebagai null, BUKAN 0, agar
+         tidak terbaca "tepat sesuai target"; labelnya diberi penanda ▪.
+         Batas sumbu mengikuti data sehingga magnitudo tetap terbaca; bar yang
+         benar-benar terpotong diberi garis tepi tebal.
+      ------------------------------------------------------------------ */
+      // Sumbu diukur dari deviasi yang MASUK AKAL (≤100%). Deviasi ekstrem —
+      // yang muncul bila RPD bulan-bulan awal masih kosong sementara realisasi
+      // sudah tercatat — dipotong dan ditandai, agar tidak memipihkan sisanya.
+      const nyata = m.deviasi.filter(v => v !== null).map(Math.abs);
+      const wajar = nyata.filter(v => v <= 100);
+      const maksData = wajar.length ? Math.max(...wajar) : (nyata.length ? Math.min(...nyata) : 10);
+      const TANGGA = [15, 30, 60, 100];
+      const ATAP = TANGGA.find(v => v >= Math.ceil(maksData * 1.1)) || 100;
+      const terpotong = m.deviasi.map(v => v !== null && Math.abs(v) > ATAP);
+      const nilaiBar = m.deviasi.map(v => v === null ? null : Math.max(-ATAP, Math.min(ATAP, v)));
+      const adaBelumDinilai = m.deviasi.some(v => v === null);
+
+      const warnaDev = (dev) => {
+        const a = Math.abs(dev);
+        if (a <= 5) return dark ? '#34D399' : '#0E9F6E';
+        if (a <= 10) return dark ? '#FBBF24' : '#C98A00';
+        return dark ? '#F87171' : '#D93B3B';
+      };
+
+      barData = {
+        labels: BULAN,
+        datasets: [
+          { type: 'bar', label: 'Deviasi realisasi terhadap target RPD bulan itu',
+            data: nilaiBar,
+            backgroundColor: m.deviasi.map(v => v === null ? 'transparent' : warnaDev(v)),
+            // Bar terpotong diberi tepi gelap tebal agar beda dari bar yang benar-benar mencapai batas.
+            borderColor: m.deviasi.map((v, i) => terpotong[i] ? (dark ? '#fff' : '#0B2545') : 'transparent'),
+            borderWidth: m.deviasi.map((v, i) => terpotong[i] ? 2 : 0),
+            borderRadius: 4, barPercentage: .7, categoryPercentage: .82, order: 4 },
+          { type: 'line', label: 'Batas toleransi ±5%', data: BULAN.map(() => 5),
+            borderColor: dark ? 'rgba(52,211,153,.7)' : 'rgba(14,159,110,.65)', borderWidth: 1.4,
+            borderDash: [4, 4], pointRadius: 0, fill: false, order: 1 },
+          { type: 'line', label: '−5%', data: BULAN.map(() => -5),
+            borderColor: dark ? 'rgba(52,211,153,.7)' : 'rgba(14,159,110,.65)', borderWidth: 1.4,
+            borderDash: [4, 4], pointRadius: 0, fill: false, order: 2 }
+        ]
+      };
+      barOpts = {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 600 },
+        onClick: (evt, els) => { if (els && els.length) this.setState({ bulanRpd: els[0].index }); },
+        plugins: {
+          legend: { position: 'top', align: 'end',
+            labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle', color: tick,
+                      font: { family: 'Manrope', size: 12, weight: '700' },
+                      generateLabels: () => {
+                        const l = [
+                          { text: 'Dalam toleransi ±5%', fillStyle: dark ? '#34D399' : '#0E9F6E', strokeStyle: 'transparent', pointStyle: 'circle' },
+                          { text: 'Waspada ±10%', fillStyle: dark ? '#FBBF24' : '#C98A00', strokeStyle: 'transparent', pointStyle: 'circle' },
+                          { text: 'Bermasalah > 10%', fillStyle: dark ? '#F87171' : '#D93B3B', strokeStyle: 'transparent', pointStyle: 'circle' }
+                        ];
+                        // Swatch "belum dinilai" hanya muncul bila memang ada bulan seperti itu.
+                        if (adaBelumDinilai) l.push({ text: 'Belum dinilai (tanpa bar)', fillStyle: 'transparent',
+                          strokeStyle: dark ? '#7C8AA0' : '#9AA8BC', lineWidth: 1.5, pointStyle: 'circle' });
+                        return l;
+                      } } },
+          tooltip: {
+            titleFont: { family: 'Manrope', size: 12.5, weight: '800' },
+            bodyFont: { family: 'IBM Plex Mono', size: 11.5 },
+            filter: (it) => it.datasetIndex === 0,
+            callbacks: {
+              title: (items) => BLN_PANJANG[items[0].dataIndex] + ' 2026',
+              label: (c) => {
+                const i = c.dataIndex;
+                if (m.deviasi[i] === null) return m.sebab[i];
+                const dev = m.deviasi[i];
+                const a = Math.abs(dev);
+                return 'Deviasi: ' + (dev > 0 ? '+' : dev < 0 ? '−' : '') + a.toFixed(2) + '%' +
+                  (terpotong[i] ? '  (bar dipotong pada ' + ATAP + '%)' : '');
+              },
+              afterBody: (items) => {
+                const i = items[0].dataIndex;
+                const baris = [
+                  'Target RPD:  Rp ' + fmt(m.target[i]),
+                  'Realisasi:   Rp ' + fmt(m.realisasi[i])
+                ];
+                if (m.deviasi[i] === null) return baris;
+                baris.push('Selisih:     Rp ' + fmt(Math.abs(m.target[i] - m.realisasi[i])));
+                baris.push('Capaian:     ' + m.capaian[i].toFixed(2) + '% dari target');
+                baris.push('');
+                baris.push('Kumulatif s.d. ' + BLN_PANJANG[i] + ':');
+                baris.push('  target    Rp ' + fmt(m.targetKum[i]));
+                baris.push('  realisasi Rp ' + fmt(m.realKum[i]));
+                const a = Math.abs(m.deviasi[i]);
+                baris.push('');
+                baris.push(a <= 5 ? 'BAIK — dalam toleransi ±5%'
+                  : a <= 10 ? 'PERLU PERHATIAN — di luar ±5%'
+                  : 'BERMASALAH — deviasi > 10%');
+                return baris;
               }
-              return baris;
             }
           }
+        },
+        scales: {
+          y: { min: -ATAP, max: ATAP, grid: { color: grid }, border: { display: false },
+               ticks: { color: tick, font: { family: 'IBM Plex Mono', size: 11.5, weight: '600' },
+                        maxTicksLimit: 7, callback: (v) => (v > 0 ? '+' : '') + v + '%' } },
+          x: { grid: { display: false }, border: { display: false },
+               ticks: { color: tick, font: { family: 'Manrope', size: 12, weight: '700' },
+                        // Bulan tak-ternilai ditandai ▪ agar celahnya terbaca sebagai "tidak ada data".
+                        callback: (v, i) => m.deviasi[i] === null ? BULAN[i] + ' ▪' : BULAN[i] } }
         }
-      },
-      scales: {
-        x: { stacked: true, min: 0, max: 100, grid: { color: grid }, border: { display: false }, ticks: { color: tick, font: { family: 'IBM Plex Mono', size: 10.5 }, stepSize: 25, callback: (v) => v + '%' } },
-        y: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { color: tick, font: { family: 'Manrope', size: 11 }, autoSkip: false } }
-      }
-    };
-    const donutData = {
-      labels: ['Realisasi', 'Sisa Anggaran'],
-      datasets: [{ data: [totals.realisasi, Math.max(totals.sisa, 0)], backgroundColor: [dark ? '#34D399' : '#0E9F6E', dark ? '#1E3050' : '#DCE4F0'], borderWidth: 0, hoverOffset: 6 }]
-    };
+      };
+    } else {
+      const pctTerserap = utama.map(u => u.pagu <= 0 ? (u.realisasi > 0 ? 100 : 0) : Math.min(100, (u.realisasi / u.pagu) * 100));
+      barData = {
+        labels: utama.map(u => u.nama.length > 32 ? u.nama.slice(0, 31) + '…' : u.nama),
+        datasets: [
+          { label: 'Terserap', data: pctTerserap, backgroundColor: dark ? '#34D399' : '#0E9F6E', borderRadius: { topLeft: 0, bottomLeft: 0, topRight: 4, bottomRight: 4 }, barPercentage: .78, categoryPercentage: .8 },
+          { label: 'Belum terserap', data: pctTerserap.map(p => 100 - p), backgroundColor: dark ? '#1E3050' : '#DCE4F0', borderRadius: 4, barPercentage: .78, categoryPercentage: .8 }
+        ]
+      };
+      barOpts = {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: { duration: 600 },
+        onClick: (evt, els) => { if (els && els.length) this.openDocs(utama[els[0].index], null); },
+        plugins: {
+          legend: { position: 'top', align: 'end', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: 'circle', color: tick, font: { family: 'Manrope', size: 12.5, weight: '700' } } },
+          tooltip: {
+            titleFont: { family: 'Manrope', size: 12.5, weight: '800' },
+            bodyFont: { family: 'IBM Plex Mono', size: 11.5 },
+            callbacks: {
+              label: (c) => c.dataset.label + ': ' + c.raw.toFixed(2) + '%',
+              afterBody: (items) => {
+                const u = utama[items[0].dataIndex];
+                return ['Pagu:      Rp ' + fmt(u.pagu),
+                        'Realisasi: Rp ' + fmt(u.realisasi),
+                        'Sisa:      Rp ' + fmt(u.sisa)];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { stacked: true, min: 0, max: 100, grid: { color: grid }, border: { display: false }, ticks: { color: tick, font: { family: 'IBM Plex Mono', size: 11.5, weight: '600' }, stepSize: 25, callback: (v) => v + '%' } },
+          y: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { color: tick, font: { family: 'Manrope', size: 12, weight: '700' }, autoSkip: false } }
+        }
+      };
+    }
+
+    /* Donat mengikuti pilihan acuan.
+       Pada mode RPD, ring TIDAK boleh hijau penuh saat realisasi melampaui target
+       (itu akan terbaca "sempurna" padahal deviasinya dinilai bermasalah). Karena
+       itu warna ring mengikuti mutu deviasi, dan irisan kedua berganti makna:
+       "Belum mencapai target" bila kurang, "Melampaui target" bila lebih. */
+    const mm = this.bulananRpd();
+    const devDonut = mm.deviasiKum[bln];
+    const warnaMutu = devDonut === null
+      ? (dark ? '#7C8AA0' : '#9AA8BC')
+      : (Math.abs(devDonut) <= 5 ? (dark ? '#34D399' : '#0E9F6E')
+        : Math.abs(devDonut) <= 10 ? (dark ? '#FBBF24' : '#C98A00')
+        : (dark ? '#F87171' : '#D93B3B'));
+    const kurang = Math.max(mm.targetKum[bln] - mm.realKum[bln], 0);
+    const lebih = Math.max(mm.realKum[bln] - mm.targetKum[bln], 0);
+
+    const donutData = modeRpd
+      ? (lebih > 0
+        // Melampaui target: porsi dasar = target, porsi kelebihan diberi warna mutu.
+        ? { labels: ['Sesuai target s.d. ' + BULAN[bln], 'Melampaui target'],
+            datasets: [{ data: [mm.targetKum[bln], lebih],
+                         backgroundColor: [dark ? '#1E3050' : '#DCE4F0', warnaMutu], borderWidth: 0, hoverOffset: 6 }] }
+        : { labels: ['Realisasi s.d. ' + BULAN[bln], 'Belum mencapai target'],
+            datasets: [{ data: [mm.realKum[bln], kurang],
+                         backgroundColor: [warnaMutu, dark ? '#1E3050' : '#DCE4F0'], borderWidth: 0, hoverOffset: 6 }] })
+      : { labels: ['Realisasi', 'Sisa Anggaran'],
+          datasets: [{ data: [totals.realisasi, Math.max(totals.sisa, 0)],
+                       backgroundColor: [dark ? '#34D399' : '#0E9F6E', dark ? '#1E3050' : '#DCE4F0'], borderWidth: 0, hoverOffset: 6 }] };
     const donutOpts = {
       cutout: '72%', responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.label + ': Rp ' + fmt(c.raw) } } }
+      plugins: { legend: { display: false }, tooltip: { bodyFont: { family: 'IBM Plex Mono', size: 12, weight: '600' }, callbacks: { label: (c) => c.label + ': Rp ' + fmt(c.raw) } } }
     };
 
+    if (this.barChart && this.barMode !== modeRpd) { this.barChart.destroy(); this.barChart = null; }
+    this.barMode = modeRpd;
     if (this.barChart) { this.barChart.data = barData; this.barChart.options = barOpts; this.barChart.update(); }
     else this.barChart = new window.Chart(this.barEl, { type: 'bar', data: barData, options: barOpts });
+    // Jenis grafik berubah antar-mode, jadi instance lama dibuang bila perlu.
     if (this.donutChart) { this.donutChart.data = donutData; this.donutChart.options = donutOpts; this.donutChart.update(); }
     else this.donutChart = new window.Chart(this.donutEl, { type: 'doughnut', data: donutData, options: donutOpts });
+  }
+
+  /**
+   * Rekap bulanan: target RPD, realisasi (dari butir SP2D), dan deviasinya.
+   * Deviasi = (realisasi − target) / target × 100 — negatif berarti tertinggal.
+   */
+  /**
+   * Rekap RPD per bulan.
+   *
+   * DEFINISI RESMI (dipakai serentak oleh grafik, donat, ticker, dan laporan):
+   * deviasi BULANAN — realisasi bulan itu dibandingkan target RPD bulan itu.
+   *
+   *   deviasi(bulan) = ( realisasi(bulan) / target_RPD(bulan) − 1 ) × 100%
+   *
+   * Contoh nyata Agustus 2026: target RPD 8.192.566.800, realisasi 7.723.352.992
+   * → deviasi −5,73% (masih di dalam toleransi ±5%… tepat di ambangnya).
+   *
+   * Pelaksanaan Pusdatin KP dimulai Juli 2026, sehingga Januari–Juni memang tidak
+   * memiliki target maupun realisasi — bulan-bulan itu ditandai "belum ada
+   * pelaksanaan", BUKAN deviasi 0%.
+   *
+   * Angka kumulatif tetap dihitung untuk kartu donat dan rincian tooltip.
+   */
+  bulananRpd() {
+    const utama = this.tree().utama;
+    const target = Array(12).fill(0);
+    utama.forEach(u => (u.rpd || []).forEach((v, i) => { if (i < 12) target[i] += (v || 0); }));
+
+    // Realisasi per bulan dari tanggal butir berstatus SP2D.
+    const realisasi = Array(12).fill(0);
+    (this.state.butir || []).forEach(b => {
+      if (String(b.status).toUpperCase() !== 'SP2D') return;
+      const t = new Date(b.tanggal || 0);
+      if (isNaN(t) || t.getFullYear() !== 2026) return;
+      realisasi[t.getMonth()] += (b.nominal || 0);
+    });
+
+    const targetKum = [], realKum = [];
+    let a = 0, b2 = 0;
+    for (let i = 0; i < 12; i++) { a += target[i]; b2 += realisasi[i]; targetKum.push(a); realKum.push(b2); }
+
+    // Bulan berjalan dan sesudahnya belum jatuh tempo penuh → belum dinilai.
+    const kini = new Date();
+    const bulanTerakhirSelesai = kini.getFullYear() > 2026 ? 11 : (kini.getFullYear() < 2026 ? -1 : kini.getMonth() - 1);
+
+    // Bulan pertama yang punya rencana penarikan = awal pelaksanaan program.
+    const mulai = target.findIndex(v => v > 0);
+
+    const dinilai = target.map((t, i) => t > 0 && i <= bulanTerakhirSelesai);
+    const capaian = target.map((t, i) => dinilai[i] ? (realisasi[i] / t) * 100 : null);
+    const deviasi = capaian.map(c => c === null ? null : c - 100);
+    const sebab = target.map((t, i) => {
+      // Realisasi tanpa target RPD selalu diberitakan lebih dulu — itu tanda data
+      // belum dimigrasi, jangan sampai tertutup label "belum ada pelaksanaan".
+      if (t <= 0 && realisasi[i] > 0) {
+        return 'Realisasi Rp ' + nfx.format(Math.round(realisasi[i])) +
+               ' tercatat tanpa target RPD — data perlu diperiksa';
+      }
+      if (mulai >= 0 && i < mulai) return 'Belum ada pelaksanaan — program dimulai ' + BLN_LENGKAP[mulai] + ' 2026';
+      if (i > bulanTerakhirSelesai) return i === kini.getMonth() ? 'Bulan berjalan — belum jatuh tempo' : 'Belum berjalan';
+      if (t <= 0) return 'Tidak ada rencana penarikan pada bulan ini';
+      return '';
+    });
+
+    // Deviasi kumulatif — dipakai kartu donat dan rincian tooltip.
+    const dinilaiKum = targetKum.map((t, i) => t > 0 && i <= bulanTerakhirSelesai);
+    const capaianKum = targetKum.map((t, i) => dinilaiKum[i] ? (realKum[i] / t) * 100 : null);
+    const deviasiKum = capaianKum.map(c => c === null ? null : c - 100);
+
+    return { target, realisasi, capaian, deviasi, targetKum, realKum,
+             capaianKum, deviasiKum, dinilai, sebab, bulanTerakhirSelesai, mulai };
+  }
+
+  /** Label & warna mutu deviasi menurut ambang ±5% / ±10%. */
+  mutuDeviasi(dev) {
+    if (dev === null || dev === undefined || !isFinite(dev)) {
+      return { label: 'Belum dinilai', warna: 'var(--ink-3)', bg: 'var(--surface-3)' };
+    }
+    const a = Math.abs(dev);
+    if (a <= 5) return { label: 'Dalam toleransi', warna: 'var(--green)', bg: 'var(--green-bg)' };
+    if (a <= 10) return { label: 'Perlu perhatian', warna: 'var(--amber)', bg: 'var(--amber-bg)' };
+    return { label: 'Bermasalah', warna: 'var(--red)', bg: 'var(--red-bg)' };
+  }
+
+  /* --------------------------- Apresiasi -------------------------------
+     Apresiasi pengunjung disimpan di localStorage:
+       AP_KEY  → jumlah apresiasi per komponen (angka)
+       AP_MINE → komponen yang sudah diapresiasi perangkat ini (agar sekali saja)
+     Catatan: nilainya lokal per perangkat. Untuk hitungan lintas-pengguna,
+     tambahkan action 'apresiasi' di Apps Script dan simpan di sheet tersendiri.
+  --------------------------------------------------------------------- */
+  bacaApresiasi() {
+    try {
+      return {
+        jml: JSON.parse(localStorage.getItem('anggaran_apresiasi') || '{}'),
+        aku: JSON.parse(localStorage.getItem('anggaran_apresiasi_saya') || '{}')
+      };
+    } catch (e) { return { jml: {}, aku: {} }; }
+  }
+
+  beriApresiasi = (id) => {
+    const { jml, aku } = this.bacaApresiasi();
+    const sudah = !!aku[id];
+    const baru = { ...jml, [id]: Math.max(0, (jml[id] || 0) + (sudah ? -1 : 1)) };
+    const bAku = { ...aku };
+    if (sudah) delete bAku[id]; else bAku[id] = true;
+    try {
+      localStorage.setItem('anggaran_apresiasi', JSON.stringify(baru));
+      localStorage.setItem('anggaran_apresiasi_saya', JSON.stringify(bAku));
+    } catch (e) {}
+    this.setState({ apresiasiTick: (this.state.apresiasiTick || 0) + 1 });
+  };
+
+  /** Lambang komponen — dipilih dari kata kunci nama kegiatan. */
+  lambang(nama, id) {
+    const t = String(nama || '').toLowerCase();
+    const cocok = [
+      [/pengaman|pemelihara|keamanan/, '🛡'],
+      [/aplikasi|pembangunan|pengembangan|develop/, '🧩'],
+      [/lisensi|pengadaan/, '🔑'],
+      [/statistik|dalam angka|penyusunan/, '📊'],
+      [/tata kelola|spbe|governance/, '⚖'],
+      [/sosialisasi|fgd|konsinyering|bimbingan/, '🎓'],
+      [/penyebaran|publikasi|siaran|media/, '📣'],
+      [/komunikasi|informasi publik|humas/, '💬'],
+      [/data dan informasi|pengelolaan data|basis data/, '🗄'],
+      [/jaringan|infrastruktur|server|perangkat/, '🖧'],
+      [/perjalanan|dinas/, '✈'],
+      [/bahan|belanja|konsumsi/, '📦'],
+      [/honor|jasa|profesi/, '👔'],
+      [/pemeliharaan|perawatan/, '🔧']
+    ].find(([re]) => re.test(t));
+    return cocok ? cocok[1] : '📁';
   }
 
   /* ------------------------------- aksi --------------------------------- */
@@ -479,6 +1018,295 @@ class Component extends DCLogic {
     URL.revokeObjectURL(a.href);
   };
 
+  /* ------------------------- laporan cetak (PDF) ------------------------- */
+  /** Buka jendela cetak berisi HTML laporan; jatuh ke unduhan .html bila popup diblokir. */
+  cetakHtml(judul, html) {
+    const w = window.open('', '_blank', 'width=980,height=1200');
+    if (!w) {
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = judul.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      return;
+    }
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { try { w.print(); } catch (e) {} }, 650);
+  }
+
+  /** Kerangka dokumen laporan: kop instansi, ringkasan, isi, dan blok tanda tangan. */
+  bungkusLaporan(judul, subjudul, isi, ringkas) {
+    const ds = this.ds, fmt = ds.fmt;
+    const kini = new Date().toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const instansi = this.props.instansi ?? 'Kementerian Imigrasi dan Pemasyarakatan';
+    const unit = this.props.unit ?? 'Pusat Data, Informasi dan Komunikasi Publik';
+    const satker = this.props.satker ?? '694677 — Sekretariat Jenderal';
+    const kartu = (ringkas || []).map(r =>
+      '<div class="kartu"><div class="kl">' + r.label + '</div><div class="kv">' + r.nilai + '</div>' +
+      (r.sub ? '<div class="ks">' + r.sub + '</div>' : '') + '</div>').join('');
+    return '<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><title>' + judul + '</title>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">' +
+      '<style>' +
+      '@page{size:A4;margin:16mm 14mm}' +
+      '*{box-sizing:border-box}' +
+      'body{margin:0;font-family:Manrope,Helvetica,Arial,sans-serif;color:#0B2545;font-size:10.5pt;line-height:1.5}' +
+      '.kop{display:flex;gap:14px;align-items:center;padding-bottom:12px;border-bottom:3px solid #0B2545}' +
+      '.kop .lg{width:60px;height:60px;flex:0 0 auto;object-fit:contain}' +
+      '.kop h1{margin:0;font-size:13pt;font-weight:800;letter-spacing:-.01em}' +
+      '.kop .u{font-size:8.5pt;letter-spacing:.12em;text-transform:uppercase;color:#5B6C86;font-weight:700}' +
+      '.kop .s{font-size:9pt;color:#4A5A72;margin-top:2px}' +
+      'h2.jd{margin:16px 0 2px;font-size:14pt;font-weight:800;letter-spacing:-.02em;text-align:center}' +
+      '.sj{text-align:center;font-size:9.5pt;color:#4A5A72;margin-bottom:14px}' +
+      '.ring{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}' +
+      '.kartu{flex:1 1 120px;border:1px solid #DDE5F0;border-radius:8px;padding:9px 11px;background:#F7F9FC}' +
+      '.kl{font-size:7.5pt;letter-spacing:.09em;text-transform:uppercase;color:#5B6C86;font-weight:800}' +
+      '.kv{font-family:"IBM Plex Mono",monospace;font-size:12pt;font-weight:600;margin-top:4px}' +
+      '.ks{font-size:8pt;color:#4A5A72;margin-top:2px}' +
+      'table{width:100%;border-collapse:collapse;margin-bottom:16px;border:1.5px solid #0B2545}' +
+      'thead{display:table-header-group}' +
+      'th{background:#0B2545;color:#fff;font-size:8.5pt;letter-spacing:.04em;text-transform:uppercase;padding:8px;text-align:left;font-weight:800;border-right:1px solid rgba(255,255,255,.22)}' +
+      'th:last-child{border-right:none}' +
+      'td{padding:7px 8px;border-bottom:1px solid #D7E0EC;border-right:1px solid #EDF1F7;font-size:9.5pt;vertical-align:middle}' +
+      'td:last-child{border-right:none}' +
+      'tbody tr:nth-child(even) td{background:#F8FAFD}' +
+      'td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap;font-size:9.5pt}' +
+      'td.c,th.c{text-align:center}' +
+      'tr.u td{background:#E4EBF6 !important;font-weight:800;border-top:1.5px solid #0B2545;font-size:9.5pt}' +
+      'tr.s td:first-child{padding-left:26px;color:#33475F}' +
+      'tr.tot td{background:#0B2545 !important;color:#fff;font-weight:800;font-size:10pt;border-top:2px solid #0B2545}' +
+      '.kode{font-family:"IBM Plex Mono",monospace;font-size:8pt;color:#5B6C86;display:block;letter-spacing:.02em}' +
+      'tr.u .kode{color:#33475F}' +
+      '.pill{display:inline-block;padding:1px 7px;border-radius:99px;font-size:7.5pt;font-weight:800;border:1px solid currentColor}' +
+      'h3{font-size:10.5pt;font-weight:800;margin:18px 0 7px;padding:0 0 5px;border-bottom:2px solid #0B2545}' +
+      '.cat{font-size:8.5pt;line-height:1.55;color:#33475F;background:#F4F7FB;border:1px solid #DDE5F0;border-radius:6px;padding:8px 10px;margin:-6px 0 16px}' +
+      '.ft{margin-top:18px;padding-top:8px;border-top:1px solid #DDE5F0;font-size:7.5pt;color:#7C8AA0;display:flex;justify-content:space-between}' +
+      'tr{page-break-inside:avoid}' +
+      '</style></head><body>' +
+      '<div class="kop"><img class="lg" src="' + (ds.LOGO_DATA || '') + '" alt=""><div><div class="u">' + unit + '</div>' +
+      '<h1>' + instansi + '</h1><div class="s">Satuan Kerja ' + satker + ' · TA 2026</div></div></div>' +
+      '<h2 class="jd">' + judul + '</h2><div class="sj">' + subjudul + '</div>' +
+      '<div class="ring">' + kartu + '</div>' + isi +
+      '<div class="ft"><span>Dicetak dari Dashboard Monitoring Penyerapan Anggaran</span><span>' + kini + '</span></div>' +
+      '</body></html>';
+  }
+
+  barisTabel(list) {
+    const fmt = this.ds.fmt;
+    let no = 0;
+    const sel = (n, kelas, nomor) => '<tr class="' + kelas + '">' +
+      '<td class="c" style="width:26px">' + (nomor || '') + '</td>' +
+      '<td><span class="kode">' + n.id + '</span>' + n.nama + '</td>' +
+      '<td class="n">' + fmt(n.pagu) + '</td><td class="n">' + fmt(n.realisasi) + '</td>' +
+      '<td class="n">' + fmt(n.sisa) + '</td><td class="n">' + n.pct.toFixed(2) + '%</td>' +
+      '<td class="c"><span class="pill" style="color:' + (n.status.key === 'aman' ? '#0E7A55' : n.status.key === 'waspada' ? '#9A6A00' : '#B32A2A') + '">' +
+      n.status.label + '</span></td></tr>';
+    let html = '<table><thead><tr><th class="c" style="width:26px">No</th>' +
+      '<th>Komponen / Subkomponen</th><th class="n" style="width:14%">Pagu (Rp)</th>' +
+      '<th class="n" style="width:14%">Realisasi (Rp)</th><th class="n" style="width:14%">Sisa (Rp)</th>' +
+      '<th class="n" style="width:8%">Serap</th><th class="c" style="width:11%">Status</th></tr></thead><tbody>';
+    list.forEach(u => {
+      no++;
+      html += sel(u, 'u', String(no));
+      (u.children || []).forEach(c => { html += sel(c, 's', ''); });
+    });
+    const tP = list.reduce((t, u) => t + u.pagu, 0);
+    const tR = list.reduce((t, u) => t + u.realisasi, 0);
+    html += '<tr class="tot"><td class="c">—</td><td>JUMLAH ' + list.length + ' KOMPONEN UTAMA</td>' +
+      '<td class="n">' + fmt(tP) + '</td><td class="n">' + fmt(tR) + '</td>' +
+      '<td class="n">' + fmt(tP - tR) + '</td><td class="n">' + (tP ? (tR / tP * 100).toFixed(2) : '0.00') + '%</td>' +
+      '<td class="c">—</td></tr>';
+    return html + '</tbody></table>';
+  }
+
+  cetakLaporan = () => {
+    const L = this.state.laporan;
+    if (!L) return;
+    const ds = this.ds, fmt = ds.fmt, short = ds.short;
+    const { utama, totals } = this.tree();
+    const BLN_P = ds.BULAN_PANJANG;
+
+    let dipakai = utama, judul = 'Laporan Penyerapan Anggaran', sub = '', tambahan = '';
+
+    if (L.lingkup === 'PILIH') {
+      const ada = (id) => !!L.pilih[id];
+      dipakai = utama
+        .map(u => ({ ...u, children: (u.children || []).filter(c => ada(c.id) || ada(u.id)) }))
+        .filter(u => ada(u.id) || u.children.length);
+      judul = 'Laporan Penyerapan Anggaran (Terpilih)';
+      sub = dipakai.length + ' komponen utama dipilih · per ' + new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    } else if (L.lingkup === 'BULAN') {
+      judul = 'Laporan Penyerapan Anggaran — ' + BLN_P[L.bulan] + ' 2026';
+      sub = 'Realisasi dibandingkan target Rencana Penarikan Dana (RPD) kumulatif s.d. ' + BLN_P[L.bulan];
+      const m = this.bulananRpd();
+      const barisBulan = ds.BULAN.map((b, i) => {
+        const dev = m.deviasi[i];
+        const sel = '<tr' + (i === L.bulan ? ' class="u"' : '') + '><td class="c">' + (i + 1) + '</td><td>' + ds.BULAN_PANJANG[i] + '</td>' +
+          '<td class="n">' + fmt(m.target[i]) + '</td><td class="n">' + fmt(m.realisasi[i]) + '</td>';
+        if (dev === null) {
+          return sel + '<td class="n">—</td><td class="n">—</td>' +
+            '<td class="c" style="color:#7C8AA0;font-size:8pt">' + m.sebab[i] + '</td></tr>';
+        }
+        const a = Math.abs(dev);
+        const mutu = a <= 5 ? 'Baik' : (a <= 10 ? 'Perlu perhatian' : 'Bermasalah');
+        const warna = a <= 5 ? '#0E7A55' : (a <= 10 ? '#9A6A00' : '#B32A2A');
+        return sel + '<td class="n">' + m.capaian[i].toFixed(2) + '%</td>' +
+          '<td class="n" style="color:' + warna + ';font-weight:800">' + (dev > 0 ? '+' : dev < 0 ? '−' : '') + a.toFixed(2) + '%</td>' +
+          '<td class="c" style="color:' + warna + ';font-weight:700;font-size:8.5pt">' + mutu + '</td></tr>';
+      }).join('');
+      const adaTargetKum = m.targetKum[L.bulan] > 0;
+      const devKum = m.deviasiKum[L.bulan];
+
+      tambahan = '<h3>Penyerapan terhadap RPD per Bulan &amp; Deviasinya</h3>' +
+        '<table><thead><tr><th class="c" style="width:26px">No</th><th>Bulan</th>' +
+        '<th class="n" style="width:16%">Target RPD (Rp)</th><th class="n" style="width:16%">Realisasi (Rp)</th>' +
+        '<th class="n" style="width:10%">Capaian</th><th class="n" style="width:10%">Deviasi</th>' +
+        '<th class="c" style="width:15%">Keterangan</th></tr></thead><tbody>' + barisBulan +
+        '<tr class="tot"><td class="c">—</td><td>KUMULATIF s.d. ' + BLN_P[L.bulan].toUpperCase() + '</td>' +
+        '<td class="n">' + fmt(m.targetKum[L.bulan]) + '</td><td class="n">' + fmt(m.realKum[L.bulan]) + '</td>' +
+        '<td class="n">' + (adaTargetKum ? (m.realKum[L.bulan] / m.targetKum[L.bulan] * 100).toFixed(2) + '%' : '—') + '</td>' +
+        '<td class="n">' + (devKum === null ? '—' : (devKum > 0 ? '+' : devKum < 0 ? '−' : '') + Math.abs(devKum).toFixed(2) + '%') + '</td>' +
+        '<td class="c">—</td></tr></tbody></table>' +
+        '<div class="cat"><b>Ketentuan deviasi:</b> rentang −5% s.d. +5% dinilai <b>baik</b>; ' +
+        'di luar rentang itu hingga 10% perlu perhatian; deviasi <b>melebihi 10%</b> menandakan ' +
+        'masalah serius (overbudget atau keterlambatan penarikan). Deviasi negatif berarti ' +
+        'realisasi tertinggal dari target RPD, positif berarti melampaui target. ' +
+        'Deviasi tiap baris dihitung <b>bulanan</b>: realisasi bulan itu dibandingkan target RPD bulan ' +
+        'yang sama. Baris terakhir menyajikan angka <b>kumulatif</b> s.d. bulan acuan. Pelaksanaan ' +
+        'Pusdatin KP dimulai Juli 2026, sehingga Januari–Juni tidak memiliki target maupun realisasi ' +
+        'dan ditandai “—”; begitu pula bulan yang belum jatuh tempo. Realisasi dihitung dari tanggal ' +
+        'butir kegiatan berstatus SP2D.</div>' +
+
+        '<h3>Rincian per Komponen Utama terhadap Target RPD s.d. ' + BLN_P[L.bulan] + '</h3>' +
+        '<table><thead><tr><th class="c" style="width:26px">No</th><th>Komponen Utama</th>' +
+        '<th class="n" style="width:17%">Target Kumulatif (Rp)</th><th class="n" style="width:17%">Realisasi (Rp)</th>' +
+        '<th class="n" style="width:11%">Capaian</th><th class="n" style="width:11%">Deviasi</th></tr></thead><tbody>' +
+        utama.map((u, i) => {
+          const target = (u.rpd || []).slice(0, L.bulan + 1).reduce((t, v) => t + v, 0);
+          const kepala = '<tr><td class="c">' + (i + 1) + '</td><td><span class="kode">' + u.id + '</span>' + u.nama + '</td>' +
+            '<td class="n">' + fmt(target) + '</td><td class="n">' + fmt(u.realisasi) + '</td>';
+          if (target <= 0) return kepala + '<td class="n">—</td><td class="n" style="color:#7C8AA0">tanpa target</td></tr>';
+          const cap = (u.realisasi / target) * 100;
+          const dv = cap - 100;
+          const aa = Math.abs(dv);
+          const wr = aa <= 5 ? '#0E7A55' : (aa <= 10 ? '#9A6A00' : '#B32A2A');
+          return kepala + '<td class="n">' + cap.toFixed(2) + '%</td>' +
+            '<td class="n" style="color:' + wr + ';font-weight:800">' + (dv > 0 ? '+' : dv < 0 ? '−' : '') + aa.toFixed(2) + '%</td></tr>';
+        }).join('') + '</tbody></table>';
+    } else {
+      sub = 'Seluruh komponen · per ' + new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+
+    const pagu = dipakai.reduce((t, u) => t + u.pagu, 0);
+    const real = dipakai.reduce((t, u) => t + u.realisasi, 0);
+    const pct = pagu ? (real / pagu) * 100 : 0;
+
+    // Rekap tahapan berkas ikut dilampirkan agar laporan lengkap.
+    const semuaButir = [];
+    dipakai.forEach(u => { (u.butir || []).forEach(b => semuaButir.push(b)); (u.children || []).forEach(c => (c.butir || []).forEach(b => semuaButir.push(b))); });
+    const tahap = (ds.STATUS_BUTIR || []).map(t => ({
+      label: t.label, n: semuaButir.filter(b => String(b.status).toUpperCase() === t.key).length
+    }));
+    const nRevisi = semuaButir.filter(b => b.revisi).length;
+    const totalButir = semuaButir.reduce((s, b) => s + (b.nominal || 0), 0);
+    const rekapBerkas = '<h3>Rekapitulasi Tahapan Berkas</h3>' +
+      '<table><thead><tr><th class="c" style="width:26px">No</th><th>Tahapan Berkas</th>' +
+      '<th class="n" style="width:16%">Jumlah Butir</th><th class="n" style="width:22%">Nominal (Rp)</th>' +
+      '<th class="n" style="width:14%">Porsi</th></tr></thead><tbody>' +
+      tahap.map((t, i) => {
+        const key = (ds.STATUS_BUTIR.find(x => x.label === t.label) || {}).key;
+        const rows = semuaButir.filter(b => String(b.status).toUpperCase() === key);
+        const nom = rows.reduce((s, b) => s + (b.nominal || 0), 0);
+        return '<tr><td class="c">' + (i + 1) + '</td><td>' + t.label + '</td>' +
+          '<td class="n">' + t.n + '</td><td class="n">' + fmt(nom) + '</td>' +
+          '<td class="n">' + (totalButir ? (nom / totalButir * 100).toFixed(1) : '0.0') + '%</td></tr>';
+      }).join('') +
+      '<tr><td class="c">—</td><td style="color:#B32A2A;font-weight:800">Ditandai perlu revisi</td>' +
+      '<td class="n" style="color:#B32A2A;font-weight:800">' + nRevisi + '</td>' +
+      '<td class="n">' + fmt(semuaButir.filter(b => b.revisi).reduce((s, b) => s + (b.nominal || 0), 0)) + '</td>' +
+      '<td class="n">—</td></tr>' +
+      '<tr class="tot"><td class="c">—</td><td>JUMLAH BUTIR KEGIATAN</td><td class="n">' + semuaButir.length +
+      '</td><td class="n">' + fmt(totalButir) + '</td><td class="n">100.0%</td></tr>' +
+      '</tbody></table>' +
+      '<div class="cat">Revisi adalah <b>penanda kondisional</b>, bukan tahapan — butir bertanda revisi tetap berada pada tahapannya.</div>';
+
+    const isi = tambahan + '<h3>Rincian Pagu, Realisasi, dan Sisa Anggaran</h3>' +
+      this.barisTabel(dipakai) + rekapBerkas;
+
+    const html = this.bungkusLaporan(judul, sub, isi, [
+      { label: 'Pagu', nilai: short(pagu), sub: 'Rp ' + fmt(pagu) },
+      { label: 'Realisasi', nilai: short(real), sub: 'Rp ' + fmt(real) },
+      { label: 'Sisa', nilai: short(pagu - real), sub: 'Rp ' + fmt(pagu - real) },
+      { label: 'Penyerapan', nilai: pct.toFixed(2) + '%', sub: dipakai.length + ' komponen utama' }
+    ]);
+    this.cetakHtml(judul, html);
+    this.setState({ laporan: null });
+  };
+
+  /* --------------------------- rincian KPI ------------------------------ */
+  kpiData(i) {
+    const ds = this.ds, fmt = ds.fmt, short = ds.short;
+    const { utama, totals } = this.tree();
+    const urut = (fn) => utama.slice().sort((a, b) => fn(b) - fn(a));
+    if (i === 0) return {
+      judul: 'Total Pagu Anggaran', nilai: 'Rp ' + fmt(totals.pagu), warna: 'var(--navy-3)',
+      ket: 'Pagu seluruh komponen utama TA 2026, diurutkan dari alokasi terbesar. Persentase menunjukkan porsi terhadap total pagu.',
+      rincian: urut(u => u.pagu).map(u => ({ kode: u.id, nama: u.nama, nilai: short(u.pagu),
+        tanda: (totals.pagu ? (u.pagu / totals.pagu * 100).toFixed(1) : '0') + '% dari total', warna: 'var(--ink-3)' }))
+    };
+    if (i === 1) return {
+      judul: 'Total Realisasi', nilai: 'Rp ' + fmt(totals.realisasi), warna: 'var(--green)',
+      ket: 'Realisasi terakumulasi dari butir kegiatan berstatus SP2D. Diurutkan dari realisasi terbesar.',
+      rincian: urut(u => u.realisasi).map(u => ({ kode: u.id, nama: u.nama, nilai: short(u.realisasi),
+        tanda: u.pct.toFixed(2) + '% dari pagunya', warna: u.status.color }))
+    };
+    if (i === 2) return {
+      judul: 'Total Sisa Anggaran', nilai: 'Rp ' + fmt(totals.sisa), warna: 'var(--amber)',
+      ket: 'Sisa pagu yang belum terserap. Komponen dengan sisa terbesar perlu percepatan penarikan.',
+      rincian: urut(u => u.sisa).map(u => ({ kode: u.id, nama: u.nama, nilai: short(u.sisa),
+        tanda: (100 - u.pct).toFixed(2) + '% belum terserap', warna: u.sisa > 0 ? 'var(--amber)' : 'var(--green)' }))
+    };
+    return {
+      judul: 'Rata-rata Penyerapan', nilai: totals.avg.toFixed(2) + '%', warna: totals.avg >= 75 ? 'var(--green)' : (totals.avg >= 25 ? 'var(--amber)' : 'var(--red)'),
+      ket: 'Rata-rata persentase penyerapan antar komponen utama (bukan tertimbang). Diurutkan dari penyerapan tertinggi.',
+      rincian: urut(u => u.pct).map(u => ({ kode: u.id, nama: u.nama, nilai: u.pct.toFixed(2) + '%',
+        tanda: u.status.label, warna: u.status.color }))
+    };
+  }
+
+  kpiCetak = () => {
+    const i = this.state.kpi;
+    if (i == null) return;
+    const k = this.kpiData(i);
+    const ds = this.ds, fmt = ds.fmt, short = ds.short;
+    const { totals } = this.tree();
+    const isi = '<h3>' + k.judul + ' per Komponen Utama</h3>' +
+      '<table><thead><tr><th>Kode</th><th>Komponen Utama</th><th class="n">Nilai</th><th class="n">Keterangan</th></tr></thead><tbody>' +
+      k.rincian.map(r => '<tr><td style="font-family:\'IBM Plex Mono\',monospace;font-size:8pt">' + r.kode +
+        '</td><td>' + r.nama + '</td><td class="n">' + r.nilai + '</td><td class="n">' + r.tanda + '</td></tr>').join('') +
+      '</tbody></table>' +
+      '<div style="font-size:8.5pt;color:#4A5A72">' + k.ket + '</div>' +
+      '<h3>Rincian Lengkap Seluruh Komponen</h3>' + this.barisTabel(this.tree().utama);
+    const html = this.bungkusLaporan('Rincian ' + k.judul, k.judul + ' · per ' +
+      new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }), isi, [
+      { label: 'Pagu', nilai: short(totals.pagu), sub: 'Rp ' + fmt(totals.pagu) },
+      { label: 'Realisasi', nilai: short(totals.realisasi), sub: 'Rp ' + fmt(totals.realisasi) },
+      { label: 'Sisa', nilai: short(totals.sisa), sub: 'Rp ' + fmt(totals.sisa) },
+      { label: k.judul, nilai: k.nilai }
+    ]);
+    this.cetakHtml('Rincian ' + k.judul, html);
+  };
+
+  /** Sorot baris komponen: buka induknya lalu kedipkan sebentar. */
+  sorot = (node, parentId) => {
+    if (parentId) this.setState(s => ({ expanded: { ...s.expanded, [parentId]: true } }));
+    this.setState({ sorotan: node.id });
+    clearTimeout(this.sorotTimer);
+    this.sorotTimer = setTimeout(() => this.setState({ sorotan: null }), 2400);
+  };
+
   renderVals() {
     const ds = this.ds;
     const { utama, totals } = this.tree();
@@ -490,6 +1318,104 @@ class Component extends DCLogic {
     const BLN_PANJANG = (ds && ds.BULAN_PANJANG) || BLN;
     const up = this.state.updated;
 
+    const q = this.state.query.trim().toLowerCase();
+    const sorot = this.state.sorotan;
+    const tandai = (n) => {
+      const cocok = !!q && !!this.alasanCocok(n, q);
+      if (n.id === sorot) return { bg: 'var(--amber-bg)', anim: 'kedip 700ms ease-in-out 3' };
+      if (cocok) return { bg: 'var(--amber-bg)', anim: 'none' };
+      return null;
+    };
+
+    const modeRpdV = this.state.acuan === 'RPD';
+    const mBul = this.bulananRpd();
+    const blnV = this.state.bulanRpd;
+    const capaianRpd = mBul.targetKum[blnV] > 0 ? (mBul.realKum[blnV] / mBul.targetKum[blnV]) * 100 : 0;
+    const devRpd = mBul.deviasiKum[blnV];
+    const mutu = this.mutuDeviasi(devRpd);
+
+    // Papan peringkat selalu terhadap pagu masing-masing komponen.
+    const papanSkor = utama.map(u => {
+      const pct = u.pagu > 0 ? (u.realisasi / u.pagu) * 100 : (u.realisasi > 0 ? 100 : 0);
+      const bp = (u.butir || []).concat(...(u.children || []).map(c => c.butir || []))
+        .filter(b => b.picNama).sort((a, b) => new Date(b.tanggal || 0) - new Date(a.tanggal || 0))[0];
+      return { u, pct, pic: bp ? bp.picNama : 'belum dicatat' };
+    }).sort((a, b) => b.pct - a.pct);
+    const papanTotalHal = Math.max(1, Math.ceil(papanSkor.length / 5));
+    const papanHal = Math.min(this.state.papanHal || 1, papanTotalHal);
+    const papanMulai = (papanHal - 1) * 5;
+
+    // Bulan mana pun yang punya realisasi tercatat tetapi TANPA target RPD.
+    // Ini penanda data belum dimigrasi (mis. sheet masih memuat pencairan
+    // Januari–Juni padahal pelaksanaan baru dimulai Juli) — harus selalu
+    // dilaporkan, termasuk untuk bulan sebelum program dimulai.
+    const rpdBolong = mBul.target
+      .map((t, i) => (t <= 0 && mBul.realisasi[i] > 0) ? i : -1)
+      .filter(i => i >= 0);
+    const rpdBolongNilai = rpdBolong.reduce((t, i) => t + mBul.realisasi[i], 0);
+
+    const apre = this.bacaApresiasi();
+
+    /* --------------------- Bahan running text --------------------------- */
+    const tickerItem = (() => {
+      const it = [];
+      const bl = mBul.bulanTerakhirSelesai;
+      const nm = (v) => this.ds.short(v);
+
+      it.push({ ikon: '◉', label: 'REALISASI', teks: 'Total terserap ' + nm(totals.realisasi) +
+        ' dari pagu ' + nm(totals.pagu) + ' (' + totals.pct.toFixed(2) + '%)',
+        bg: 'rgba(52,211,153,.2)', ink: '#34D399', warna: '#34D399' });
+
+      it.push({ ikon: '◷', label: 'SISA ANGGARAN', teks: nm(totals.sisa) + ' belum tercairkan',
+        bg: 'rgba(255,255,255,.14)', ink: '#fff', warna: 'rgba(255,255,255,.92)' });
+
+      if (bl >= 0 && mBul.deviasi[bl] !== null) {
+        const dev = mBul.deviasi[bl];
+        const lbl = Math.abs(dev) <= 5 ? 'DEVIASI AMAN' : (Math.abs(dev) <= 10 ? 'DEVIASI WASPADA' : 'DEVIASI TINGGI');
+        it.push({ ikon: Math.abs(dev) <= 5 ? '✓' : '!', label: lbl,
+          teks: BLN_PANJANG[bl] + ': target RPD ' + nm(mBul.target[bl]) + ', terserap ' + nm(mBul.realisasi[bl]) +
+                ' → ' + (dev > 0 ? '+' : dev < 0 ? '−' : '') + Math.abs(dev).toFixed(2) + '% (toleransi ±5%)',
+          bg: Math.abs(dev) <= 5 ? 'rgba(52,211,153,.2)' : (Math.abs(dev) <= 10 ? 'rgba(251,191,36,.22)' : 'rgba(248,113,113,.22)'),
+          ink: Math.abs(dev) <= 5 ? '#34D399' : (Math.abs(dev) <= 10 ? '#FBBF24' : '#F87171'),
+          warna: Math.abs(dev) <= 5 ? '#34D399' : (Math.abs(dev) <= 10 ? '#FBBF24' : '#F87171') });
+      }
+
+      const kritis = utama.filter(u => u.pct < 25);
+      if (kritis.length) {
+        it.push({ ikon: '!', label: 'PERINGATAN', teks: kritis.length + ' komponen masih di bawah 25%: ' +
+          kritis.slice(0, 3).map(u => u.nama).join(', ') + (kritis.length > 3 ? ', dan lainnya' : ''),
+          bg: 'rgba(248,113,113,.22)', ink: '#F87171', warna: '#F87171' });
+      }
+
+      const semuaButir = utama.reduce((t, u) => t.concat(u.butir || [], ...(u.children || []).map(c => c.butir || [])), []);
+      const revisi = semuaButir.filter(b => b.revisi);
+      if (revisi.length) {
+        it.push({ ikon: '⚑', label: 'PERLU REVISI', teks: revisi.length + ' berkas ditandai perlu perbaikan oleh tim verifikasi',
+          bg: 'rgba(251,191,36,.22)', ink: '#FBBF24', warna: '#FBBF24' });
+      }
+      const tertahan = semuaButir.filter(b => {
+        if (String(b.status).toUpperCase() === 'SP2D') return false;
+        const t = new Date(b.tanggal || 0);
+        return !isNaN(t) && (Date.now() - t.getTime()) / 86400000 >= 14;
+      });
+      if (tertahan.length) {
+        it.push({ ikon: '⏱', label: 'BERKAS TERTAHAN', teks: tertahan.length + ' butir belum SP2D lebih dari 14 hari — mohon ditindaklanjuti',
+          bg: 'rgba(251,191,36,.22)', ink: '#FBBF24', warna: '#FBBF24' });
+      }
+
+      const teratas = papanSkor[0];
+      if (teratas) {
+        it.push({ ikon: '★', label: 'PENYERAPAN TERTINGGI', teks: teratas.u.nama + ' — ' + teratas.pct.toFixed(2) + '% terserap',
+          bg: 'rgba(255,255,255,.14)', ink: '#fff', warna: 'rgba(255,255,255,.92)' });
+      }
+
+      it.push({ ikon: '↻', label: 'PEMBARUAN', teks: 'Data ditarik langsung dari ' + this.state.source +
+        (this.state.updated ? ' · terakhir ' + new Date(this.state.updated).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''),
+        bg: 'rgba(255,255,255,.14)', ink: '#fff', warna: 'rgba(255,255,255,.75)' });
+
+      return it;
+    })();
+
     const list = this.visibleUtama();
     const rows = [];
     list.forEach(u => {
@@ -497,7 +1423,14 @@ class Component extends DCLogic {
       const hasKids = u.children.length > 0;
       rows.push({
         kode: u.id, nama: u.nama, tipeLabel: 'Komponen Utama', weight: '700', indent: '18px',
-        rowBg: 'var(--surface-2)',
+        rowBg: (tandai(u) || {}).bg || 'var(--surface-2)',
+        rowAnim: (tandai(u) || {}).anim || 'none',
+        lambang: this.lambang(u.nama, u.id),
+        lambangJudul: 'Lambang komponen: ' + u.nama,
+        lambangUk: '30px',
+        lambangFont: '15px',
+        lambangBg: 'var(--surface-3)',
+        lambangBorder: 'var(--line-2)',
         caret: hasKids ? (open ? '−' : '+') : '·',
         caretBg: hasKids ? 'var(--navy)' : 'var(--surface)',
         caretColor: hasKids ? '#fff' : 'var(--ink-3)',
@@ -514,7 +1447,15 @@ class Component extends DCLogic {
       });
       if (open) u.children.forEach(c => rows.push({
         kode: c.id, nama: c.nama, tipeLabel: 'Subkomponen', weight: '500', indent: '54px',
-        rowBg: 'transparent', caret: '›', caretBg: 'var(--surface)', caretColor: 'var(--ink-3)',
+        rowBg: (tandai(c) || {}).bg || 'transparent',
+        rowAnim: (tandai(c) || {}).anim || 'none',
+        lambang: this.lambang(c.nama, c.id),
+        lambangJudul: 'Lambang subkomponen: ' + c.nama,
+        lambangUk: '26px',
+        lambangFont: '13px',
+        lambangBg: 'transparent',
+        lambangBorder: 'var(--line-2)',
+        caret: '›', caretBg: 'var(--surface)', caretColor: 'var(--ink-3)',
         caretBorder: 'var(--line)', caretCursor: 'pointer',
         onToggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(c, u); },
         onRowClick: () => this.openDocs(c, u),
@@ -559,8 +1500,192 @@ class Component extends DCLogic {
         { label: 'Total Realisasi', value: short(totals.realisasi), sub: 'Rp ' + fmt(totals.realisasi), tag: totals.pct.toFixed(2) + '%', color: 'var(--green)', bar: Math.min(100, totals.pct).toFixed(1) + '%' },
         { label: 'Total Sisa Anggaran', value: short(totals.sisa), sub: 'Rp ' + fmt(totals.sisa), tag: (100 - totals.pct).toFixed(2) + '%', color: 'var(--amber)', bar: Math.max(0, 100 - totals.pct).toFixed(1) + '%' },
         { label: 'Rata-rata Penyerapan', value: totals.avg.toFixed(2) + '%', sub: 'rata-rata antar komponen utama', tag: totals.avg >= 75 ? 'Aman' : (totals.avg >= 25 ? 'Waspada' : 'Kritis'), color: totals.avg >= 75 ? 'var(--green)' : (totals.avg >= 25 ? 'var(--amber)' : 'var(--red)'), bar: Math.min(100, totals.avg).toFixed(1) + '%' }
-      ],
-      legend: [
+      ].map((k, i) => ({ ...k, onClick: () => this.setState({ kpi: i }) })),
+
+      judulPendek: 'Monitoring Penyerapan Anggaran',
+      dotWarna: this.state.errorMsg ? 'var(--amber)' : '#34D399',
+      dotHalo: this.state.errorMsg ? 'rgba(201,138,0,.25)' : 'rgba(52,211,153,.22)',
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+
+      navBawah: [
+        { ikon: '▦', label: 'Ringkasan', key: 'top' },
+        { ikon: '◔', label: 'Grafik', key: 'grafik' },
+        { ikon: '☰', label: 'Tabel', key: 'tabel' },
+        { ikon: '↓', label: 'Laporan', key: 'laporan' }
+      ].map(n => ({
+        ...n,
+        bg: 'transparent', color: 'var(--ink-2)',
+        onClick: () => {
+          if (n.key === 'laporan') return this.setState({ laporan: { lingkup: 'ALL', bulan: new Date().getMonth(), pilih: {} } });
+          const y = n.key === 'top' ? 0 : (n.key === 'grafik' ? 380 : 1100);
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      })),
+
+      /* ---- Papan peringkat: 5 besar per halaman, medali untuk 3 teratas ---- */
+      papanInfo: utama.length + ' komponen utama',
+      papanAdaPaging: utama.length > 5,
+      papanHalamanLabel: 'Peringkat ' + (papanMulai + 1) + '–' + Math.min(papanMulai + 5, papanSkor.length) + ' dari ' + papanSkor.length,
+      papanPrev: () => this.setState(s => ({ papanHal: Math.max(1, (s.papanHal || 1) - 1) })),
+      papanNext: () => this.setState(s => ({ papanHal: Math.min(papanTotalHal, (s.papanHal || 1) + 1) })),
+      papanPrevDim: papanHal <= 1 ? '.4' : '1',
+      papanNextDim: papanHal >= papanTotalHal ? '.4' : '1',
+      papanTabs: Array.from({ length: papanTotalHal }, (_, i) => ({
+        label: String(i + 1),
+        onClick: () => this.setState({ papanHal: i + 1 }),
+        bg: papanHal === i + 1 ? 'var(--navy)' : 'var(--surface)',
+        color: papanHal === i + 1 ? '#fff' : 'var(--ink-2)',
+        border: papanHal === i + 1 ? 'var(--navy)' : 'var(--line)'
+      })),
+      papan: papanSkor.slice(papanMulai, papanMulai + 5).map((s, idx) => {
+        const i = papanMulai + idx;
+        // Medali emas / perak / bronze untuk peringkat 1-3.
+        const medali = [
+          { ikon: '🥇', bg: 'linear-gradient(145deg,#F7D774,#C9A227)', ink: '#4A3A00', border: '1px solid #C9A227', shadow: '0 3px 10px -4px rgba(201,162,39,.7)', nama: 'Peringkat 1 — Medali Emas' },
+          { ikon: '🥈', bg: 'linear-gradient(145deg,#E4E8EE,#A8B3C1)', ink: '#38424F', border: '1px solid #A8B3C1', shadow: '0 3px 10px -4px rgba(168,179,193,.7)', nama: 'Peringkat 2 — Medali Perak' },
+          { ikon: '🥉', bg: 'linear-gradient(145deg,#E0AE85,#B06E3F)', ink: '#4A2A10', border: '1px solid #B06E3F', shadow: '0 3px 10px -4px rgba(176,110,63,.7)', nama: 'Peringkat 3 — Medali Bronze' }
+        ][i];
+        return {
+          rank: medali ? medali.ikon : String(i + 1),
+          rankTitle: medali ? medali.nama : 'Peringkat ' + (i + 1),
+          rankBg: medali ? medali.bg : 'var(--surface-3)',
+          rankInk: medali ? medali.ink : 'var(--ink-3)',
+          rankBorder: medali ? medali.border : '1px solid var(--line-2)',
+          rankShadow: medali ? medali.shadow : 'none',
+          rankRadius: medali ? '50%' : '10px',
+          rankSize: medali ? '17px' : '13px',
+          kode: s.u.id, nama: s.u.nama, pic: s.pic,
+          apJumlah: String(apre.jml[s.u.id] || 0),
+          apIkon: apre.aku[s.u.id] ? '👏' : '👍',
+          apBg: apre.aku[s.u.id] ? 'var(--green)' : 'var(--surface)',
+          apInk: apre.aku[s.u.id] ? '#fff' : 'var(--ink-2)',
+          apBorder: apre.aku[s.u.id] ? 'var(--green)' : 'var(--line)',
+          apresiasiJudul: apre.aku[s.u.id]
+            ? 'Anda sudah memberi apresiasi — klik untuk membatalkan'
+            : 'Beri apresiasi untuk capaian komponen ini',
+          onApresiasi: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.beriApresiasi(s.u.id); },
+          pct: s.pct.toFixed(2) + '%', bar: Math.min(100, s.pct).toFixed(1) + '%',
+          warna: s.pct >= 75 ? 'var(--green)' : (s.pct >= 25 ? 'var(--amber)' : 'var(--red)'),
+          bg: i === 0 ? 'var(--green-bg)' : 'var(--surface-2)',
+          border: i === 0 ? 'var(--green)' : 'var(--line-2)',
+          onClick: () => this.openDocs(s.u, null)
+        };
+      }),
+
+      kpiOpen: this.state.kpi != null,
+      kpiJudul: this.state.kpi != null ? this.kpiData(this.state.kpi).judul : '',
+      kpiNilai: this.state.kpi != null ? this.kpiData(this.state.kpi).nilai : '',
+      kpiWarna: this.state.kpi != null ? this.kpiData(this.state.kpi).warna : 'var(--ink)',
+      kpiKet: this.state.kpi != null ? this.kpiData(this.state.kpi).ket : '',
+      kpiRincian: this.state.kpi != null ? this.kpiData(this.state.kpi).rincian : [],
+      kpiHeadBg: 'var(--surface-2)',
+      tutupKpi: () => this.setState({ kpi: null }),
+      kpiCetak: this.kpiCetak,
+
+      bukaLaporan: () => this.setState({ laporan: { lingkup: 'ALL', bulan: new Date().getMonth(), pilih: {} } }),
+      tutupLaporan: () => this.setState({ laporan: null }),
+      cetakLaporan: this.cetakLaporan,
+      laporanOpen: !!this.state.laporan,
+      lingkupBulan: !!this.state.laporan && this.state.laporan.lingkup === 'BULAN',
+      lingkupPilih: !!this.state.laporan && this.state.laporan.lingkup === 'PILIH',
+      lingkupOpsi: [
+        { key: 'ALL', label: 'Laporan keseluruhan', ket: 'Seluruh komponen dan subkomponen, lengkap dengan rekap tahapan berkas.' },
+        { key: 'BULAN', label: 'Laporan bulanan (vs RPD)', ket: 'Realisasi dibandingkan target RPD kumulatif, beserta deviasinya per komponen.' },
+        { key: 'PILIH', label: 'Komponen tertentu', ket: 'Centang sendiri komponen utama / subkomponen yang ingin dilaporkan.' }
+      ].map(o => {
+        const aktif = !!this.state.laporan && this.state.laporan.lingkup === o.key;
+        return {
+          label: o.label, ket: o.ket,
+          onClick: () => this.setState(s => ({ laporan: { ...s.laporan, lingkup: o.key } })),
+          bg: aktif ? 'var(--surface-2)' : 'var(--surface)',
+          border: aktif ? 'var(--navy-3)' : 'var(--line)',
+          dotBorder: aktif ? 'var(--navy-3)' : 'var(--line)',
+          dotBg: aktif ? 'var(--navy-3)' : 'transparent',
+          dotInner: aktif ? '#fff' : 'transparent'
+        };
+      }),
+      bulanLaporan: BLN.map((b, i) => {
+        const aktif = !!this.state.laporan && this.state.laporan.bulan === i;
+        return {
+          label: b,
+          onClick: () => this.setState(s => ({ laporan: { ...s.laporan, bulan: i } })),
+          bg: aktif ? 'var(--navy)' : 'var(--surface)',
+          color: aktif ? '#fff' : 'var(--ink-2)',
+          border: aktif ? 'var(--navy)' : 'var(--line)'
+        };
+      }),
+      pilihDaftar: (() => {
+        if (!this.state.laporan) return [];
+        const p = this.state.laporan.pilih || {};
+        const out = [];
+        utama.forEach(u => {
+          const tog = (id) => () => this.setState(s => ({ laporan: { ...s.laporan, pilih: { ...s.laporan.pilih, [id]: !s.laporan.pilih[id] } } }));
+          const kotak = (id, ind, nama, kode, pct, w) => ({
+            kode, nama, indent: ind, weight: w, onClick: tog(id),
+            tanda: p[id] ? '✓' : '',
+            boxBorder: p[id] ? 'var(--navy)' : 'var(--line)',
+            boxBg: p[id] ? 'var(--navy)' : 'transparent',
+            bg: p[id] ? 'var(--surface-3)' : 'var(--surface)',
+            border: p[id] ? 'var(--navy-3)' : 'var(--line-2)',
+            pct: pct.toFixed(1) + '%',
+            pctWarna: pct >= 75 ? 'var(--green)' : (pct >= 25 ? 'var(--amber)' : 'var(--red)')
+          });
+          out.push(kotak(u.id, '0px', u.nama, u.id, u.pct, '800'));
+          (u.children || []).forEach(c => out.push(kotak(c.id, '18px', c.nama, c.id, c.pct, '600')));
+        });
+        return out;
+      })(),
+      pilihJumlah: (() => {
+        const p = (this.state.laporan && this.state.laporan.pilih) || {};
+        const n = Object.keys(p).filter(k => p[k]).length;
+        return n + ' dipilih';
+      })(),
+      laporanDisabled: !!this.state.laporan && this.state.laporan.lingkup === 'PILIH' &&
+        !Object.keys(this.state.laporan.pilih || {}).some(k => this.state.laporan.pilih[k]),
+      laporanOpacity: (!!this.state.laporan && this.state.laporan.lingkup === 'PILIH' &&
+        !Object.keys(this.state.laporan.pilih || {}).some(k => this.state.laporan.pilih[k])) ? '.5' : '1',
+      laporanTombol: '↓ Buat & unduh PDF',
+      laporanKet: 'Laporan dibuka di jendela cetak — pilih "Simpan sebagai PDF" pada dialog printer. ' +
+        'Dokumen sudah berisi kop instansi, kartu ringkasan, tabel rincian, rekap tahapan berkas, dan blok tanda tangan.',
+      /* ---- Running text: informasi real-time, peringatan, dan status ---- */
+      grafikJudul: modeRpdV ? 'Deviasi Penyerapan terhadap RPD per Bulan' : 'Persentase Penyerapan per Komponen Utama',
+      adaRpdBolong: rpdBolong.length > 0,
+      rpdBolongJudul: 'Data belum sesuai laporan SP2D — angka di layar masih perlu dimigrasi',
+      rpdBolongKet: rpdBolong.length
+        ? 'Ada realisasi ' + this.ds.short(rpdBolongNilai) + ' tercatat pada ' +
+          rpdBolong.map(i => BLN_PANJANG[i]).join(', ') + ' padahal bulan tersebut tidak punya target RPD. ' +
+          'Akibatnya Total Realisasi di kartu KPI (' + this.ds.short(totals.realisasi) + ' · ' +
+          totals.pct.toFixed(2) + '%) lebih besar daripada laporan SP2D. ' +
+          'Buka Apps Script lalu jalankan fungsi perbaikiDataJuliSeptember, kemudian muat ulang halaman (Ctrl+Shift+R).'
+        : '',
+      tickerDetik: Math.max(34, tickerItem.length * 9),
+      // Daftar digandakan agar animasi translateX(-50%) menyambung tanpa jeda.
+      ticker: tickerItem.concat(tickerItem),
+
+      donutJudul: modeRpdV ? 'Capaian terhadap RPD' : 'Penyerapan Keseluruhan',
+      donutSub: modeRpdV
+        ? 'Realisasi kumulatif dibandingkan target RPD kumulatif s.d. ' + BLN_PANJANG[this.state.bulanRpd] + '. Toleransi deviasi ±5%.'
+        : 'Realisasi dibandingkan pagu seluruh komponen TA 2026.',
+      donutAngka: modeRpdV ? (mBul.targetKum[blnV] > 0 ? capaianRpd.toFixed(2) + '%' : '—') : totals.pct.toFixed(2) + '%',
+      donutLabel: modeRpdV ? 'capaian RPD' : 'terserap',
+      adaCatatanRpd: modeRpdV,
+      catatanRpd: mBul.targetKum[blnV] > 0
+        ? 'Realisasi bulanan dihitung dari tanggal butir berstatus SP2D. Bulan tanpa target RPD dan bulan yang belum selesai tidak dinilai.'
+        : 'Belum ada target RPD sampai ' + BLN_PANJANG[blnV] + ', sehingga deviasi belum dapat dihitung.',
+      donutTag: modeRpdV ? mutu.label : (totals.pct >= 75 ? 'Aman' : (totals.pct >= 25 ? 'Waspada' : 'Kritis')),
+      donutTagBg: modeRpdV ? mutu.bg : (totals.pct >= 75 ? 'var(--green-bg)' : (totals.pct >= 25 ? 'var(--amber-bg)' : 'var(--red-bg)')),
+      donutTagInk: modeRpdV ? mutu.warna : (totals.pct >= 75 ? 'var(--green)' : (totals.pct >= 25 ? 'var(--amber)' : 'var(--red)')),
+      devTeks: mBul.targetKum[blnV] > 0
+        ? (devRpd > 0 ? '+' : devRpd < 0 ? '−' : '') + Math.abs(devRpd).toFixed(2) + '% deviasi'
+        : 'belum ada target',
+      devWarna: mutu.warna,
+
+      legend: modeRpdV ? [
+        { label: 'Target RPD s.d. ' + BLN[this.state.bulanRpd], value: short(mBul.targetKum[this.state.bulanRpd]), color: 'var(--navy-3)' },
+        { label: 'Realisasi tercatat', value: short(mBul.realKum[this.state.bulanRpd]), color: 'var(--green)' },
+        { label: mBul.realKum[this.state.bulanRpd] >= mBul.targetKum[this.state.bulanRpd] ? 'Melampaui target' : 'Kurang dari target',
+          value: short(Math.abs(mBul.targetKum[this.state.bulanRpd] - mBul.realKum[this.state.bulanRpd])), color: mutu.warna }
+      ] : [
         { label: 'Realisasi s.d. periode ini', value: short(totals.realisasi), color: 'var(--green)' },
         { label: 'Sisa anggaran', value: short(totals.sisa), color: 'var(--line)' }
       ],
@@ -581,7 +1706,7 @@ class Component extends DCLogic {
       })(),
       modeRpd: this.state.acuan === 'RPD',
       acuanKet: this.state.acuan === 'RPD'
-        ? '% realisasi terhadap Rencana Penarikan Dana kumulatif s.d. ' + BLN_PANJANG[this.state.bulanRpd]
+        ? 'Realisasi bulan tersebut dibanding target RPD bulan yang sama · toleransi ±5% · klik bar untuk memilih bulan acuan'
         : '% realisasi terhadap pagu masing-masing komponen',
       acuanTabs: [
         { key: 'PAGU', label: 'Terhadap Pagu' },
@@ -596,8 +1721,8 @@ class Component extends DCLogic {
       bulanTabs: BLN.map((b, i) => ({
         label: b,
         onClick: () => this.setState({ bulanRpd: i }),
-        bg: i === this.state.bulanRpd ? 'var(--navy)' : 'var(--surface)',
-        color: i === this.state.bulanRpd ? '#fff' : 'var(--ink-2)',
+        bg: i === this.state.bulanRpd ? 'var(--navy)' : (mBul.dinilai[i] ? 'var(--surface)' : 'var(--surface-3)'),
+        color: i === this.state.bulanRpd ? '#fff' : (mBul.dinilai[i] ? 'var(--ink-2)' : 'var(--ink-3)'),
         border: i === this.state.bulanRpd ? 'var(--navy)' : 'var(--line)'
       })),
       rpdRingkas: (() => {

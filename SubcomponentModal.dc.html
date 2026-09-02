@@ -22,6 +22,8 @@
   a{color:var(--blue);text-decoration:none}
   a:hover{text-decoration:underline}
   @keyframes popIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+  .om-nowrap-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .om-nowrap-scroll::-webkit-scrollbar{display:none}
   @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 </style>
 </helmet>
@@ -93,12 +95,15 @@
 
             <sc-if value="{{ s.terbuka }}" hint-placeholder-val="{{ false }}">
               <div style="padding:0 14px 14px;border-top:1px solid var(--line-2);animation:slideDown 200ms ease both">
-                <div style="display:flex;flex-wrap:wrap;gap:6px;padding:12px 0">
-                  <sc-for list="{{ s.filter }}" as="f" hint-placeholder-count="5">
-                    <button type="button" onClick="{{ f.onClick }}" style="height:30px;padding:0 11px;border-radius:99px;border:1px {{ f.style }} {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-family:Manrope;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="filter:brightness(.97)">{{ f.label }} <span style="font-family:'IBM Plex Mono',monospace;opacity:.7">{{ f.jumlah }}</span></button>
-                  </sc-for>
+                <div style="margin:11px 0 10px;padding:9px 11px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-2)">
+                  <div class="om-nowrap-scroll" style="display:flex;gap:6px;align-items:center">
+                    <sc-for list="{{ s.filter }}" as="f" hint-placeholder-count="5">
+                      <button type="button" onClick="{{ f.onClick }}" style="height:32px;flex:0 0 auto;padding:0 11px;border-radius:99px;border:1px {{ f.style }} {{ f.border }};background:{{ f.bg }};color:{{ f.color }};font-family:Manrope;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="filter:brightness(.97)">{{ f.label }} <span style="font-family:'IBM Plex Mono',monospace;opacity:.7">{{ f.jumlah }}</span></button>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--ink-3);overflow-wrap:anywhere">{{ s.caption }}</div>
                 </div>
-                <dc-import name="ActivityTable" items="{{ s.butir }}" editable="{{ false }}" caption="{{ s.caption }}" empty-text="{{ s.kosong }}" hint-size="100%,260px"></dc-import>
+                <dc-import name="ActivityTable" items="{{ s.butir }}" editable="{{ false }}" caption="" empty-text="{{ s.kosong }}" hint-size="100%,260px"></dc-import>
               </div>
             </sc-if>
           </div>
@@ -236,8 +241,8 @@ class Component extends DCLogic {
           onClick: () => this.setState(s => ({ buka: s.buka === c.id ? null : c.id })),
           filter: [
             chip('ALL', 'Semua', 'var(--navy-3)', 'var(--surface-3)'),
-            chip('TU', 'Verifikasi TU', 'var(--blue)', 'rgba(37,99,201,.12)'),
-            chip('KEUANGAN', 'Verifikasi Keuangan', 'var(--navy-3)', 'rgba(27,64,121,.12)'),
+            chip('TU', 'Verif. TU', 'var(--blue)', 'rgba(37,99,201,.12)'),
+            chip('KEUANGAN', 'Verif. Keuangan', 'var(--navy-3)', 'rgba(27,64,121,.12)'),
             chip('REVISI', '⚑ Perlu revisi', 'var(--red)', 'var(--red-bg)', true),
             chip('SP2D', 'SP2D', 'var(--green)', 'var(--green-bg)')
           ],

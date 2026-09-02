@@ -43,9 +43,17 @@
   @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   input,select,button,textarea{font-size:16px}          /* cegah zoom otomatis iOS */
   @media (min-width:640px){input,select,button,textarea{font-size:inherit}}
-  @media (max-width:640px){
+  .om-nowrap-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .om-nowrap-scroll::-webkit-scrollbar{display:none}
+  .om-only-sm{display:none}
+  @media (max-width:720px){
     .om-pad{padding-left:14px !important;padding-right:14px !important}
     .om-tap{min-height:44px}
+    .om-hide-sm{display:none !important}
+    .om-only-sm{display:flex !important}
+    .om-logo{width:38px !important;height:38px !important;border-radius:10px !important}
+    .om-h1{font-size:15px !important}
+    .om-sub{font-size:9.5px !important;letter-spacing:.1em !important}
   }
 </style>
 </helmet>
@@ -58,30 +66,30 @@
 <div data-theme="{{ theme }}" style="min-height:100vh;color:var(--ink);background:var(--bg)">
 
   <header style="position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-2) 100%);color:#fff">
-    <div class="om-pad" style="max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:14px">
-      <div style="display:flex;align-items:center;gap:14px;flex:1 1 300px;min-width:0">
+    <div class="om-pad" style="max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:nowrap;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;flex:1 1 auto;min-width:0">
         <div title="Logo Kementerian Imigrasi dan Pemasyarakatan" style="width:50px;height:50px;flex:0 0 auto;position:relative;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center">
-          <span style="font-weight:800;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.9)">I</span>
+          <span style="font-weight:800;font-size:11px;letter-spacing:.06em;color:rgba(255,255,255,.9)">IMIPAS</span>
           <img src="logo.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:5px">
         </div>
         <div style="min-width:0">
-          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:600">Panel Admin / TU · Internal</div>
-          <h1 style="margin:2px 0 0;font-size:18px;font-weight:800;letter-spacing:-.01em">Pengelolaan Berkas, Pagu &amp; RPD</h1>
+          <div class="om-sub" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Panel Admin / TU · Internal</div>
+          <h1 class="om-h1" style="margin:2px 0 0;font-size:18px;font-weight:800;letter-spacing:-.015em;text-wrap:pretty">Pengelolaan Berkas, Pagu &amp; RPD</h1>
         </div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:rgba(255,255,255,.86)">{{ statusKoneksi }}</span>
-        <a href="index.html" style="height:38px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:13px;font-weight:600" style-hover="background:rgba(255,255,255,.18);text-decoration:none;color:#fff">← Dashboard</a>
-        <button type="button" onClick="{{ refresh }}" style="height:38px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-family:Manrope;font-size:13px;font-weight:600;cursor:pointer">Muat Ulang</button>
-        <span title="{{ sesiEmail }}" style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 12px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);max-width:210px">
-          <span style="width:22px;height:22px;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:9.5px;font-weight:800">{{ sesiInisial }}</span>
-          <span style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sesiNama }}</span>
-        </span>
-        <button type="button" onClick="{{ keluar }}" title="Keluar dari sesi" style="height:38px;padding:0 13px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-family:Manrope;font-size:13px;font-weight:600;cursor:pointer">Keluar</button>
+      <div style="display:flex;gap:8px;flex-wrap:nowrap;align-items:center;flex:0 0 auto">
+        <span title="{{ statusKoneksi }}" aria-label="{{ statusKoneksi }}" style="width:11px;height:11px;flex:0 0 auto;border-radius:50%;background:{{ dotWarna }};box-shadow:0 0 0 3px {{ dotHalo }}"></span>
+        <a class="om-hide-sm" href="index.html" style="height:38px;display:inline-flex;align-items:center;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:13px;font-weight:600" style-hover="background:rgba(255,255,255,.18);text-decoration:none;color:#fff">← Dashboard</a>
+        <button type="button" onClick="{{ refresh }}" title="Muat ulang data" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer">⟳</button>
+        <button type="button" onClick="{{ bukaProfil }}" title="Pengaturan akun: profil, NIP, password, tambah pengguna" style="display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 11px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);max-width:210px;color:#fff;font-family:Manrope;cursor:pointer" style-hover="background:rgba(255,255,255,.18)">
+          <span style="width:24px;height:24px;flex:0 0 auto;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:9.5px;font-weight:800">{{ sesiInisial }}</span>
+          <span class="om-hide-sm" style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ sesiNama }}</span>
+          <span class="om-hide-sm" style="font-size:10px;opacity:.7">▾</span>
+        </button>
         <button type="button" onClick="{{ toggleTheme }}" title="Mode gelap / terang" style="width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;font-size:14px;cursor:pointer">{{ themeIcon }}</button>
       </div>
     </div>
-    <div style="max-width:1280px;margin:0 auto;padding:0 24px 14px;display:flex;gap:8px;flex-wrap:wrap">
+    <div class="om-pad om-nowrap-scroll" style="max-width:1280px;margin:0 auto;padding:0 24px 14px;display:flex;gap:8px">
       <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
         <button type="button" onClick="{{ t.onClick }}" style="height:40px;flex:0 0 auto;padding:0 15px;border-radius:10px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-family:Manrope;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 180ms ease">{{ t.label }}</button>
       </sc-for>
@@ -101,7 +109,7 @@
           <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px">
             <div style="min-width:0">
               <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Kelola Tahapan Berkas</h2>
-              <div style="margin-top:2px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty">3 tahap wajib: Verifikasi TU → Keuangan → SP2D. Revisi adalah penanda kondisional, bukan tahap.</div>
+              <div style="margin-top:2px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty" title="Alur berkas: Verifikasi Tim TU Pusdatin KP → Verifikasi Tim Keuangan → SP2D. Revisi adalah penanda kondisional, bukan tahap wajib.">3 tahap: Verifikasi TU → Keuangan → SP2D</div>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <input type="search" value="{{ cari }}" onInput="{{ onCari }}" placeholder="Cari butir..." style="height:38px;width:180px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
@@ -253,9 +261,114 @@
           </div>
         </div>
       </sc-if>
+
+      <sc-if value="{{ tabSp2d }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;animation:fadeUp 280ms ease both">
+          <div style="padding:18px;border-bottom:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between">
+            <div style="min-width:0">
+              <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Pencairan (SP2D)</h2>
+              <div style="margin-top:2px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty" title="Butir yang sudah SP2D otomatis tercatat sebagai bukti pencairan dan terakumulasi ke realisasi anggaran — tidak ada input manual.">Bukti pencairan dari butir yang sudah SP2D</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input type="search" value="{{ cariSp2d }}" onInput="{{ onCariSp2d }}" placeholder="Cari nomor / kegiatan / PIC..." style="height:40px;width:210px;max-width:100%;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+              <button type="button" onClick="{{ cetakSp2d }}" style="height:40px;padding:0 14px;border-radius:10px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:12.5px;font-weight:800;cursor:pointer;white-space:nowrap">↓ Rekap PDF</button>
+            </div>
+          </div>
+
+          <div style="padding:14px 18px;display:flex;flex-wrap:wrap;gap:10px;background:var(--surface-2);border-bottom:1px solid var(--line-2)">
+            <sc-for list="{{ sp2dRingkas }}" as="r" hint-placeholder-count="3">
+              <div style="flex:1 1 150px;min-width:0;padding:10px 12px;border-radius:11px;background:var(--surface);border:1px solid var(--line-2)">
+                <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)">{{ r.label }}</div>
+                <div style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:{{ r.warna }};overflow-wrap:anywhere">{{ r.nilai }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="padding:14px;display:grid;gap:8px">
+            <sc-for list="{{ sp2dDaftar }}" as="d" hint-placeholder-count="6">
+              <div style="padding:12px 13px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:11px;align-items:center">
+                <span style="width:32px;height:32px;flex:0 0 auto;border-radius:9px;background:var(--green-bg);color:var(--green);display:grid;place-items:center;font-size:13px;font-weight:800">✓</span>
+                <span style="flex:1 1 200px;min-width:0">
+                  <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:var(--navy-3);overflow-wrap:anywhere">{{ d.nomor }}</span>
+                  <span style="display:block;font-size:13px;font-weight:700;letter-spacing:-.01em;overflow-wrap:anywhere;text-wrap:pretty">{{ d.nama }}</span>
+                  <span style="display:block;margin-top:2px;font-size:11px;color:var(--ink-3);overflow-wrap:anywhere">{{ d.meta }}</span>
+                </span>
+                <span style="flex:0 0 auto;text-align:right">
+                  <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:700;color:var(--green)">{{ d.nominal }}</span>
+                  <span style="display:block;font-size:10.5px;color:var(--ink-3)">{{ d.tanggal }}</span>
+                </span>
+                <sc-if value="{{ d.adaBerkas }}" hint-placeholder-val="{{ false }}">
+                  <a href="{{ d.berkas }}" target="_blank" rel="noopener" title="Buka dokumen bukti (PDF)" style="flex:0 0 auto;height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--navy-3);font-size:12px;font-weight:700;text-decoration:none" style-hover="border-color:var(--navy-3);text-decoration:none">🗎 Bukti</a>
+                </sc-if>
+              </div>
+            </sc-for>
+            <sc-if value="{{ sp2dKosong }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:34px 18px;text-align:center;font-size:13px;color:var(--ink-2);text-wrap:pretty">Belum ada butir berstatus SP2D. Selesaikan tahapan berkas di tab <strong>Butir Kegiatan &amp; Berkas</strong>.</div>
+            </sc-if>
+            <sc-if value="{{ sp2dAdaPaging }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between">
+                <span style="font-size:11.5px;color:var(--ink-3)">{{ sp2dHalamanLabel }}</span>
+                <div style="display:flex;gap:5px;align-items:center">
+                  <button type="button" onClick="{{ sp2dPrev }}" aria-label="Halaman sebelumnya" style="width:38px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;opacity:{{ sp2dPrevDim }}">‹</button>
+                  <sc-for list="{{ sp2dTabs }}" as="h" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ h.onClick }}" style="min-width:36px;height:36px;border-radius:9px;border:1px solid {{ h.border }};background:{{ h.bg }};color:{{ h.color }};font-family:Manrope;font-size:12.5px;font-weight:700;cursor:pointer">{{ h.label }}</button>
+                  </sc-for>
+                  <button type="button" onClick="{{ sp2dNext }}" aria-label="Halaman berikutnya" style="width:38px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:14px;font-weight:700;cursor:pointer;opacity:{{ sp2dNextDim }}">›</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
     </section>
 
     <section style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:20px">
+
+      <div style="background:var(--surface);border:1px solid {{ perhatianBorder }};border-radius:16px;box-shadow:var(--shadow);overflow:hidden">
+        <div style="padding:15px 18px;background:{{ perhatianBg }};border-bottom:1px solid var(--line-2);display:flex;gap:11px;align-items:flex-start">
+          <span style="width:30px;height:30px;flex:0 0 auto;border-radius:9px;background:{{ perhatianIkonBg }};color:{{ perhatianWarna }};display:grid;place-items:center;font-size:14px;font-weight:800">!</span>
+          <div style="min-width:0;flex:1">
+            <h2 style="margin:0;font-size:14.5px;font-weight:800;letter-spacing:-.01em">Perlu Diperhatikan</h2>
+            <div style="margin-top:2px;font-size:11.5px;line-height:1.5;color:var(--ink-2);text-wrap:pretty">{{ perhatianKet }}</div>
+          </div>
+        </div>
+        <div style="padding:12px;display:grid;gap:7px;max-height:420px;overflow-y:auto">
+          <sc-for list="{{ perhatian }}" as="w" hint-placeholder-count="4">
+            <button type="button" onClick="{{ w.onClick }}" title="Klik untuk memuat butir ini ke form dan menindaklanjuti" style="text-align:left;width:100%;padding:11px 12px;border-radius:12px;border:1px solid {{ w.border }};background:{{ w.bg }};cursor:pointer;font-family:Manrope;display:flex;gap:10px;align-items:flex-start" style-hover="border-color:{{ w.warna }}">
+              <span style="width:38px;flex:0 0 auto;text-align:center">
+                <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;line-height:1.1;color:{{ w.warna }}">{{ w.umur }}</span>
+                <span style="display:block;font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">hari</span>
+              </span>
+              <span style="min-width:0;flex:1">
+                <span style="display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:700;color:var(--navy-3);overflow-wrap:anywhere">{{ w.nomor }}</span>
+                <span style="display:block;font-size:12.5px;font-weight:700;letter-spacing:-.01em;color:var(--ink);overflow-wrap:anywhere;text-wrap:pretty">{{ w.nama }}</span>
+                <span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;align-items:center">
+                  <span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:{{ w.tahapBg }};color:{{ w.tahapWarna }};white-space:nowrap">{{ w.tahap }}</span>
+                  <sc-if value="{{ w.adaRevisi }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:var(--red-bg);color:var(--red);white-space:nowrap">⚑ REVISI</span>
+                  </sc-if>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-3)">{{ w.nominal }}</span>
+                </span>
+                <span style="display:block;margin-top:4px;font-size:10.5px;color:var(--ink-3);overflow-wrap:anywhere">masuk {{ w.tanggal }} · PIC {{ w.pic }}</span>
+              </span>
+              <sc-if value="{{ w.adaWa }}" hint-placeholder-val="{{ false }}">
+                <a href="{{ w.waLink }}" target="_blank" rel="noopener" onClick="{{ stop }}" title="Ingatkan PIC lewat WhatsApp" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:#25D366;color:#08331C;display:grid;place-items:center;font-size:13px;text-decoration:none;font-weight:800" style-hover="filter:brightness(.95);text-decoration:none">✆</a>
+              </sc-if>
+            </button>
+          </sc-for>
+          <sc-if value="{{ perhatianKosong }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:22px 14px;text-align:center;font-size:12.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty">Tidak ada berkas yang tertahan. Semua butir bergerak dalam {{ ambangHari }} hari terakhir.</div>
+          </sc-if>
+        </div>
+        <div style="padding:11px 16px;border-top:1px solid var(--line-2);background:var(--surface-2);display:flex;flex-wrap:wrap;gap:9px;align-items:center;justify-content:space-between">
+          <span style="font-size:11px;color:var(--ink-3)">Ambang tertahan</span>
+          <div style="display:flex;gap:4px">
+            <sc-for list="{{ ambangOpsi }}" as="a" hint-placeholder-count="3">
+              <button type="button" onClick="{{ a.onClick }}" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid {{ a.border }};background:{{ a.bg }};color:{{ a.color }};font-family:Manrope;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap">{{ a.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
       <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
         <h2 style="margin:0 0 4px;font-size:15px;font-weight:800;letter-spacing:-.01em">Ringkasan</h2>
         <div style="font-size:12px;color:var(--ink-2);margin-bottom:13px">Sumber: {{ sourceLabel }}</div>
@@ -340,6 +453,102 @@
     </div>
   </footer>
 </div>
+
+  <sc-if value="{{ konfirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:80;background:rgba(6,14,26,.62);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px" onClick="{{ tutupKonfirm }}">
+      <div onClick="{{ stop }}" style="width:100%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden;animation:fadeUp 240ms ease both">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--line-2);background:var(--green-bg);display:flex;gap:12px;align-items:flex-start">
+          <span style="width:34px;height:34px;flex:0 0 auto;border-radius:10px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:15px;font-weight:800">✓</span>
+          <div style="min-width:0;flex:1">
+            <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:800">Konfirmasi Tahap Akhir</div>
+            <h2 style="margin:3px 0 0;font-size:16.5px;font-weight:800;letter-spacing:-.015em;text-wrap:pretty">Yakin dokumen sudah lengkap dan bisa dipertanggungjawabkan?</h2>
+            <div style="margin-top:5px;font-size:12px;line-height:1.6;color:var(--ink-2);text-wrap:pretty">Setelah ditandai SP2D, nominal butir ini langsung terakumulasi ke realisasi anggaran. Periksa dokumennya sekali lagi di bawah.</div>
+          </div>
+        </div>
+
+        <div style="padding:16px 20px;overflow-y:auto;flex:1;display:grid;gap:13px">
+          <div style="display:grid;gap:7px">
+            <sc-for list="{{ konfirmRincian }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;padding:9px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line-2)">
+                <span style="flex:0 0 118px;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">{{ r.label }}</span>
+                <span style="flex:1 1 160px;min-width:0;font-size:12.5px;font-weight:{{ r.weight }};font-family:{{ r.font }};color:{{ r.warna }};overflow-wrap:anywhere">{{ r.nilai }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div>
+            <div style="display:flex;flex-wrap:wrap;gap:9px;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)">Preview dokumen</span>
+              <sc-if value="{{ konfirmAdaBerkas }}" hint-placeholder-val="{{ true }}">
+                <a href="{{ konfirmBerkas }}" target="_blank" rel="noopener" style="font-size:12px;font-weight:700;color:var(--navy-3)">Buka di tab baru ↗</a>
+              </sc-if>
+            </div>
+            <sc-if value="{{ konfirmAdaBerkas }}" hint-placeholder-val="{{ true }}">
+              <iframe src="{{ konfirmPreview }}" title="Preview dokumen bukti" style="width:100%;height:340px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)"></iframe>
+            </sc-if>
+            <sc-if value="{{ konfirmTanpaBerkas }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:20px 16px;border-radius:12px;background:var(--red-bg);border:1px dashed var(--red);font-size:12.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty"><strong style="color:var(--red)">Belum ada tautan berkas.</strong> Sebaiknya lampirkan link PDF dokumen bukti lebih dulu lewat tombol Edit pada butir ini, agar pencairan dapat dipertanggungjawabkan.</div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="padding:14px 20px;border-top:1px solid var(--line-2);background:var(--surface-2);display:flex;gap:9px;flex-wrap:wrap">
+          <button type="button" onClick="{{ tutupKonfirm }}" style="height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:13px;font-weight:700;cursor:pointer">Batal, periksa dulu</button>
+          <button type="button" onClick="{{ lanjutSp2d }}" style="flex:1;min-width:180px;height:46px;border-radius:12px;border:none;background:var(--green);color:#fff;font-family:Manrope;font-size:13.5px;font-weight:800;cursor:pointer">Ya, tandai SP2D &amp; catat realisasi</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ profilBuka }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:80;background:rgba(6,14,26,.62);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px" onClick="{{ tutupProfil }}">
+      <div onClick="{{ stop }}" style="width:100%;max-width:560px;max-height:92vh;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);overflow:hidden;animation:fadeUp 240ms ease both">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--line-2);display:flex;gap:12px;align-items:center">
+          <span style="width:44px;height:44px;flex:0 0 auto;border-radius:13px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800">{{ sesiInisial }}</span>
+          <div style="min-width:0;flex:1">
+            <h2 style="margin:0;font-size:16px;font-weight:800;letter-spacing:-.015em;overflow-wrap:anywhere">{{ sesiNama }}</h2>
+            <div style="margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3);overflow-wrap:anywhere">{{ profilSub }}</div>
+          </div>
+          <button type="button" onClick="{{ tutupProfil }}" aria-label="Tutup" style="width:38px;height:38px;flex:0 0 auto;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);font-size:15px;cursor:pointer">✕</button>
+        </div>
+
+        <div class="om-nowrap-scroll" style="display:flex;gap:4px;padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--line-2)">
+          <sc-for list="{{ profilTabs }}" as="t" hint-placeholder-count="3">
+            <button type="button" onClick="{{ t.onClick }}" style="height:38px;flex:0 0 auto;padding:0 14px;border-radius:10px;border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-family:Manrope;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap">{{ t.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="padding:18px 20px;overflow-y:auto;flex:1;display:grid;gap:13px">
+          <sc-for list="{{ profilFields }}" as="f" hint-placeholder-count="4">
+            <div>
+              <label style="display:block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">{{ f.label }}</label>
+              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                <select value="{{ f.value }}" onChange="{{ f.onInput }}" style="width:100%;height:46px;padding:0 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13.5px;cursor:pointer;outline:none">
+                  <option value="STAF">STAF — hanya kelola berkas</option>
+                  <option value="ADMIN">ADMIN — kelola berkas &amp; pengguna</option>
+                </select>
+              </sc-if>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="{{ f.type }}" value="{{ f.value }}" onInput="{{ f.onInput }}" placeholder="{{ f.placeholder }}" style="width:100%;height:46px;padding:0 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:{{ f.font }};font-size:13.5px;outline:none" style-focus="border-color:var(--navy-3);background:var(--surface)">
+              </sc-if>
+              <sc-if value="{{ f.adaHint }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:5px;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">{{ f.hint }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ profilAdaPesan }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="padding:12px 14px;border-radius:11px;background:{{ profilPesanBg }};border:1px solid {{ profilPesanBorder }};font-size:12.5px;line-height:1.55;overflow-wrap:anywhere">{{ profilPesan }}</div>
+          </sc-if>
+        </div>
+
+        <div style="padding:14px 20px;border-top:1px solid var(--line-2);background:var(--surface-2);display:flex;gap:9px">
+          <button type="button" onClick="{{ tutupProfil }}" style="height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font-family:Manrope;font-size:13px;font-weight:700;cursor:pointer">Tutup</button>
+          <button type="button" onClick="{{ simpanProfil }}" disabled="{{ profilBusy }}" style="flex:1;height:46px;border-radius:12px;border:none;background:var(--navy);color:#fff;font-family:Manrope;font-size:13.5px;font-weight:800;cursor:pointer;opacity:{{ profilOpacity }}">{{ profilTombol }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
 </sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;defaultDark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tampilan&quot;}}">
@@ -367,6 +576,8 @@ const TAHAP_FALLBACK = [
 const POLL_MS = 60000;
 const KOSONG = { id: '', komponen: '', nama: '', nominal: '', tanggal: new Date().toISOString().slice(0, 10), status: 'TU', catatan: '', berkas: '', revisi: false, picNama: '', picNip: '', picWa: '' };
 
+const nf = new Intl.NumberFormat('id-ID');
+
 class Component extends DCLogic {
   state = {
     sesi: null, siapMasuk: false,
@@ -376,6 +587,11 @@ class Component extends DCLogic {
     cari: '', filterKomponen: 'ALL', filterStatus: 'ALL',
     rpd: [],
     halaman: 1, perHalaman: 6,
+    cariSp2d: '', sp2dHal: 1, sp2dPer: 6, ambangHari: 7, konfirmSp2d: null,
+    profilBuka: false, profilTab: 'profil', profil: null, profilBusy: false, profilPesan: '', profilOk: true,
+    fProfil: { nama: '', unit: '', nip: '', wa: '' },
+    fPw: { lama: '', baru: '', ulang: '' },
+    fAkun: { email: '', nama: '', unit: '', peran: 'STAF', password: '' },
     kunciRpd: {},               // {komponenId: {bulanIndex: true}} — sel RPD yang dikunci
     riwayat: [], riwayatBuka: false, riwayatMuat: false,
     formKomp: { id: '', tipe: 'SUB', parent: '', nama: '', pagu: '' }, busyKomp: false, formKompBuka: false,
@@ -538,6 +754,23 @@ class Component extends DCLogic {
 
   ubahStatus = async (b, statusBaru) => {
     if (!statusBaru || statusBaru === b.status) return;
+    // Perpindahan ke SP2D bersifat final (masuk realisasi) — minta konfirmasi
+    // sekaligus tampilkan preview dokumen untuk pengecekan singkat.
+    if (String(statusBaru).toUpperCase() === 'SP2D') {
+      this.setState({ konfirmSp2d: { b, statusBaru } });
+      return;
+    }
+    return this.terapkanStatus(b, statusBaru);
+  };
+
+  lanjutSp2d = () => {
+    const k = this.state.konfirmSp2d;
+    if (!k) return;
+    this.setState({ konfirmSp2d: null });
+    this.terapkanStatus(k.b, k.statusBaru);
+  };
+
+  terapkanStatus = async (b, statusBaru) => {
     this.setState(s => ({ butir: s.butir.map(x => x.id === b.id ? { ...x, status: statusBaru } : x), okButir: '', errButir: '' }));
     try {
       const res = await this.ds.updateButir({ ID_Butir: b.id, Status: statusBaru });
@@ -577,6 +810,133 @@ class Component extends DCLogic {
     } catch (e) {
       this.setState({ butir: sebelum, errButir: 'Gagal menghapus: ' + e.message });
     }
+  };
+
+  /* ------------------------- Pengaturan akun ------------------------------ */
+  bukaProfil = async () => {
+    const s = this.state.sesi || {};
+    // Isi dulu dari sesi agar form tidak kosong, lalu segarkan dari server.
+    this.setState(st => ({
+      profilBuka: true, profilPesan: '',
+      fProfil: { ...st.fProfil, nama: st.fProfil.nama || s.nama || '' }
+    }));
+    try {
+      const pr = await this.ds.fetchProfil();
+      if (pr) this.setState({ profil: pr, fProfil: { nama: pr.nama || '', unit: pr.unit || '', nip: pr.nip || '', wa: pr.wa || '' } });
+    } catch (e) {
+      const s = this.state.sesi || {};
+      this.setState({ fProfil: { nama: s.nama || '', unit: '', nip: '', wa: '' } });
+    }
+  };
+
+  setProfil = (grup, key) => (e) => {
+    const v = e.target.value;
+    this.setState(s => ({ [grup]: { ...s[grup], [key]: v }, profilPesan: '' }));
+  };
+
+  simpanProfil = async () => {
+    const t = this.state.profilTab;
+    this.setState({ profilBusy: true, profilPesan: '' });
+    try {
+      if (t === 'profil') {
+        const f = this.state.fProfil;
+        if (!f.nama.trim()) throw new Error('Nama tidak boleh kosong.');
+        const res = await this.ds.updateProfil(f);
+        this.setState(s => ({
+          sesi: { ...s.sesi, nama: f.nama.trim() },
+          profilOk: true, profilPesan: (res.simulated ? 'Simulasi: ' : '') + 'Profil diperbarui.'
+        }));
+        const sesi = this.ds.getSesi();
+        if (sesi) this.ds.setSesi({ ...sesi, nama: f.nama.trim() });
+      } else if (t === 'password') {
+        const f = this.state.fPw;
+        if (f.baru !== f.ulang) throw new Error('Konfirmasi password baru tidak sama.');
+        if (f.baru.length < 8) throw new Error('Password baru minimal 8 karakter.');
+        const res = await this.ds.gantiPassword({ lama: f.lama, baru: f.baru });
+        this.setState({ fPw: { lama: '', baru: '', ulang: '' }, profilOk: true,
+                        profilPesan: res.message || 'Password diperbarui.' });
+      } else {
+        const f = this.state.fAkun;
+        const res = await this.ds.tambahAkun(f);
+        this.setState({ fAkun: { email: '', nama: '', unit: '', peran: 'STAF', password: '' },
+                        profilOk: true, profilPesan: res.message || 'Akun dibuat.' });
+      }
+      this.setState({ profilBusy: false });
+    } catch (e) {
+      this.setState({ profilBusy: false, profilOk: false, profilPesan: (e && e.message) || String(e) });
+    }
+  };
+
+  /* ------------------- Pencairan (SP2D) & berkas tertahan ------------------ */
+  namaKomponen(id) {
+    const r = this.state.anggaran.find(x => x.id === id);
+    return r ? r.nama : '';
+  }
+  tglSingkat(t) {
+    if (!t) return '—';
+    const d = new Date(t);
+    if (isNaN(d)) return String(t);
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  /** Butir berstatus SP2D = bukti pencairan yang sudah masuk realisasi. */
+  sp2dTersaring() {
+    const q = this.state.cariSp2d.trim().toLowerCase();
+    return this.state.butir
+      .filter(b => String(b.status).toUpperCase() === 'SP2D')
+      .filter(b => !q || [b.id, b.nama, b.komponenId, b.picNama, b.picNip, b.catatan]
+        .some(v => String(v || '').toLowerCase().includes(q)))
+      .sort((a, b) => new Date(b.tanggal || 0) - new Date(a.tanggal || 0));
+  }
+  /** Butir belum SP2D yang diam ≥ ambangHari sejak berkas diterima. */
+  tertahan() {
+    const kini = Date.now();
+    const tahapan = (this.ds && this.ds.STATUS_BUTIR) || [];
+    return this.state.butir
+      .filter(b => String(b.status).toUpperCase() !== 'SP2D')
+      .map(b => {
+        const t = new Date(b.tanggal || 0);
+        const umur = isNaN(t) ? 0 : Math.floor((kini - t.getTime()) / 86400000);
+        const key = String(b.status).toUpperCase() === 'REVISI' ? 'TU' : String(b.status).toUpperCase();
+        return { b, umur, tahap: tahapan.find(x => x.key === key) || { key: 'TU', label: 'Verifikasi TU' } };
+      })
+      .filter(w => w.umur >= this.state.ambangHari)
+      .sort((a, b) => b.umur - a.umur);
+  }
+
+  cetakSp2d = () => {
+    const rows = this.sp2dTersaring();
+    const nfx = new Intl.NumberFormat('id-ID');
+    const total = rows.reduce((t, b) => t + (b.nominal || 0), 0);
+    const html = '<!DOCTYPE html><html lang="id"><head><meta charset="utf-8">' +
+      '<title>Rekap Pencairan SP2D</title>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">' +
+      '<style>@page{size:A4;margin:16mm 14mm}body{font-family:Manrope,sans-serif;color:#0B2545;font-size:10pt}' +
+      '.kop{display:flex;gap:14px;align-items:center;padding-bottom:12px;border-bottom:3px solid #0B2545}' +
+      '.lg{width:56px;height:56px;object-fit:contain}' +
+      'h1{margin:0;font-size:12.5pt;font-weight:800}.u{font-size:8pt;letter-spacing:.12em;text-transform:uppercase;color:#5B6C86;font-weight:700}' +
+      'h2{margin:16px 0 12px;font-size:13pt;text-align:center;font-weight:800}' +
+      'table{width:100%;border-collapse:collapse}th{background:#0B2545;color:#fff;font-size:8pt;text-transform:uppercase;padding:7px;text-align:left}' +
+      'td{padding:6px 7px;border-bottom:1px solid #E6EBF3;font-size:9pt}td.n{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap}' +
+      'tr.t td{background:#EEF3FA;font-weight:800}tr{page-break-inside:avoid}' +
+      '.ft{margin-top:16px;padding-top:8px;border-top:1px solid #DDE5F0;font-size:7.5pt;color:#7C8AA0}</style></head><body>' +
+      '<div class="kop"><img class="lg" src="' + (this.ds.LOGO_DATA || '') + '" alt=""><div><div class="u">Pusat Data, Informasi dan Komunikasi Publik</div>' +
+      '<h1>Kementerian Imigrasi dan Pemasyarakatan</h1></div></div>' +
+      '<h2>Rekapitulasi Pencairan (SP2D) TA 2026</h2>' +
+      '<table><thead><tr><th>No. Dokumen</th><th>Kegiatan</th><th>Komponen</th><th>PIC</th>' +
+      '<th class="n">Nominal</th><th class="n">Tanggal</th></tr></thead><tbody>' +
+      rows.map(b => '<tr><td style="font-family:\'IBM Plex Mono\',monospace;font-size:8pt">' + b.id + '</td>' +
+        '<td>' + b.nama + '</td><td style="font-size:8pt">' + (this.namaKomponen(b.komponenId) || b.komponenId) + '</td>' +
+        '<td style="font-size:8.5pt">' + (b.picNama || '—') + '</td>' +
+        '<td class="n">' + nfx.format(Math.round(b.nominal || 0)) + '</td>' +
+        '<td class="n">' + this.tglSingkat(b.tanggal) + '</td></tr>').join('') +
+      '<tr class="t"><td colspan="4">TOTAL ' + rows.length + ' BUTIR</td><td class="n">' +
+      nfx.format(Math.round(total)) + '</td><td></td></tr></tbody></table>' +
+      '<div class="ft">Dicetak ' + new Date().toLocaleString('id-ID') + ' dari Panel Admin Dashboard Penyerapan Anggaran</div>' +
+      '</body></html>';
+    const w = window.open('', '_blank', 'width=980,height=1200');
+    if (!w) return;
+    w.document.write(html); w.document.close(); w.focus();
+    setTimeout(() => { try { w.print(); } catch (e) {} }, 600);
   };
 
   /* ----------------------------- Riwayat ---------------------------------- */
@@ -768,6 +1128,11 @@ class Component extends DCLogic {
       return true;
     });
 
+    const sp2dSemua = this.sp2dTersaring();
+    const sp2dTotalHal = Math.max(1, Math.ceil(sp2dSemua.length / this.state.sp2dPer));
+    const sp2dHal = Math.min(this.state.sp2dHal, sp2dTotalHal);
+    const sp2dMulai = (sp2dHal - 1) * this.state.sp2dPer;
+
     const totalHalaman = Math.max(1, Math.ceil(butirTampil.length / this.state.perHalaman));
     const hal = Math.min(this.state.halaman, totalHalaman);
     const mulai = (hal - 1) * this.state.perHalaman;
@@ -859,10 +1224,183 @@ class Component extends DCLogic {
       statusKoneksi: mode === 'appscript' ? 'TERSAMBUNG · Google Sheets' : 'MODE ' + mode.toUpperCase(),
       sourceLabel: this.state.source,
       mode,
-      tabs: [tab('butir', 'Butir Kegiatan & Berkas'), tab('pagu', 'Revisi Pagu'), tab('rpd', 'Revisi RPD')],
+      tabs: [tab('butir', 'Butir Kegiatan & Berkas'), tab('pagu', 'Revisi Pagu'),
+             tab('rpd', 'Revisi RPD'), tab('sp2d', 'Pencairan (SP2D)')],
       tabButir: this.state.tab === 'butir',
       tabPagu: this.state.tab === 'pagu',
       tabRpd: this.state.tab === 'rpd',
+      tabSp2d: this.state.tab === 'sp2d',
+
+      /* ---- konfirmasi SP2D + preview dokumen ---- */
+      konfirmOpen: !!this.state.konfirmSp2d,
+      tutupKonfirm: () => this.setState({ konfirmSp2d: null }),
+      lanjutSp2d: this.lanjutSp2d,
+      konfirmRincian: (() => {
+        const k = this.state.konfirmSp2d;
+        if (!k) return [];
+        const b = k.b;
+        return [
+          { label: 'No. dokumen', nilai: b.id, weight: '700', font: "'IBM Plex Mono',monospace", warna: 'var(--navy-3)' },
+          { label: 'Kegiatan', nilai: b.nama, weight: '700', font: 'Manrope', warna: 'var(--ink)' },
+          { label: 'Komponen', nilai: (this.namaKomponen(b.komponenId) || b.komponenId), weight: '600', font: 'Manrope', warna: 'var(--ink-2)' },
+          { label: 'Nominal', nilai: 'Rp ' + nf.format(Math.round(b.nominal || 0)), weight: '700', font: "'IBM Plex Mono',monospace", warna: 'var(--green)' },
+          { label: 'PIC', nilai: (b.picNama || 'belum dicatat') + (b.picNip ? ' · NIP ' + b.picNip : ''), weight: '600', font: 'Manrope', warna: 'var(--ink-2)' }
+        ];
+      })(),
+      konfirmAdaBerkas: !!(this.state.konfirmSp2d && this.state.konfirmSp2d.b.berkas),
+      konfirmTanpaBerkas: !!(this.state.konfirmSp2d && !this.state.konfirmSp2d.b.berkas),
+      konfirmBerkas: (this.state.konfirmSp2d && this.state.konfirmSp2d.b.berkas) || '#',
+      konfirmPreview: (() => {
+        const k = this.state.konfirmSp2d;
+        const u = k && k.b.berkas;
+        if (!u) return 'about:blank';
+        // Tautan Google Drive diubah ke bentuk /preview agar bisa ditampilkan dalam frame.
+        const m = String(u).match(/drive\.google\.com\/file\/d\/([^/]+)/);
+        if (m) return 'https://drive.google.com/file/d/' + m[1] + '/preview';
+        const m2 = String(u).match(/[?&]id=([^&]+)/);
+        if (m2 && /drive\.google/.test(u)) return 'https://drive.google.com/file/d/' + m2[1] + '/preview';
+        return u;
+      })(),
+
+      /* ---- pengaturan akun ---- */
+      profilBuka: this.state.profilBuka,
+      bukaProfil: this.bukaProfil,
+      tutupProfil: () => this.setState({ profilBuka: false, profilPesan: '' }),
+      simpanProfil: this.simpanProfil,
+      profilBusy: this.state.profilBusy,
+      profilOpacity: this.state.profilBusy ? '.7' : '1',
+      profilSub: ((this.state.profil && this.state.profil.email) || (this.state.sesi && this.state.sesi.email) || '—') +
+        ' · ' + ((this.state.profil && this.state.profil.peran) || (this.state.sesi && this.state.sesi.peran) || 'STAF'),
+      profilAdaPesan: !!this.state.profilPesan,
+      profilPesan: this.state.profilPesan,
+      profilPesanBg: this.state.profilOk ? 'var(--green-bg)' : 'var(--red-bg)',
+      profilPesanBorder: this.state.profilOk ? 'var(--green)' : 'var(--red)',
+      profilTombol: this.state.profilBusy ? 'Menyimpan...' :
+        (this.state.profilTab === 'profil' ? 'Simpan profil' :
+         this.state.profilTab === 'password' ? 'Ubah password' : 'Buat akun'),
+      profilTabs: [
+        { key: 'profil', label: 'Data Diri' },
+        { key: 'password', label: 'Ubah Password' },
+        { key: 'akun', label: 'Tambah Pengguna' }
+      ].map(t => ({
+        label: t.label,
+        onClick: () => this.setState({ profilTab: t.key, profilPesan: '' }),
+        bg: this.state.profilTab === t.key ? 'var(--navy)' : 'var(--surface)',
+        color: this.state.profilTab === t.key ? '#fff' : 'var(--ink-2)',
+        border: this.state.profilTab === t.key ? 'var(--navy)' : 'var(--line)'
+      })),
+      profilFields: (() => {
+        const mk = (label, grup, key, opt) => ({
+          label, isInput: !opt || !opt.select, isSelect: !!(opt && opt.select),
+          type: (opt && opt.type) || 'text',
+          value: this.state[grup][key],
+          placeholder: (opt && opt.placeholder) || '',
+          font: (opt && opt.mono) ? "'IBM Plex Mono',monospace" : 'Manrope',
+          adaHint: !!(opt && opt.hint), hint: (opt && opt.hint) || '',
+          onInput: this.setProfil(grup, key)
+        });
+        const t = this.state.profilTab;
+        if (t === 'profil') return [
+          mk('Nama lengkap', 'fProfil', 'nama', { placeholder: 'Nama sesuai kepegawaian' }),
+          mk('Unit / Tim kerja', 'fProfil', 'unit', { placeholder: 'mis. Tim TU Pusdatin KP' }),
+          mk('NIP', 'fProfil', 'nip', { mono: true, placeholder: '19xxxxxxxxxxxxxxxx', hint: 'Opsional bagi non-pegawai.' }),
+          mk('No. WhatsApp', 'fProfil', 'wa', { mono: true, type: 'tel', placeholder: '0812xxxxxxx', hint: 'Dipakai bila PIC perlu menghubungi Anda.' })
+        ];
+        if (t === 'password') return [
+          mk('Password lama', 'fPw', 'lama', { type: 'password', placeholder: '••••••••' }),
+          mk('Password baru', 'fPw', 'baru', { type: 'password', placeholder: 'minimal 8 karakter' }),
+          mk('Ulangi password baru', 'fPw', 'ulang', { type: 'password', placeholder: 'ulangi' })
+        ];
+        return [
+          mk('Email dinas', 'fAkun', 'email', { type: 'email', placeholder: 'nama@imipas.go.id', hint: 'Harus berdomain instansi. Akun langsung AKTIF karena dibuat oleh admin.' }),
+          mk('Nama lengkap', 'fAkun', 'nama', { placeholder: 'Nama sesuai kepegawaian' }),
+          mk('Unit / Tim kerja', 'fAkun', 'unit', { placeholder: 'mis. Tim TU Pusdatin KP' }),
+          mk('Peran', 'fAkun', 'peran', { select: true }),
+          mk('Password sementara', 'fAkun', 'password', { type: 'text', mono: true, placeholder: 'minimal 8 karakter', hint: 'Dikirim ke email pengguna; minta segera diganti setelah login.' })
+        ];
+      })(),
+
+      dotWarna: this.state.errorMsg ? 'var(--amber)' : '#34D399',
+      dotHalo: this.state.errorMsg ? 'rgba(201,138,0,.25)' : 'rgba(52,211,153,.22)',
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+
+      /* ---- tab Pencairan (SP2D): butir selesai = bukti pencairan ---- */
+      cariSp2d: this.state.cariSp2d,
+      onCariSp2d: (e) => this.setState({ cariSp2d: e.target.value, sp2dHal: 1 }),
+      cetakSp2d: this.cetakSp2d,
+      sp2dAdaPaging: sp2dSemua.length > this.state.sp2dPer,
+      sp2dHalamanLabel: 'Menampilkan ' + (sp2dMulai + 1) + '–' + Math.min(sp2dMulai + this.state.sp2dPer, sp2dSemua.length) + ' dari ' + sp2dSemua.length + ' bukti',
+      sp2dPrev: () => this.setState(s => ({ sp2dHal: Math.max(1, s.sp2dHal - 1) })),
+      sp2dNext: () => this.setState(s => ({ sp2dHal: Math.min(sp2dTotalHal, s.sp2dHal + 1) })),
+      sp2dPrevDim: sp2dHal <= 1 ? '.4' : '1',
+      sp2dNextDim: sp2dHal >= sp2dTotalHal ? '.4' : '1',
+      sp2dTabs: Array.from({ length: sp2dTotalHal }, (_, i) => ({
+        label: String(i + 1),
+        onClick: () => this.setState({ sp2dHal: i + 1 }),
+        bg: sp2dHal === i + 1 ? 'var(--navy)' : 'var(--surface)',
+        color: sp2dHal === i + 1 ? '#fff' : 'var(--ink-2)',
+        border: sp2dHal === i + 1 ? 'var(--navy)' : 'var(--line)'
+      })),
+      sp2dDaftar: sp2dSemua.slice(sp2dMulai, sp2dMulai + this.state.sp2dPer).map(b => ({
+        nomor: b.id,
+        nama: b.nama,
+        meta: (this.namaKomponen(b.komponenId) || b.komponenId) + (b.picNama ? ' · PIC ' + b.picNama : ''),
+        nominal: 'Rp ' + nf.format(Math.round(b.nominal || 0)),
+        tanggal: this.tglSingkat(b.tanggal),
+        adaBerkas: !!b.berkas,
+        berkas: b.berkas || '#'
+      })),
+      sp2dKosong: sp2dSemua.length === 0,
+      sp2dRingkas: (() => {
+        const all = this.state.butir.filter(b => String(b.status).toUpperCase() === 'SP2D');
+        const total = all.reduce((t, b) => t + (b.nominal || 0), 0);
+        const berkas = all.filter(b => b.berkas).length;
+        return [
+          { label: 'Butir SP2D', nilai: String(all.length), warna: 'var(--green)' },
+          { label: 'Nilai tercairkan', nilai: 'Rp ' + nf.format(Math.round(total)), warna: 'var(--ink)' },
+          { label: 'Berkas terlampir', nilai: berkas + ' / ' + all.length, warna: berkas === all.length ? 'var(--green)' : 'var(--amber)' }
+        ];
+      })(),
+
+      /* ---- sidebar Perlu Diperhatikan ---- */
+      ambangHari: this.state.ambangHari,
+      ambangOpsi: [3, 7, 14].map(n => ({
+        label: '≥ ' + n + ' hari',
+        onClick: () => this.setState({ ambangHari: n }),
+        bg: this.state.ambangHari === n ? 'var(--navy)' : 'var(--surface)',
+        color: this.state.ambangHari === n ? '#fff' : 'var(--ink-2)',
+        border: this.state.ambangHari === n ? 'var(--navy)' : 'var(--line)'
+      })),
+      perhatian: this.tertahan().map(w => ({
+        umur: String(w.umur),
+        nomor: w.b.id,
+        nama: w.b.nama,
+        nominal: 'Rp ' + nf.format(Math.round(w.b.nominal || 0)),
+        tanggal: this.tglSingkat(w.b.tanggal),
+        pic: w.b.picNama || 'belum dicatat',
+        tahap: w.tahap.label,
+        tahapBg: w.tahap.key === 'TU' ? 'rgba(37,99,201,.12)' : 'rgba(27,64,121,.12)',
+        tahapWarna: w.tahap.key === 'TU' ? 'var(--blue)' : 'var(--navy-3)',
+        adaRevisi: !!w.b.revisi,
+        warna: w.umur >= 21 ? 'var(--red)' : (w.umur >= 14 ? 'var(--amber)' : 'var(--navy-3)'),
+        bg: w.umur >= 21 ? 'var(--red-bg)' : 'var(--surface-2)',
+        border: w.umur >= 21 ? 'var(--red)' : 'var(--line-2)',
+        adaWa: !!w.b.picWa,
+        waLink: 'https://wa.me/' + (w.b.picWa || '') + '?text=' + encodeURIComponent(
+          'Halo ' + (w.b.picNama || 'Bapak/Ibu') + ', mohon tindak lanjut berkas berikut:\n\n' +
+          '• Nomor dokumen: ' + w.b.id + '\n• Kegiatan: ' + w.b.nama + '\n' +
+          '• Nominal: Rp ' + nf.format(Math.round(w.b.nominal || 0)) + '\n' +
+          '• Tahap saat ini: ' + w.tahap.label + '\n• Sudah ' + w.umur + ' hari sejak berkas diterima.\n' +
+          (w.b.revisi ? '• PERLU REVISI: ' + (w.b.catatan || 'mohon perbaikan berkas') + '\n' : '') +
+          '\nTerima kasih.'),
+        onClick: () => this.setState({ tab: 'butir', filterStatus: 'ALL', halaman: 1 }, () => this.mulaiEdit(w.b))
+      })),
+      perhatianKosong: this.tertahan().length === 0,
+      perhatianKet: 'Butir yang belum SP2D dan diam ≥ ' + this.state.ambangHari + ' hari sejak berkas diterima — urut dari yang paling lama.',
+      perhatianWarna: this.tertahan().some(w => w.umur >= 21) ? 'var(--red)' : 'var(--amber)',
+      perhatianBg: this.tertahan().some(w => w.umur >= 21) ? 'var(--red-bg)' : 'var(--amber-bg)',
+      perhatianIkonBg: this.tertahan().some(w => w.umur >= 21) ? 'rgba(217,59,59,.16)' : 'rgba(201,138,0,.16)',
+      perhatianBorder: this.tertahan().some(w => w.umur >= 21) ? 'var(--red)' : 'var(--line)',
 
       subOptions, semuaOptions,
       tahapOptions: TAHAP.map(t => ({ value: t.key, label: t.urut + '. ' + t.label }))
