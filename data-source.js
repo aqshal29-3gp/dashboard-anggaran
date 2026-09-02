@@ -34,6 +34,7 @@ export const CONFIG = {
   SHEET_PENCAIRAN: 'Pencairan',
   SHEET_BUTIR: 'Butir',
   SHEET_RPD: 'RPD',
+  SHEET_DETAIL: 'Detail',
 
   // Kontak Tim TU untuk tombol "Hubungi TU" (format internasional tanpa + dan spasi).
   WA_TU: '6282240281981',
@@ -101,6 +102,81 @@ export const SEED_ANGGARAN = [
 
   ['051.0N', 'UTAMA', '', 'Pengadaan Lisensi', 408000000, 0],
   ['051.0N-521111', 'SUB', '051.0N', 'Belanja Keperluan Perkantoran', 408000000, 0]
+];
+
+/* -----------------------------------------------------------------------------
+   SHEET 5 — DETAIL KEGIATAN (level ke-3 struktur anggaran)
+   Urutan hierarki:  KOMPONEN  →  SUBKOMPONEN  →  DETAIL KEGIATAN
+   Kolom sheet: ID_Detail | ID_Komponen | Nama_Detail | Pagu | Akrual_Lalu | Akrual_Ini
+
+   • ID_Detail   = kode item resmi pada Laporan Ketersediaan Dana Detail (6 digit).
+   • ID_Komponen = subkomponen induk (level SUB pada sheet Anggaran).
+   • Nama_Detail = NAMA BAKU/FIXED. Nama ditulis UMUM, tanpa embel-embel lokasi
+     atau satuan kerja: semua "Makan Rapat Biasa D.K.I. JAKARTA" cukup
+     "Makan Rapat", semua "Transport Lokal" tetap "Transport Lokal", dst.
+     Sehingga item yang sama di subkomponen berbeda memakai nama yang sama.
+   • AKRUAL — data baru dari Laporan Ketersediaan Dana Detail:
+       Akrual_Lalu = Realisasi Periode Lalu (sebelum bulan laporan)
+       Akrual_Ini  = Realisasi Periode Ini  (bulan laporan)
+       Akrual s.d. = Akrual_Lalu + Akrual_Ini  (dihitung otomatis)
+     Akrual BUKAN realisasi kas/SP2D. Penyerapan kas tetap dihitung dari butir
+     berstatus SP2D; akrual dipakai sebagai pembanding basis akrual.
+----------------------------------------------------------------------------- */
+export const AKRUAL_PERIODE = { indeks: 8, label: 'September 2026' };
+
+export const SEED_DETAIL = [
+  ['004115', '051.0A-521211', 'Makan Rapat', 37050000, 4560000, 0],
+  ['004116', '051.0A-521211', 'Snack Rapat', 15600000, 2400000, 0],
+  ['007323', '051.0A-521211', 'ATK', 2251000, 0, 0],
+  ['004120', '051.0A-522151', 'Honorarium Narasumber', 21600000, 1800000, 0],
+  ['007456', '051.0B-524111', 'Biaya Perjalanan Tiket PP', 328440000, 30190495, 0],
+  ['007457', '051.0B-524111', 'Biaya Penginapan Eselon II', 35000000, 3100000, 0],
+  ['007458', '051.0B-524111', 'Biaya Penginapan Eselon III / Golongan IV', 14000000, 1286000, 0],
+  ['007459', '051.0B-524111', 'Biaya Penginapan Eselon IV / Golongan III ke bawah', 119280000, 52193000, 0],
+  ['007460', '051.0B-524111', 'Biaya Uang Harian', 108360000, 57350000, 1850000],
+  ['007461', '051.0B-524111', 'Biaya Transportasi ke Terminal Asal PP', 35000000, 11652000, 0],
+  ['007462', '051.0B-524111', 'Biaya Transportasi ke Terminal Tujuan PP', 42000000, 4902000, 0],
+  ['007463', '051.0B-524111', 'Uang Representasi Luar Kota Pejabat Eselon II', 3150000, 150000, 0],
+  ['007464', '051.0B-524111', 'Transport Darat', 9000000, 0, 355000],
+  ['004448', '051.0B-524113', 'Transport Kegiatan Dalam Kota PP', 11900000, 8840000, 680000],
+  ['004449', '051.0B-524113', 'Uang Harian Perjalanan Dinas Dalam Kota Lebih dari 8 Jam', 13650000, 0, 2380000],
+  ['004450', '051.0E-522191', 'Penyebaran Informasi dan Dokumentasi Melalui Media Online', 1300000000, 449550000, 149850000],
+  ['004451', '051.0E-522191', 'Penyebaran Informasi dan Dokumentasi Melalui Media Cetak', 135000000, 45000000, 0],
+  ['004453', '051.0E-522191', 'Penyebaran Informasi dan Dokumentasi Melalui Media TV', 400000000, 0, 0],
+  ['004455', '051.0E-522191', 'Media Monitoring PPID', 270000000, 44999999, 0],
+  ['007465', '051.0H-521211', 'Seminar Kit', 18000000, 0, 0],
+  ['004461', '051.0H-524114', 'Paket Fullboard Pejabat Eselon I / II', 5380000, 0, 0],
+  ['004462', '051.0H-524114', 'Paket Fullboard Pejabat Eselon III ke bawah', 138852000, 0, 0],
+  ['004463', '051.0H-524114', 'Uang Harian Fullboard', 23400000, 0, 0],
+  ['004464', '051.0H-524114', 'Transport Lokal', 9860000, 0, 0],
+  ['007332', '051.0I-536111', 'STAR APPS 1 Paket', 9848482000, 9847032000, 0],
+  ['005216', '051.0J-521211', 'Snack Rapat', 5400000, 0, 0],
+  ['005225', '051.0J-521211', 'Makan Rapat', 12825000, 0, 0],
+  ['005231', '051.0J-522131', 'Jasa Konsultan Pendamping Penyusunan Pedoman Standar Pengembangan Aplikasi (Tunggakan)', 49143000, 49143000, 0],
+  ['007343', '051.0J-522131', 'Konsultan Pendamping Penyusunan Dokumen Tata Kelola', 99000000, 0, 0],
+  ['005232', '051.0J-522151', 'Honorarium Narasumber', 5400000, 1800000, 0],
+  ['005238', '051.0J-524113', 'Transport Lokal', 1360000, 170000, 0],
+  ['005243', '051.0K-521211', 'Snack Rapat', 1440000, 0, 0],
+  ['005244', '051.0K-521211', 'Makan Rapat', 3420000, 0, 0],
+  ['007466', '051.0K-521211', 'Pencetakan Buku Imipas Dalam Angka', 64800000, 0, 20546100],
+  ['005291', '051.0L-521211', 'Snack Rapat', 6000000, 2400000, 0],
+  ['005304', '051.0L-521211', 'Makan Rapat', 14250000, 5700000, 0],
+  ['007467', '051.0L-521211', 'Seminar Kit', 14560000, 0, 0],
+  ['007468', '051.0L-521211', 'ATK', 883000, 0, 0],
+  ['005305', '051.0L-522151', 'Honorarium Narasumber', 13500000, 1800000, 0],
+  ['007473', '051.0L-524113', 'Transport Kegiatan Dalam Kota PP', 3400000, 0, 0],
+  ['007469', '051.0L-524114', 'Paket Fullboard Pejabat Eselon I / II', 5388000, 0, 0],
+  ['007470', '051.0L-524114', 'Paket Fullboard Pejabat Eselon III ke bawah', 119700000, 0, 0],
+  ['007471', '051.0L-524114', 'Uang Harian Fullboard', 20280000, 0, 0],
+  ['007472', '051.0L-524114', 'Transport Lokal', 8500000, 0, 0],
+  ['005306', '051.0M-521211', 'Snack Rapat', 4800000, 2160000, 0],
+  ['005319', '051.0M-521211', 'Makan Rapat', 11400000, 5130000, 0],
+  ['005354', '051.0M-522141', 'Sewa Server Cloud', 1920000000, 1919999998, 0],
+  ['005355', '051.0M-522141', 'Langganan Jasa Email Dinas Kemenimipas', 5500000000, 5499999995, 0],
+  ['005329', '051.0M-522151', 'Honorarium Narasumber', 7200000, 1800000, 0],
+  ['005330', '051.0M-524113', 'Transport Kegiatan Dalam Kota PP', 1700000, 850000, 510000],
+  ['005369', '051.0N-521111', 'Lisensi Remote Desktop', 8000000, 0, 0],
+  ['005370', '051.0N-521111', 'Lisensi Vulnerability Assessment', 400000000, 0, 0]
 ];
 
 /* -----------------------------------------------------------------------------
@@ -279,7 +355,7 @@ export const STATUS_BUTIR = [
   { key: 'SP2D', urut: 3, label: 'SP2D', pendek: 'SP2D', color: 'var(--green)', bg: 'var(--green-bg)' }
 ];
 /** Tampilan penanda revisi (dipakai bila butir.revisi === true). */
-export const TANDA_REVISI = { label: 'Perlu revisi', color: 'var(--red)', bg: 'var(--red-bg)' };
+export const TANDA_REVISI = { label: 'Perlu perbaikan', color: 'var(--red)', bg: 'var(--red-bg)' };
 
 export function statusButir(key) {
   const k = String(key || '').toUpperCase();
@@ -390,7 +466,8 @@ const rowButir = (r) => {
     revisi: boolID(r[8]) || statusMentah === 'REVISI',
     picNama: String(r[9] ?? '').trim(),
     picNip: String(r[10] ?? '').trim(),
-    picWa: normalWa(r[11])
+    picWa: normalWa(r[11]),
+    detailId: String(r[12] ?? '').trim()      // Detail Kegiatan yang dibiayai
   };
 };
 
@@ -430,7 +507,26 @@ const objPencairan = (o) => rowPencairan([o.ID_Pencairan ?? o.id, o.ID_Komponen 
 const objButir = (o) => rowButir([o.ID_Butir ?? o.id, o.ID_Komponen ?? o.komponenId, o.Nama_Butir ?? o.nama,
   o.Nominal ?? o.nominal, o.Tanggal_Terima ?? o.tanggal, o.Status ?? o.status,
   o.Catatan ?? o.catatan, o.Link_Berkas ?? o.berkas, o.Revisi ?? o.revisi,
-  o.PIC_Nama ?? o.picNama, o.PIC_NIP ?? o.picNip, o.PIC_WA ?? o.picWa]);
+  o.PIC_Nama ?? o.picNama, o.PIC_NIP ?? o.picNip, o.PIC_WA ?? o.picWa,
+  o.ID_Detail ?? o.detailId]);
+
+/* Detail Kegiatan — normalisasi baris sheet / objek Apps Script. */
+const rowDetail = (r) => {
+  const lalu = toNum(r[4]);
+  const ini = toNum(r[5]);
+  return {
+    id: String(r[0] ?? '').trim(),
+    komponenId: String(r[1] ?? '').trim(),
+    nama: String(r[2] ?? '').trim(),
+    pagu: toNum(r[3]),
+    akrualLalu: lalu,
+    akrualIni: ini,
+    akrual: lalu + ini
+  };
+};
+const objDetail = (o) => Array.isArray(o) ? rowDetail(o) : rowDetail([
+  o.ID_Detail ?? o.id, o.ID_Komponen ?? o.komponenId, o.Nama_Detail ?? o.nama,
+  o.Pagu ?? o.pagu, o.Akrual_Lalu ?? o.akrualLalu, o.Akrual_Ini ?? o.akrualIni]);
 
 /* ============================== pengambilan data ========================== */
 
@@ -444,11 +540,13 @@ async function getFromAppScript() {
   const p = json.pencairan || json.data?.pencairan || [];
   const b = json.butir || json.data?.butir || [];
   const rp = json.rpd || json.data?.rpd || [];
+  const dt = json.detail || json.data?.detail || [];
   return {
     anggaran: a.map(objAnggaran).filter(r => r.id),
     pencairan: p.map(objPencairan).filter(r => r.id || r.komponenId),
     butir: b.map(objButir).filter(r => r.komponenId),
     rpd: rp.length ? rp.map(objRPD).filter(r => r.komponenId) : SEED_RPD.map(rowRPD),
+    detail: dt.length ? dt.map(objDetail).filter(r => r.id && r.komponenId) : SEED_DETAIL.map(rowDetail),
     source: 'Google Apps Script Web App'
   };
 }
@@ -464,15 +562,17 @@ async function getFromGViz() {
     const j = JSON.parse(t.substring(t.indexOf('{'), t.lastIndexOf('}') + 1));
     return (j.table.rows || []).map(r => (r.c || []).map(c => (c ? c.f ?? c.v : '')));
   };
-  const [a, p, b, rp] = await Promise.all([
+  const [a, p, b, rp, dt] = await Promise.all([
     one(CONFIG.SHEET_ANGGARAN), one(CONFIG.SHEET_PENCAIRAN),
-    one(CONFIG.SHEET_BUTIR).catch(() => []), one(CONFIG.SHEET_RPD).catch(() => [])
+    one(CONFIG.SHEET_BUTIR).catch(() => []), one(CONFIG.SHEET_RPD).catch(() => []),
+    one(CONFIG.SHEET_DETAIL).catch(() => [])
   ]);
   return {
     anggaran: a.map(rowAnggaran).filter(r => r.id),
     pencairan: p.map(rowPencairan).filter(r => r.komponenId),
-    butir: b.map(r => rowButir([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[9], r[10], r[11], r[12]])).filter(r => r.komponenId),
+    butir: b.map(r => rowButir([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[9], r[10], r[11], r[12], r[13]])).filter(r => r.komponenId),
     rpd: rp.length ? rp.map(rowRPD).filter(r => r.komponenId) : SEED_RPD.map(rowRPD),
+    detail: dt.length ? dt.map(rowDetail).filter(r => r.id && r.komponenId) : SEED_DETAIL.map(rowDetail),
     source: 'Google Sheets (GViz)'
   };
 }
@@ -509,6 +609,7 @@ export async function fetchAll() {
     pencairan: SEED_PENCAIRAN.map(rowPencairan),
     butir: SEED_BUTIR.map(rowButir),
     rpd: SEED_RPD.map(rowRPD),
+    detail: SEED_DETAIL.map(rowDetail),
     source: 'Data contoh (laporan TA 2026)'
   };
 }
@@ -520,6 +621,7 @@ export function seedFallback() {
     pencairan: SEED_PENCAIRAN.map(rowPencairan),
     butir: SEED_BUTIR.map(rowButir),
     rpd: SEED_RPD.map(rowRPD),
+    detail: SEED_DETAIL.map(rowDetail),
     source: 'Fallback data contoh'
   };
 }
@@ -643,6 +745,19 @@ export function sudahSP2D(b) {
   return statusButir(b.status).key === 'SP2D';
 }
 
+/** Admin: tambah Detail Kegiatan baru pada satu subkomponen. */
+export function addDetail(payload) {
+  return postAksi('addDetail', payload, { id: payload.ID_Detail });
+}
+/** Admin: ubah nama / pagu / akrual satu Detail Kegiatan. */
+export function updateDetail(payload) {
+  return postAksi('updateDetail', payload, { id: payload.ID_Detail });
+}
+/** Admin: hapus Detail Kegiatan. */
+export function deleteDetail(id) {
+  return postAksi('deleteDetail', { ID_Detail: id }, { id });
+}
+
 /** Admin: tambah komponen utama / subkomponen baru. */
 export function addKomponen(payload) {
   return postAksi('addKomponen', payload, { id: payload.ID_Komponen });
@@ -682,7 +797,7 @@ export function updateRPD(payload) {
  * RPD (Rencana Penarikan Dana) dilampirkan per komponen utama, lengkap dengan
  * nilai kumulatif s.d. bulan berjalan untuk mengukur on-track/tertinggal.
  */
-export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan) {
+export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan, detail) {
   const subs = anggaran.filter(r => r.tipe === 'SUB');
   const byKomponen = {};
   (pencairan || []).forEach(p => {
@@ -694,6 +809,11 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan) {
   });
   const rpdBy = {};
   (rpd && rpd.length ? rpd : SEED_RPD.map(rowRPD)).forEach(r => { rpdBy[r.komponenId] = r; });
+  // DETAIL KEGIATAN — level ke-3 (di bawah subkomponen).
+  const detailBy = {};
+  (detail && detail.length ? detail : SEED_DETAIL.map(rowDetail)).forEach(d => {
+    (detailBy[d.komponenId] = detailBy[d.komponenId] || []).push(d);
+  });
 
   const urutButir = (arr) => arr.slice().sort((a, b) => (a.tanggal < b.tanggal ? 1 : -1));
   const bulanKini = Number.isInteger(bulanAcuan) ? bulanAcuan : new Date().getMonth();  // 0-11
@@ -705,7 +825,20 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan) {
       const realisasi = items.length ? items.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0) : s.realisasi;
       const pct = s.pagu > 0 ? (realisasi / s.pagu) * 100 : 0;
       const docs = items.filter(sudahSP2D);          // bukti pencairan = butir SP2D
-      return { ...s, realisasi, sisa: s.pagu - realisasi, pct, status: statusOf(pct), docs, butir: items, ringkas: ringkasButir(items) };
+      // DETAIL KEGIATAN milik subkomponen ini + butir yang menempel padanya.
+      const rincian = (detailBy[s.id] || []).map(d => {
+        const bd = items.filter(b => b.detailId === d.id);
+        const kas = bd.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0);
+        const pk = d.pagu > 0 ? (d.akrual / d.pagu) * 100 : 0;
+        return { ...d, realisasi: kas, sisa: d.pagu - d.akrual, pct: pk, status: statusOf(pk),
+                 butir: bd, ringkas: ringkasButir(bd) };
+      });
+      const akrual = rincian.reduce((t, d) => t + d.akrual, 0);
+      const akrualIni = rincian.reduce((t, d) => t + d.akrualIni, 0);
+      return { ...s, realisasi, sisa: s.pagu - realisasi, pct, status: statusOf(pct), docs,
+               butir: items, ringkas: ringkasButir(items),
+               detail: rincian, akrual, akrualIni,
+               pctAkrual: s.pagu > 0 ? (akrual / s.pagu) * 100 : 0 };
     });
     const pagu = children.length ? children.reduce((t, c) => t + c.pagu, 0) : u.pagu;
     const items = urutButir(children.reduce((all, c) => all.concat(c.butir), (butirBy[u.id] || []).slice()));
@@ -714,6 +847,9 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan) {
       : (items.length ? items.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0) : u.realisasi);
     const pct = pagu > 0 ? (realisasi / pagu) * 100 : 0;
     const docs = items.filter(sudahSP2D);
+    const akrual = children.reduce((t, c) => t + (c.akrual || 0), 0);
+    const akrualIni = children.reduce((t, c) => t + (c.akrualIni || 0), 0);
+    const nDetail = children.reduce((t, c) => t + (c.detail || []).length, 0);
 
     // --- RPD ---
     const r = rpdBy[u.id] || { bulan: new Array(12).fill(0), total: 0 };
@@ -723,6 +859,7 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan) {
     return {
       ...u, pagu, realisasi, sisa: pagu - realisasi, pct, status: statusOf(pct),
       children, docs, butir: items, ringkas: ringkasButir(items),
+      akrual, akrualIni, nDetail, pctAkrual: pagu > 0 ? (akrual / pagu) * 100 : 0,
       rpd: r.bulan, rpdTotal: r.total, rpdSd, pctRpd, adaRpd: r.total > 0
     };
   });
@@ -732,9 +869,14 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan) {
   const rpdSd = utama.reduce((t, u) => t + u.rpdSd, 0);
   const rpdTotal = utama.reduce((t, u) => t + u.rpdTotal, 0);
   const semuaButir = butir || [];
+  const akrual = utama.reduce((t, u) => t + (u.akrual || 0), 0);
+  const akrualIni = utama.reduce((t, u) => t + (u.akrualIni || 0), 0);
   const totals = {
     pagu, realisasi, sisa: pagu - realisasi,
     pct: pagu ? (realisasi / pagu) * 100 : 0,
+    akrual, akrualIni, sisaAkrual: pagu - akrual,
+    pctAkrual: pagu ? (akrual / pagu) * 100 : 0,
+    nDetail: utama.reduce((t, u) => t + (u.nDetail || 0), 0),
     avg: utama.length ? utama.reduce((t, u) => t + u.pct, 0) / utama.length : 0,
     rpdSd, rpdTotal, bulanKini,
     pctRpd: rpdSd ? (realisasi / rpdSd) * 100 : 0,

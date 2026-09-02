@@ -70,7 +70,7 @@
       <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between">
         <div style="min-width:0">
           <div style="font-size:13.5px;font-weight:800;letter-spacing:-.01em">Subkomponen</div>
-          <div style="margin-top:2px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">Klik salah satu untuk melihat butir kegiatannya</div>
+          <div style="margin-top:2px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">Klik salah satu untuk melihat detail kegiatan dan berkasnya</div>
         </div>
         <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ jumlahSub }}</span>
       </div>
@@ -103,6 +103,24 @@
                   </div>
                   <div style="margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.5;color:var(--ink-3);overflow-wrap:anywhere">{{ s.caption }}</div>
                 </div>
+                <sc-if value="{{ s.adaDetail }}" hint-placeholder-val="{{ true }}">
+                  <div style="margin:0 0 11px;border:1px solid var(--line-2);border-radius:11px;overflow:hidden">
+                    <div style="padding:8px 11px;background:var(--surface-3);display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between">
+                      <span style="font-size:11.5px;font-weight:800;letter-spacing:-.01em">Detail Kegiatan</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-3)">{{ s.detailMeta }}</span>
+                    </div>
+                    <sc-for list="{{ s.detail }}" as="d" hint-placeholder-count="3">
+                      <div title="{{ d.judul }}" style="display:flex;gap:10px;align-items:center;padding:8px 11px;border-top:1px solid var(--line-2);background:var(--surface)">
+                        <span style="width:46px;flex:0 0 auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-3)">{{ d.kode }}</span>
+                        <span style="flex:1;min-width:0;font-size:12px;font-weight:600;text-wrap:pretty">{{ d.nama }}</span>
+                        <span style="flex:0 0 auto;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-2)">{{ d.pagu }}</span>
+                        <span style="width:96px;flex:0 0 auto;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:{{ d.warna }}">{{ d.akrual }}</span>
+                        <span style="width:46px;flex:0 0 auto;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:{{ d.warna }}">{{ d.pct }}</span>
+                      </div>
+                    </sc-for>
+                    <div style="padding:7px 11px;border-top:1px solid var(--line-2);background:var(--surface-2);font-size:10.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">Kolom kanan = akrual s.d. periode (realisasi periode lalu + periode ini) dan persentasenya terhadap pagu detail kegiatan.</div>
+                  </div>
+                </sc-if>
                 <dc-import name="ActivityTable" items="{{ s.butir }}" editable="{{ false }}" caption="" empty-text="{{ s.kosong }}" hint-size="100%,260px"></dc-import>
               </div>
             </sc-if>
@@ -130,7 +148,7 @@
  *   2. Daftar subkomponen — tiap baris menampilkan pagu & % penyerapannya,
  *      dan DAPAT DIKLIK untuk membuka butir kegiatannya di bawah
  *   3. Butir kegiatan (read-only) + filter tahapan: Verifikasi TU, Verifikasi
- *      Keuangan, Perlu revisi, SP2D
+ *      Keuangan, Perlu perbaikan, SP2D
  *
  * Props: node (komponen utama hasil buildTree), onClose
  *
@@ -195,6 +213,7 @@ class Component extends DCLogic {
       angka: [
         { label: 'Pagu', value: rp(n.pagu), color: 'var(--ink)' },
         { label: 'Realisasi', value: rp(n.realisasi), color: 'var(--green)' },
+        { label: 'Akrual s.d.', value: rp(n.akrual || 0), color: 'var(--blue)' },
         { label: 'Sisa anggaran', value: rp(n.pagu - n.realisasi), color: 'var(--amber)' },
         { label: 'Penyerapan', value: pct.toFixed(2) + '%', color: warna }
       ],
@@ -207,7 +226,7 @@ class Component extends DCLogic {
       rpdBg: pctRpd >= 95 ? 'var(--green-bg)' : (pctRpd >= 70 ? 'var(--amber-bg)' : 'var(--red-bg)'),
       rpdText: 'Terhadap RPD s.d. bulan ini (' + rp(n.rpdSd || 0) + '): ' + pctRpd.toFixed(1) + '%',
 
-      jumlahSub: anak.length + ' subkomponen · ' + (n.butir || []).length + ' butir kegiatan',
+      jumlahSub: anak.length + ' subkomponen · ' + (n.nDetail || 0) + ' detail kegiatan · ' + (n.butir || []).length + ' berkas',
       subs: anak.map(c => {
         const cp = c.pagu > 0 ? (c.realisasi / c.pagu) * 100 : 0;
         const w = this.warna(cp);
@@ -243,10 +262,23 @@ class Component extends DCLogic {
             chip('ALL', 'Semua', 'var(--navy-3)', 'var(--surface-3)'),
             chip('TU', 'Verif. TU', 'var(--blue)', 'rgba(37,99,201,.12)'),
             chip('KEUANGAN', 'Verif. Keuangan', 'var(--navy-3)', 'rgba(27,64,121,.12)'),
-            chip('REVISI', '⚑ Perlu revisi', 'var(--red)', 'var(--red-bg)', true),
+            chip('REVISI', '⚑ Perlu perbaikan', 'var(--red)', 'var(--red-bg)', true),
             chip('SP2D', 'SP2D', 'var(--green)', 'var(--green-bg)')
           ],
           butir: tampil,
+          // Level ke-3: DETAIL KEGIATAN (nama baku, angka berbasis akrual).
+          adaDetail: (c.detail || []).length > 0,
+          detailMeta: (c.detail || []).length + ' detail · akrual ' + rp((c.akrual || 0)) +
+                      ' (' + (c.pctAkrual || 0).toFixed(1) + '% pagu)',
+          detail: (c.detail || []).map(d => ({
+            kode: d.id, nama: d.nama,
+            pagu: rp(d.pagu),
+            akrual: rp(d.akrual),
+            pct: (d.pct || 0).toFixed(1) + '%',
+            warna: this.warna(d.pct || 0),
+            judul: d.nama + ' — pagu ' + rp(d.pagu) + ' · akrual periode lalu ' + rp(d.akrualLalu) +
+                   ' · periode ini ' + rp(d.akrualIni) + ' · sisa ' + rp(d.pagu - d.akrual)
+          })),
           caption: 'Realisasi ' + rp(c.realisasi) + ' · sisa ' + rp(c.pagu - c.realisasi) +
                    ' · menampilkan ' + tampil.length + ' dari ' + semua.length + ' butir',
           kosong: semua.length

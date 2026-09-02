@@ -102,7 +102,7 @@
 
       <sc-if value="{{ tabButir }}" hint-placeholder-val="{{ true }}">
         <div style="animation:fadeUp 280ms ease both">
-          <dc-import name="AdminControls" komponen-options="{{ subOptions }}" values="{{ formButir }}" editing-id="{{ editingId }}" busy="{{ busyButir }}" error="{{ errButir }}" success="{{ okButir }}" mode="{{ mode }}" on-field="{{ onFieldButir }}" on-submit="{{ submitButir }}" on-reset="{{ resetButir }}" on-cancel="{{ cancelEdit }}" hint-size="100%,520px"></dc-import>
+          <dc-import name="AdminControls" komponen-options="{{ subOptions }}" detail-options="{{ detailOptions }}" values="{{ formButir }}" editing-id="{{ editingId }}" busy="{{ busyButir }}" error="{{ errButir }}" success="{{ okButir }}" mode="{{ mode }}" on-field="{{ onFieldButir }}" on-submit="{{ submitButir }}" on-reset="{{ resetButir }}" on-cancel="{{ cancelEdit }}" hint-size="100%,520px"></dc-import>
         </div>
 
         <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;animation:fadeUp 320ms ease both">
@@ -345,7 +345,7 @@
                 <span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;align-items:center">
                   <span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:{{ w.tahapBg }};color:{{ w.tahapWarna }};white-space:nowrap">{{ w.tahap }}</span>
                   <sc-if value="{{ w.adaRevisi }}" hint-placeholder-val="{{ false }}">
-                    <span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:var(--red-bg);color:var(--red);white-space:nowrap">⚑ REVISI</span>
+                    <span style="font-size:9.5px;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:5px;background:var(--red-bg);color:var(--red);white-space:nowrap">⚑ PERBAIKAN</span>
                   </sc-if>
                   <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-3)">{{ w.nominal }}</span>
                 </span>
@@ -574,14 +574,14 @@ const TAHAP_FALLBACK = [
   { key: 'SP2D', urut: 3, label: 'SP2D', pendek: 'SP2D', color: 'var(--green)', bg: 'var(--green-bg)' }
 ];
 const POLL_MS = 60000;
-const KOSONG = { id: '', komponen: '', nama: '', nominal: '', tanggal: new Date().toISOString().slice(0, 10), status: 'TU', catatan: '', berkas: '', revisi: false, picNama: '', picNip: '', picWa: '' };
+const KOSONG = { id: '', komponen: '', detail: '', nama: '', nominal: '', tanggal: new Date().toISOString().slice(0, 10), status: 'TU', catatan: '', berkas: '', revisi: false, picNama: '', picNip: '', picWa: '' };
 
 const nf = new Intl.NumberFormat('id-ID');
 
 class Component extends DCLogic {
   state = {
     sesi: null, siapMasuk: false,
-    anggaran: [], pencairan: [], butir: [], source: '—', loading: true,
+    anggaran: [], pencairan: [], butir: [], detail: [], source: '—', loading: true,
     tab: 'butir', theme: null,
     formButir: { ...KOSONG }, editingId: '', busyButir: false, errButir: '', okButir: '',
     cari: '', filterKomponen: 'ALL', filterStatus: 'ALL',
@@ -651,7 +651,7 @@ class Component extends DCLogic {
   }
 
   terapkan(d) {
-    this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, butir: d.butir || [], rpd: d.rpd || [], source: d.source, loading: false });
+    this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, butir: d.butir || [], rpd: d.rpd || [], detail: d.detail || [], source: d.source, loading: false });
   }
   async load(silent) {
     if (!silent) this.setState({ loading: true });
@@ -676,8 +676,25 @@ class Component extends DCLogic {
   /* ------------------------- Butir Kegiatan (CRUD) ------------------------ */
   onFieldButir = (field, value) => {
     const v = field === 'nominal' ? this.rupiahInput(value) : value;   // 'revisi' datang sebagai boolean
-    this.setState(s => ({ formButir: { ...s.formButir, [field]: v }, errButir: '', okButir: '' }));
+    this.setState(s => {
+      const f = { ...s.formButir, [field]: v };
+      // Detail Kegiatan bergantung pada subkomponen — ganti subkomponen, pilihan direset.
+      if (field === 'komponen') { f.detail = ''; f.nama = ''; }
+      // Nama butir SELALU mengikuti nama baku detail kegiatan (tidak diketik manual).
+      if (field === 'detail') {
+        const d = (s.detail || []).find(x => x.id === v);
+        f.nama = d ? d.nama : '';
+      }
+      return { formButir: f, errButir: '', okButir: '' };
+    });
   };
+
+  /** Detail Kegiatan pada satu subkomponen (nama baku, urut kode). */
+  detailDari(komponenId) {
+    return (this.state.detail || [])
+      .filter(d => d.komponenId === komponenId)
+      .slice().sort((a, b) => (a.id < b.id ? -1 : 1));
+  }
 
   submitButir = async () => {
     const f = this.state.formButir;
@@ -688,18 +705,19 @@ class Component extends DCLogic {
       return this.setState({ errButir: 'Nomor dokumen "' + nomor + '" sudah dipakai butir lain.', okButir: '' });
     }
     if (!f.komponen) return this.setState({ errButir: 'Subkomponen wajib dipilih.', okButir: '' });
-    if (!f.nama.trim()) return this.setState({ errButir: 'Nama butir kegiatan wajib diisi.', okButir: '' });
+    if (!f.detail) return this.setState({ errButir: 'Detail kegiatan wajib dipilih.', okButir: '' });
+    if (!f.nama.trim()) return this.setState({ errButir: 'Nama detail kegiatan tidak terbaca — pilih ulang detail kegiatannya.', okButir: '' });
     if (nominal <= 0) return this.setState({ errButir: 'Nominal harus lebih besar dari 0.', okButir: '' });
     if (f.berkas && !/^https?:\/\//i.test(f.berkas)) return this.setState({ errButir: 'Link berkas harus diawali http:// atau https://', okButir: '' });
     if (!(f.picNama || '').trim()) return this.setState({ errButir: 'Nama PIC wajib diisi.', okButir: '' });
     if (!(f.picWa || '').trim()) return this.setState({ errButir: 'Nomor WhatsApp PIC wajib diisi.', okButir: '' });
     if (this.digits(f.picWa).length < 9) return this.setState({ errButir: 'Nomor WhatsApp PIC tidak valid.', okButir: '' });
-    if (f.revisi && !f.catatan.trim()) return this.setState({ errButir: 'Butir bertanda revisi wajib menyertakan alasan pada kolom Catatan.', okButir: '' });
+    if (f.revisi && !f.catatan.trim()) return this.setState({ errButir: 'Detail kegiatan bertanda perbaikan wajib menyertakan alasan pada kolom Catatan.', okButir: '' });
 
     this.setState({ busyButir: true, errButir: '', okButir: '' });
     const payload = {
       ID_Butir: nomor,
-      ID_Komponen: f.komponen, Nama_Butir: f.nama.trim(), Nominal: nominal,
+      ID_Komponen: f.komponen, ID_Detail: f.detail || '', Nama_Butir: f.nama.trim(), Nominal: nominal,
       Tanggal_Terima: f.tanggal, Status: f.status, Catatan: f.catatan.trim(),
       Link_Berkas: f.berkas.trim(), Revisi: !!f.revisi,
       PIC_Nama: (f.picNama || '').trim(), PIC_NIP: (f.picNip || '').trim(), PIC_WA: (f.picWa || '').trim()
@@ -710,7 +728,7 @@ class Component extends DCLogic {
         const res = await this.ds.updateButir({ ID_Butir: this.state.editingId, ...payload });
         this.setState(s => ({
           butir: s.butir.map(b => b.id === s.editingId ? {
-            ...b, komponenId: f.komponen, nama: payload.Nama_Butir, nominal, tanggal: f.tanggal,
+            ...b, komponenId: f.komponen, detailId: f.detail || '', nama: payload.Nama_Butir, nominal, tanggal: f.tanggal,
             status: f.status, catatan: payload.Catatan, berkas: payload.Link_Berkas, revisi: !!f.revisi,
             picNama: payload.PIC_Nama, picNip: payload.PIC_NIP, picWa: this.ds.normalWa(payload.PIC_WA)
           } : b)
@@ -719,7 +737,7 @@ class Component extends DCLogic {
       } else {
         const res = await this.ds.addButir(payload);
         const baru = {
-          id: res.id || nomor, komponenId: f.komponen, nama: payload.Nama_Butir, nominal, tanggal: f.tanggal,
+          id: res.id || nomor, komponenId: f.komponen, detailId: f.detail || '', nama: payload.Nama_Butir, nominal, tanggal: f.tanggal,
           status: f.status, catatan: payload.Catatan, berkas: payload.Link_Berkas, revisi: !!f.revisi,
           picNama: payload.PIC_Nama, picNip: payload.PIC_NIP, picWa: this.ds.normalWa(payload.PIC_WA)
         };
@@ -739,7 +757,7 @@ class Component extends DCLogic {
     this.setState({
       tab: 'butir', editingId: b.id, errButir: '', okButir: '',
       formButir: {
-        id: b.id, komponen: b.komponenId, nama: b.nama, nominal: new Intl.NumberFormat('id-ID').format(b.nominal || 0),
+        id: b.id, komponen: b.komponenId, detail: b.detailId || '', nama: b.nama, nominal: new Intl.NumberFormat('id-ID').format(b.nominal || 0),
         tanggal: b.tanggal || KOSONG.tanggal,
         status: String(b.status || 'TU').toUpperCase() === 'REVISI' ? 'TU' : (b.status || 'TU'),
         catatan: b.catatan || '', berkas: b.berkas || '',
@@ -780,10 +798,10 @@ class Component extends DCLogic {
     }
   };
 
-  /** Toggle penanda revisi (bukan perubahan tahap). */
+  /** Toggle penanda perbaikan (bukan perubahan tahap). */
   tandaiRevisi = async (b, revisiBaru) => {
     if (revisiBaru && !(b.catatan || '').trim()) {
-      const alasan = typeof window !== 'undefined' ? window.prompt('Alasan revisi untuk ' + b.id + ':', '') : '';
+      const alasan = typeof window !== 'undefined' ? window.prompt('Alasan perbaikan untuk ' + b.id + ':', '') : '';
       if (alasan === null) return;
       b = { ...b, catatan: (alasan || '').trim() };
     }
@@ -794,9 +812,9 @@ class Component extends DCLogic {
     }));
     try {
       const res = await this.ds.updateButir({ ID_Butir: b.id, Revisi: revisiBaru, Catatan: b.catatan || '' });
-      this.setState({ okButir: (res.simulated ? 'Simulasi: ' : '') + b.id + (revisiBaru ? ' ditandai perlu revisi.' : ' — penanda revisi dilepas.') });
+      this.setState({ okButir: (res.simulated ? 'Simulasi: ' : '') + b.id + (revisiBaru ? ' ditandai perlu perbaikan.' : ' — penanda perbaikan dilepas.') });
     } catch (e) {
-      this.setState({ butir: sebelum, errButir: 'Gagal memperbarui penanda revisi: ' + e.message });
+      this.setState({ butir: sebelum, errButir: 'Gagal memperbarui penanda perbaikan: ' + e.message });
     }
   };
 
@@ -1391,7 +1409,7 @@ class Component extends DCLogic {
           '• Nomor dokumen: ' + w.b.id + '\n• Kegiatan: ' + w.b.nama + '\n' +
           '• Nominal: Rp ' + nf.format(Math.round(w.b.nominal || 0)) + '\n' +
           '• Tahap saat ini: ' + w.tahap.label + '\n• Sudah ' + w.umur + ' hari sejak berkas diterima.\n' +
-          (w.b.revisi ? '• PERLU REVISI: ' + (w.b.catatan || 'mohon perbaikan berkas') + '\n' : '') +
+          (w.b.revisi ? '• PERLU PERBAIKAN: ' + (w.b.catatan || 'mohon perbaikan berkas') + '\n' : '') +
           '\nTerima kasih.'),
         onClick: () => this.setState({ tab: 'butir', filterStatus: 'ALL', halaman: 1 }, () => this.mulaiEdit(w.b))
       })),
@@ -1403,8 +1421,11 @@ class Component extends DCLogic {
       perhatianBorder: this.tertahan().some(w => w.umur >= 21) ? 'var(--red)' : 'var(--line)',
 
       subOptions, semuaOptions,
+      detailOptions: this.detailDari(this.state.formButir.komponen).map(d => ({
+        value: d.id, label: d.id + ' — ' + d.nama
+      })),
       tahapOptions: TAHAP.map(t => ({ value: t.key, label: t.urut + '. ' + t.label }))
-        .concat([{ value: 'REVISI', label: '⚑ Perlu revisi (penanda)' }]),
+        .concat([{ value: 'REVISI', label: '⚑ Perlu perbaikan (penanda)' }]),
       formButir: this.state.formButir,
       editingId: this.state.editingId,
       busyButir: this.state.busyButir,
@@ -1530,14 +1551,14 @@ class Component extends DCLogic {
         { label: 'Total Realisasi', value: short(real), color: 'var(--green)' },
         { label: 'Sisa Anggaran', value: short(pagu - real), color: 'var(--amber)' },
         { label: 'Butir Kegiatan', value: this.state.butir.length + ' berkas', color: 'var(--ink)' },
-        { label: 'Perlu Revisi', value: jumlahRevisi + ' berkas', color: jumlahRevisi ? 'var(--red)' : 'var(--ink-3)' },
+        { label: 'Perlu Perbaikan', value: jumlahRevisi + ' berkas', color: jumlahRevisi ? 'var(--red)' : 'var(--ink-3)' },
         { label: 'Sudah SP2D (bukti pencairan)', value: sp2dCount + ' berkas · ' + short(nominalSP2D), color: 'var(--green)' }
       ],
       antrian: TAHAP.map(t => ({
         urut: t.urut, label: t.pendek, jumlah: hitung[t.key] || 0, color: t.color, bg: t.bg,
         onClick: () => this.setState({ tab: 'butir', filterStatus: t.key, halaman: 1 })
       })).concat([{
-        urut: '⚑', label: 'Perlu revisi', jumlah: jumlahRevisi, color: 'var(--red)', bg: 'var(--red-bg)',
+        urut: '⚑', label: 'Perlu perbaikan', jumlah: jumlahRevisi, color: 'var(--red)', bg: 'var(--red-bg)',
         onClick: () => this.setState({ tab: 'butir', filterStatus: 'REVISI', halaman: 1 })
       }]),
       sop: [

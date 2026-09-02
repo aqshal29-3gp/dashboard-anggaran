@@ -50,8 +50,17 @@
     </div>
 
     <div>
-      <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Nama Butir Kegiatan <span style="color:var(--red)">*</span></label>
-      <input type="text" value="{{ vNama }}" onInput="{{ onNama }}" placeholder="Contoh: SPPD monitoring wilayah IV" style="width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Detail Kegiatan <span style="color:var(--red)">*</span></label>
+        <span title="Nama detail kegiatan bersifat BAKU — sudah ditetapkan pada sheet Detail dan tidak diubah di sini. Pilih subkomponen terlebih dahulu, lalu pilih detail kegiatan yang dibiayai." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+      </div>
+      <select ref="{{ refDetail }}" value="{{ vDetail }}" onChange="{{ onDetail }}" disabled="{{ detailKunci }}" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:{{ detailBg }};color:var(--ink);font-family:Manrope;font-size:13px;cursor:pointer;outline:none" style-focus="border-color:var(--navy-3)">
+        <option value="">{{ detailKosongLabel }}</option>
+        <sc-for list="{{ detailOptions }}" as="d" hint-placeholder-count="4">
+          <option value="{{ d.value }}">{{ d.label }}</option>
+        </sc-for>
+      </select>
+      <div style="margin-top:5px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">{{ detailHint }}</div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px">
@@ -100,7 +109,7 @@
       </div>
     </div>
 
-    <button type="button" onClick="{{ toggleRevisi }}" title="Revisi bersifat kondisional — berkas tetap berada pada tahapnya, hanya diberi bendera ⚑. Berkas yang lancar tidak perlu melewati revisi sama sekali." style="display:flex;gap:11px;align-items:center;width:100%;text-align:left;padding:12px 15px;border-radius:12px;border:1px dashed {{ revisiBorder }};background:{{ revisiBg }};cursor:pointer;font-family:Manrope" style-hover="filter:brightness(.98)">
+    <button type="button" onClick="{{ toggleRevisi }}" title="Perbaikan bersifat kondisional — berkas tetap berada pada tahapnya, hanya diberi bendera ⚑. Berkas yang lancar tidak perlu melewati perbaikan sama sekali." style="display:flex;gap:11px;align-items:center;width:100%;text-align:left;padding:12px 15px;border-radius:12px;border:1px dashed {{ revisiBorder }};background:{{ revisiBg }};cursor:pointer;font-family:Manrope" style-hover="filter:brightness(.98)">
       <span style="width:20px;height:20px;flex:0 0 auto;border-radius:6px;border:2px solid {{ revisiInk }};background:{{ revisiBoxBg }};color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800">{{ revisiMark }}</span>
       <span style="flex:1;min-width:0;font-size:12.5px;font-weight:800;color:{{ revisiInk }}">{{ revisiJudul }}</span>
       <span style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800">i</span>
@@ -109,7 +118,8 @@
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
       <div>
         <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">{{ labelCatatan }}</label>
-        <input type="text" value="{{ vCatatan }}" onInput="{{ onCatatan }}" placeholder="Contoh: berkas diterima dari Tim Kerja" style="width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+        <input type="text" value="{{ vCatatan }}" onInput="{{ onCatatan }}" placeholder="{{ catatanPlaceholder }}" style="width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+        <div style="margin-top:5px;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">{{ catatanHint }}</div>
       </div>
       <div>
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
@@ -148,7 +158,7 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:560},&quot;komponenOptions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{value:string,label:string}[]&quot;},&quot;values&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;ButirForm&quot;},&quot;editingId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string | null&quot;},&quot;busy&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;error&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;seed&quot;,&quot;appscript&quot;,&quot;gviz&quot;],&quot;default&quot;:&quot;seed&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;judul&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Catat Butir Kegiatan Baru&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onField&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(field: string, value: string) =&gt; void&quot;},&quot;onSubmit&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onReset&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onCancel&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:620},&quot;komponenOptions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{value:string,label:string}[]&quot;},&quot;detailOptions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{value:string,label:string}[]&quot;},&quot;values&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;ButirForm&quot;},&quot;editingId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string | null&quot;},&quot;busy&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;error&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;seed&quot;,&quot;appscript&quot;,&quot;gviz&quot;],&quot;default&quot;:&quot;seed&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;judul&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Rekam Detail Kegiatan&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onField&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(field: string, value: string) =&gt; void&quot;},&quot;onSubmit&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onReset&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onCancel&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
 /**
  * AdminControls — form input & edit Butir Kegiatan (dipakai Admin/TU).
  *
@@ -200,6 +210,7 @@ class Component extends DCLogic {
       const v = this.props.values || {};
       const set = (el, val) => { if (el && el.options.length && el.value !== val) el.value = val; };
       set(this.elKomponen, v.komponen ?? '');
+      set(this.elDetail, v.detail ?? '');
       set(this.elStatus, v.status ?? 'TU');
     });
   }
@@ -212,11 +223,12 @@ class Component extends DCLogic {
     const editing = !!this.props.editingId;
     const mode = this.props.mode || 'seed';
     const live = mode === 'appscript';
+    const detOpt = this.props.detailOptions || [];
     return {
-      judul: editing ? 'Edit Butir Kegiatan · ' + this.props.editingId : (this.props.judul ?? 'Catat Butir Kegiatan Baru'),
+      judul: editing ? 'Edit Detail Kegiatan · ' + this.props.editingId : (this.props.judul ?? 'Rekam Detail Kegiatan'),
       subjudul: editing
-        ? 'Perbarui isi butir, lalu simpan. Tahapan berkas juga bisa diubah langsung dari tabel.'
-        : 'Dipakai Admin/TU saat menerima berkas pertanggungjawaban dari Tim Kerja.',
+        ? 'Perbarui isi rekaman, lalu simpan. Tahapan berkas juga bisa diubah langsung dari tabel.'
+        : 'Urutan struktur anggaran: Komponen → Subkomponen → Detail Kegiatan. Pilih subkomponen, lalu detail kegiatan yang dibiayai berkas ini.',
       modeLabel: live ? 'TERSAMBUNG · Google Sheets' : 'MODE ' + mode.toUpperCase() + ' · simulasi lokal',
       modeColor: live ? 'var(--green)' : 'var(--amber)',
       modeBg: live ? 'var(--green-bg)' : 'var(--amber-bg)',
@@ -231,8 +243,23 @@ class Component extends DCLogic {
         : 'Gunakan nomor dokumen/surat resmi sebagai ID butir. Harus unik.',
       // Sinkronkan <select> setelah opsi ter-render.
       refKomponen: (el) => { this.elKomponen = el; if (el && el.options.length) el.value = v.komponen ?? ''; },
+      refDetail: (el) => { this.elDetail = el; if (el && el.options.length) el.value = v.detail ?? ''; },
       refStatus: (el) => { this.elStatus = el; if (el && el.options.length) el.value = v.status ?? 'TU'; },
       vKomponen: v.komponen ?? '',
+      /* Detail Kegiatan — nama baku, dipilih (tidak diketik) dan tergantung subkomponen. */
+      detailOptions: detOpt,
+      vDetail: v.detail ?? '',
+      onDetail: this.field('detail'),
+      detailKunci: !v.komponen,
+      detailBg: v.komponen ? 'var(--surface-2)' : 'var(--surface-3)',
+      detailKosongLabel: v.komponen
+        ? (detOpt.length ? '— Pilih detail kegiatan —' : '— Subkomponen ini belum punya detail kegiatan —')
+        : '— Pilih subkomponen dahulu —',
+      detailHint: !v.komponen
+        ? 'Daftar detail kegiatan muncul setelah subkomponen dipilih.'
+        : (detOpt.length
+            ? 'Nama detail kegiatan sudah baku dan tidak dapat diubah dari sini. Tambah/ubah daftarnya lewat sheet "Detail".'
+            : 'Belum ada detail kegiatan pada subkomponen ini — tambahkan dahulu di sheet "Detail".'),
       vNama: v.nama ?? '',
       vNominal: v.nominal ?? '',
       vTanggal: v.tanggal ?? '',
@@ -249,8 +276,14 @@ class Component extends DCLogic {
       berkasBorder: cekBerkas(v.berkas).ok === false ? 'var(--amber)' : 'var(--line)',
       berkasSalah: cekBerkas(v.berkas).ok === false,
       berkasHint: cekBerkas(v.berkas).pesan,
-      labelCatatan: v.revisi ? 'Catatan / alasan revisi' : 'Catatan',
-      revisiJudul: v.revisi ? 'Ditandai perlu revisi' : 'Tandai perlu revisi (opsional)',
+      labelCatatan: v.revisi ? 'Catatan / alasan perbaikan' : 'Catatan · Deskripsi Detail Kegiatan',
+      catatanPlaceholder: v.revisi
+        ? 'Contoh: kuitansi belum ditandatangani PPK'
+        : 'Contoh: makan rapat koordinasi 30 pax, 2 kali kegiatan',
+      catatanHint: v.revisi
+        ? 'Wajib diisi bila ditandai perlu perbaikan — tuliskan apa yang harus diperbaiki.'
+        : 'Keterangan untuk menambahkan deskripsi detail kegiatan: volume, peruntukan, atau penjelasan singkat pelaksanaannya.',
+      revisiJudul: v.revisi ? 'Ditandai perlu perbaikan' : 'Tandai perlu perbaikan (opsional)',
       revisiMark: v.revisi ? '⚑' : '',
       revisiInk: v.revisi ? 'var(--red)' : 'var(--ink-3)',
       revisiBorder: v.revisi ? 'var(--red)' : 'var(--line)',
@@ -272,7 +305,7 @@ class Component extends DCLogic {
       success: this.props.success || '',
       busy: !!this.props.busy,
       busyOpacity: this.props.busy ? '.7' : '1',
-      submitLabel: this.props.busy ? 'Menyimpan...' : (editing ? 'Simpan Perubahan' : 'Simpan Butir Kegiatan'),
+      submitLabel: this.props.busy ? 'Menyimpan...' : (editing ? 'Simpan Perubahan' : 'Simpan Detail Kegiatan'),
       isEditing: editing,
       notEditing: !editing,
       onSubmit: this.props.onSubmit || (() => {}),

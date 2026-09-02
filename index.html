@@ -252,7 +252,7 @@
               </div>
             </sc-for>
           </div>
-          <div style="margin-top:13px;padding:11px 13px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-2);font-size:11.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty">Alur berkas 3 tahap: Verifikasi Tim TU Pusdatin KP → Verifikasi Tim Keuangan → SP2D. <strong>Revisi</strong> bukan tahap wajib, melainkan penanda bagi berkas yang dikembalikan untuk diperbaiki.</div>
+          <div style="margin-top:13px;padding:11px 13px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line-2);font-size:11.5px;line-height:1.6;color:var(--ink-2);text-wrap:pretty">Alur berkas 3 tahap: Verifikasi Tim TU Pusdatin KP → Verifikasi Tim Keuangan → SP2D. <strong>Perbaikan</strong> bukan tahap wajib, melainkan penanda bagi berkas yang dikembalikan untuk diperbaiki.</div>
         </div>
 
         <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px">
@@ -350,7 +350,7 @@
           <table style="width:100%;border-collapse:collapse;min-width:880px">
             <thead>
               <tr style="background:var(--surface-2)">
-                <th style="text-align:left;padding:11px 18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line)">Komponen / Subkomponen</th>
+                <th style="text-align:left;padding:11px 18px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line)">Komponen / Subkomponen / Detail Kegiatan</th>
                 <th style="text-align:right;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Pagu</th>
                 <th style="text-align:right;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Realisasi</th>
                 <th style="text-align:right;padding:11px 12px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap">Sisa</th>
@@ -412,7 +412,8 @@
       </sc-if>
 
       <div style="padding:12px 18px;border-top:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;background:var(--surface-2)">
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">{{ rowCountLabel }}</span>
+        <span style="min-width:0;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">{{ rowCountLabel }}</span>
+        <span style="min-width:0;flex:1 1 260px;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">Baris <strong>Detail Kegiatan</strong> memakai basis <strong>akrual</strong> (realisasi periode lalu + periode ini), bukan pencairan kas.</span>
         <button type="button" onClick="{{ exportCsv }}" style="height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:var(--navy-3)">Unduh CSV</button>
       </div>
     </section>
@@ -566,7 +567,7 @@ const nfx = new Intl.NumberFormat('id-ID');
 
 class Component extends DCLogic {
   state = {
-    anggaran: [], pencairan: [], butir: [], rpd: [], source: '—', isLoading: true, errorMsg: '', updated: null,
+    anggaran: [], pencairan: [], butir: [], rpd: [], detail: [], source: '—', isLoading: true, errorMsg: '', updated: null,
     acuan: 'PAGU',            // 'PAGU' | 'RPD' — pembanding grafik batang
     // Acuan RPD kumulatif: bulan terakhir yang sudah SELESAI, karena target bulan
     // berjalan belum sepenuhnya jatuh tempo (menghindari deviasi yang menyesatkan).
@@ -583,7 +584,7 @@ class Component extends DCLogic {
     // Tampilkan cache terakhir lebih dulu supaya layar tidak kosong menunggu jaringan.
     const c = this.ds.cacheAmbil && this.ds.cacheAmbil();
     if (c) this.setState({ anggaran: c.anggaran, pencairan: c.pencairan, butir: c.butir || [],
-                           rpd: c.rpd || [], source: c.source, isLoading: false, updated: new Date(c.t || Date.now()) });
+                           rpd: c.rpd || [], detail: c.detail || [], source: c.source, isLoading: false, updated: new Date(c.t || Date.now()) });
     await this.load(!!c);
     const ms = this.ds.CONFIG.REFRESH_MS;
     if (ms > 0) this.timer = setInterval(() => this.load(true), ms);
@@ -602,10 +603,10 @@ class Component extends DCLogic {
     if (!silent) this.setState({ isLoading: true, errorMsg: '' });
     try {
       const d = await this.ds.fetchAll();
-      this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, butir: d.butir || [], rpd: d.rpd || [], source: d.source, isLoading: false, errorMsg: '', updated: new Date() });
+      this.setState({ anggaran: d.anggaran, pencairan: d.pencairan, butir: d.butir || [], rpd: d.rpd || [], detail: d.detail || [], source: d.source, isLoading: false, errorMsg: '', updated: new Date() });
     } catch (e) {
       const f = this.ds.seedFallback();
-      this.setState({ anggaran: f.anggaran, pencairan: f.pencairan, butir: f.butir || [], rpd: f.rpd || [], source: f.source, isLoading: false, updated: new Date(), errorMsg: (e && e.message) || String(e) });
+      this.setState({ anggaran: f.anggaran, pencairan: f.pencairan, butir: f.butir || [], rpd: f.rpd || [], detail: f.detail || [], source: f.source, isLoading: false, updated: new Date(), errorMsg: (e && e.message) || String(e) });
     }
     // ⚡ REAL-TIME: ganti polling di componentDidMount dengan langganan WebSocket
     // (mis. socket.on('anggaran:update', d => this.setState({...}))) bila backend siap.
@@ -613,7 +614,7 @@ class Component extends DCLogic {
 
   tree() {
     return this.ds
-      ? this.ds.buildTree(this.state.anggaran, this.state.pencairan, this.state.butir, this.state.rpd)
+      ? this.ds.buildTree(this.state.anggaran, this.state.pencairan, this.state.butir, this.state.rpd, undefined, this.state.detail)
       : { utama: [], totals: { pagu: 0, realisasi: 0, sisa: 0, pct: 0, avg: 0, nKomponen: 0, nPencairan: 0, nButir: 0, kurvaRpd: [] } };
   }
 
@@ -1006,10 +1007,17 @@ class Component extends DCLogic {
 
   exportCsv = () => {
     const { fmt } = this.ds;
-    const head = ['ID_Komponen', 'Tipe', 'Parent_ID', 'Nama_Kegiatan', 'Pagu', 'Realisasi', 'Sisa', 'Persen', 'Status', 'Jumlah_Bukti'];
-    const line = (r, tipe, parent) => [r.id, tipe, parent, '"' + r.nama.replace(/"/g, '""') + '"', r.pagu, r.realisasi, r.sisa, r.pct.toFixed(2), r.status.label, r.docs.length].join(',');
+    const head = ['ID_Komponen', 'Tipe', 'Parent_ID', 'Nama_Kegiatan', 'Pagu', 'Realisasi', 'Akrual_sd', 'Sisa', 'Persen', 'Jumlah_Bukti'];
+    const line = (r, tipe, parent) => [r.id, tipe, parent, '"' + String(r.nama).replace(/"/g, '""') + '"', r.pagu,
+      r.realisasi, r.akrual || 0, r.sisa, r.pct.toFixed(2), (r.docs || []).length].join(',');
     const body = [];
-    this.tree().utama.forEach(u => { body.push(line(u, 'UTAMA', '')); u.children.forEach(c => body.push(line(c, 'SUB', u.id))); });
+    this.tree().utama.forEach(u => {
+      body.push(line(u, 'UTAMA', ''));
+      u.children.forEach(c => {
+        body.push(line(c, 'SUB', u.id));
+        (c.detail || []).forEach(d => body.push(line(d, 'DETAIL', c.id)));
+      });
+    });
     const blob = new Blob(['\uFEFF' + [head.join(','), ...body].join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1023,12 +1031,22 @@ class Component extends DCLogic {
   cetakHtml(judul, html) {
     const w = window.open('', '_blank', 'width=980,height=1200');
     if (!w) {
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = judul.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.html';
-      a.click();
-      URL.revokeObjectURL(a.href);
+      // Popup diblokir → unduh berkas .html. Anchor dilampirkan ke DOM lalu
+      // dibersihkan asinkron; revoke langsung dapat membatalkan unduhan berkas
+      // besar (logo ter-embed) dan membuat halaman menggantung.
+      try {
+        const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = judul.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.html';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { try { a.remove(); URL.revokeObjectURL(url); } catch (e) {} }, 4000);
+        this.setState({ errorMsg: 'Popup diblokir browser — laporan diunduh sebagai berkas .html. Buka berkas itu lalu cetak ke PDF.' });
+      } catch (e) {
+        this.setState({ errorMsg: 'Laporan gagal dibuka: ' + ((e && e.message) || e) });
+      }
       return;
     }
     w.document.write(html);
@@ -1074,8 +1092,13 @@ class Component extends DCLogic {
       'tbody tr:nth-child(even) td{background:#F8FAFD}' +
       'td.n,th.n{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap;font-size:9.5pt}' +
       'td.c,th.c{text-align:center}' +
-      'tr.u td{background:#E4EBF6 !important;font-weight:800;border-top:1.5px solid #0B2545;font-size:9.5pt}' +
+      'tr.u td{background:#EAF0F9 !important;font-weight:800;border-top:1.5px solid #0B2545;font-size:9.5pt}' +
+      'tr.s td{background:#FFFFFF !important}' +
       'tr.s td:first-child{padding-left:26px;color:#33475F}' +
+      'tr.d td{background:#FBFCFE !important;font-size:9pt;color:#3C4C63}' +
+      'tr.d td:first-child{padding-left:44px}' +
+      'tr.d .kode{color:#7C8AA0}' +
+      'td.pc{text-align:right;font-family:"IBM Plex Mono",monospace;font-weight:800;white-space:nowrap}' +
       'tr.tot td{background:#0B2545 !important;color:#fff;font-weight:800;font-size:10pt;border-top:2px solid #0B2545}' +
       '.kode{font-family:"IBM Plex Mono",monospace;font-size:8pt;color:#5B6C86;display:block;letter-spacing:.02em}' +
       'tr.u .kode{color:#33475F}' +
@@ -1093,32 +1116,56 @@ class Component extends DCLogic {
       '</body></html>';
   }
 
+  /** Warna angka persen pada tabel rekap (menggantikan kolom Status). */
+  warnaPersen(p) {
+    if (p > 100) return '#B32A2A';
+    if (p >= 75) return '#0E7A55';
+    if (p >= 25) return '#9A6A00';
+    return '#B32A2A';
+  }
+
+  /**
+   * Tabel rekap laporan — turun sampai DETAIL KEGIATAN.
+   *   KOMPONEN (u) → SUBKOMPONEN (s) → DETAIL KEGIATAN (d)
+   * Kolom Status dihapus; capaian dibaca dari kolom PERSEN yang diberi warna.
+   * Kolom Akrual s.d. berasal dari Laporan Ketersediaan Dana Detail (data baru).
+   */
   barisTabel(list) {
     const fmt = this.ds.fmt;
     let no = 0;
     const sel = (n, kelas, nomor) => '<tr class="' + kelas + '">' +
       '<td class="c" style="width:26px">' + (nomor || '') + '</td>' +
       '<td><span class="kode">' + n.id + '</span>' + n.nama + '</td>' +
-      '<td class="n">' + fmt(n.pagu) + '</td><td class="n">' + fmt(n.realisasi) + '</td>' +
-      '<td class="n">' + fmt(n.sisa) + '</td><td class="n">' + n.pct.toFixed(2) + '%</td>' +
-      '<td class="c"><span class="pill" style="color:' + (n.status.key === 'aman' ? '#0E7A55' : n.status.key === 'waspada' ? '#9A6A00' : '#B32A2A') + '">' +
-      n.status.label + '</span></td></tr>';
+      '<td class="n">' + fmt(n.pagu) + '</td><td class="n">' + fmt(n.realisasi || 0) + '</td>' +
+      '<td class="n">' + fmt(n.akrual || 0) + '</td>' +
+      '<td class="n">' + fmt(n.sisa) + '</td>' +
+      '<td class="pc" style="color:' + this.warnaPersen(n.pct) + '">' + n.pct.toFixed(2) + '%</td></tr>';
     let html = '<table><thead><tr><th class="c" style="width:26px">No</th>' +
-      '<th>Komponen / Subkomponen</th><th class="n" style="width:14%">Pagu (Rp)</th>' +
-      '<th class="n" style="width:14%">Realisasi (Rp)</th><th class="n" style="width:14%">Sisa (Rp)</th>' +
-      '<th class="n" style="width:8%">Serap</th><th class="c" style="width:11%">Status</th></tr></thead><tbody>';
+      '<th>Komponen / Subkomponen / Detail Kegiatan</th><th class="n" style="width:13%">Pagu (Rp)</th>' +
+      '<th class="n" style="width:13%">Realisasi (Rp)</th><th class="n" style="width:13%">Akrual s.d. (Rp)</th>' +
+      '<th class="n" style="width:13%">Sisa (Rp)</th>' +
+      '<th class="n" style="width:9%">Persen</th></tr></thead><tbody>';
     list.forEach(u => {
       no++;
       html += sel(u, 'u', String(no));
-      (u.children || []).forEach(c => { html += sel(c, 's', ''); });
+      (u.children || []).forEach(c => {
+        html += sel(c, 's', '');
+        (c.detail || []).forEach(d => { html += sel(d, 'd', ''); });
+      });
     });
     const tP = list.reduce((t, u) => t + u.pagu, 0);
     const tR = list.reduce((t, u) => t + u.realisasi, 0);
+    const tA = list.reduce((t, u) => t + (u.akrual || 0), 0);
     html += '<tr class="tot"><td class="c">—</td><td>JUMLAH ' + list.length + ' KOMPONEN UTAMA</td>' +
       '<td class="n">' + fmt(tP) + '</td><td class="n">' + fmt(tR) + '</td>' +
-      '<td class="n">' + fmt(tP - tR) + '</td><td class="n">' + (tP ? (tR / tP * 100).toFixed(2) : '0.00') + '%</td>' +
-      '<td class="c">—</td></tr>';
-    return html + '</tbody></table>';
+      '<td class="n">' + fmt(tA) + '</td>' +
+      '<td class="n">' + fmt(tP - tR) + '</td><td class="n">' + (tP ? (tR / tP * 100).toFixed(2) : '0.00') + '%</td></tr>';
+    return html + '</tbody></table>' +
+      '<div class="cat"><b>Persen</b> = realisasi kas (butir berstatus SP2D) dibanding pagu; ' +
+      'nilainya diberi warna hijau (≥75%), kuning (25–74%), merah (&lt;25% atau melampaui pagu). ' +
+      'Baris ber-indentasi paling dalam adalah <b>Detail Kegiatan</b> — nama bakunya tetap, dan ' +
+      'angka <b>Akrual s.d.</b> diambil dari Laporan Ketersediaan Dana Detail (realisasi periode ' +
+      'lalu + periode ini), bukan dari pencairan kas.</div>';
   }
 
   cetakLaporan = () => {
@@ -1223,23 +1270,26 @@ class Component extends DCLogic {
           '<td class="n">' + t.n + '</td><td class="n">' + fmt(nom) + '</td>' +
           '<td class="n">' + (totalButir ? (nom / totalButir * 100).toFixed(1) : '0.0') + '%</td></tr>';
       }).join('') +
-      '<tr><td class="c">—</td><td style="color:#B32A2A;font-weight:800">Ditandai perlu revisi</td>' +
-      '<td class="n" style="color:#B32A2A;font-weight:800">' + nRevisi + '</td>' +
+      '<tr><td class="c">⚑</td><td style="color:#9A2C2C;font-weight:800">Ditandai perlu perbaikan</td>' +
+      '<td class="n" style="color:#9A2C2C;font-weight:800">' + nRevisi + '</td>' +
       '<td class="n">' + fmt(semuaButir.filter(b => b.revisi).reduce((s, b) => s + (b.nominal || 0), 0)) + '</td>' +
       '<td class="n">—</td></tr>' +
       '<tr class="tot"><td class="c">—</td><td>JUMLAH BUTIR KEGIATAN</td><td class="n">' + semuaButir.length +
       '</td><td class="n">' + fmt(totalButir) + '</td><td class="n">100.0%</td></tr>' +
       '</tbody></table>' +
-      '<div class="cat">Revisi adalah <b>penanda kondisional</b>, bukan tahapan — butir bertanda revisi tetap berada pada tahapannya.</div>';
+      '<div class="cat">Perbaikan adalah <b>penanda kondisional</b>, bukan tahapan — berkas bertanda perbaikan tetap berada pada tahapannya.</div>';
 
-    const isi = tambahan + '<h3>Rincian Pagu, Realisasi, dan Sisa Anggaran</h3>' +
+    const isi = tambahan + '<h3>Rincian Pagu, Realisasi, dan Sisa Anggaran s.d. Detail Kegiatan</h3>' +
       this.barisTabel(dipakai) + rekapBerkas;
 
+    const akr = dipakai.reduce((t, u) => t + (u.akrual || 0), 0);
+    const nDet = dipakai.reduce((t, u) => t + (u.children || []).reduce((x, c) => x + (c.detail || []).length, 0), 0);
     const html = this.bungkusLaporan(judul, sub, isi, [
       { label: 'Pagu', nilai: short(pagu), sub: 'Rp ' + fmt(pagu) },
       { label: 'Realisasi', nilai: short(real), sub: 'Rp ' + fmt(real) },
+      { label: 'Akrual s.d.', nilai: short(akr), sub: (pagu ? (akr / pagu * 100).toFixed(2) : '0.00') + '% dari pagu' },
       { label: 'Sisa', nilai: short(pagu - real), sub: 'Rp ' + fmt(pagu - real) },
-      { label: 'Penyerapan', nilai: pct.toFixed(2) + '%', sub: dipakai.length + ' komponen utama' }
+      { label: 'Penyerapan', nilai: pct.toFixed(2) + '%', sub: dipakai.length + ' komponen · ' + nDet + ' detail kegiatan' }
     ]);
     this.cetakHtml(judul, html);
     this.setState({ laporan: null });
@@ -1390,7 +1440,7 @@ class Component extends DCLogic {
       const semuaButir = utama.reduce((t, u) => t.concat(u.butir || [], ...(u.children || []).map(c => c.butir || [])), []);
       const revisi = semuaButir.filter(b => b.revisi);
       if (revisi.length) {
-        it.push({ ikon: '⚑', label: 'PERLU REVISI', teks: revisi.length + ' berkas ditandai perlu perbaikan oleh tim verifikasi',
+        it.push({ ikon: '⚑', label: 'PERLU PERBAIKAN', teks: revisi.length + ' berkas ditandai perlu perbaikan oleh tim verifikasi',
           bg: 'rgba(251,191,36,.22)', ink: '#FBBF24', warna: '#FBBF24' });
       }
       const tertahan = semuaButir.filter(b => {
@@ -1445,7 +1495,8 @@ class Component extends DCLogic {
         docsLabel: (u.butir || []).length + ' butir · ' + u.docs.length + ' bukti',
         onDocs: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(u, null); }
       });
-      if (open) u.children.forEach(c => rows.push({
+      if (open) u.children.forEach(c => {
+      rows.push({
         kode: c.id, nama: c.nama, tipeLabel: 'Subkomponen', weight: '500', indent: '54px',
         rowBg: (tandai(c) || {}).bg || 'transparent',
         rowAnim: (tandai(c) || {}).anim || 'none',
@@ -1457,15 +1508,37 @@ class Component extends DCLogic {
         lambangBorder: 'var(--line-2)',
         caret: '›', caretBg: 'var(--surface)', caretColor: 'var(--ink-3)',
         caretBorder: 'var(--line)', caretCursor: 'pointer',
-        onToggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(c, u); },
+        onToggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); if ((c.detail || []).length) this.toggle(c.id); else this.openDocs(c, u); },
         onRowClick: () => this.openDocs(c, u),
-        rowTitle: 'Klik untuk membuka popup rincian subkomponen',
+        rowTitle: (c.detail || []).length
+          ? 'Klik untuk popup rincian · tombol kiri membuka ' + c.detail.length + ' detail kegiatan'
+          : 'Klik untuk membuka popup rincian subkomponen',
         pagu: fmt(c.pagu), realisasi: fmt(c.realisasi), sisa: fmt(c.sisa),
         pct: c.pct.toFixed(2) + '%', bar: Math.min(100, c.pct).toFixed(1) + '%',
         color: c.status.color, badgeBg: c.status.bg, statusLabel: c.status.label,
-        docsLabel: (c.butir || []).length + ' butir · ' + c.docs.length + ' bukti',
+        docsLabel: (c.detail || []).length + ' detail · ' + (c.butir || []).length + ' berkas',
         onDocs: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(c, u); }
-      }));
+      });
+        // Level ke-3: DETAIL KEGIATAN (nama baku) — angkanya berbasis AKRUAL.
+        if (this.state.expanded[c.id]) (c.detail || []).forEach(d => rows.push({
+          kode: d.id, nama: d.nama, tipeLabel: 'Detail Kegiatan · akrual', weight: '500', indent: '92px',
+          rowBg: (tandai(d) || {}).bg || 'var(--surface-2)',
+          rowAnim: (tandai(d) || {}).anim || 'none',
+          lambang: '·', lambangJudul: 'Detail kegiatan: ' + d.nama,
+          lambangUk: '20px', lambangFont: '11px',
+          lambangBg: 'transparent', lambangBorder: 'var(--line-2)',
+          caret: '·', caretBg: 'var(--surface)', caretColor: 'var(--ink-3)',
+          caretBorder: 'var(--line-2)', caretCursor: 'default',
+          onToggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+          onRowClick: () => this.openDocs(c, u),
+          rowTitle: 'Detail kegiatan ' + d.id + ' — realisasi memakai basis AKRUAL (Laporan Ketersediaan Dana Detail)',
+          pagu: fmt(d.pagu), realisasi: fmt(d.akrual), sisa: fmt(d.pagu - d.akrual),
+          pct: d.pct.toFixed(2) + '%', bar: Math.min(100, d.pct).toFixed(1) + '%',
+          color: d.status.color, badgeBg: d.status.bg, statusLabel: d.status.label,
+          docsLabel: 'akrual',
+          onDocs: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openDocs(c, u); }
+        }));
+      });
     });
 
     const counts = { aman: 0, waspada: 0, kritis: 0, over: 0 };
@@ -1499,6 +1572,7 @@ class Component extends DCLogic {
         { label: 'Total Pagu Anggaran', value: short(totals.pagu), sub: 'Rp ' + fmt(totals.pagu), tag: totals.nKomponen + ' komponen', color: 'var(--navy-3)', bar: '100%' },
         { label: 'Total Realisasi', value: short(totals.realisasi), sub: 'Rp ' + fmt(totals.realisasi), tag: totals.pct.toFixed(2) + '%', color: 'var(--green)', bar: Math.min(100, totals.pct).toFixed(1) + '%' },
         { label: 'Total Sisa Anggaran', value: short(totals.sisa), sub: 'Rp ' + fmt(totals.sisa), tag: (100 - totals.pct).toFixed(2) + '%', color: 'var(--amber)', bar: Math.max(0, 100 - totals.pct).toFixed(1) + '%' },
+        { label: 'Realisasi Akrual', value: short(totals.akrual || 0), sub: 'Rp ' + fmt(totals.akrual || 0) + ' · basis akrual', tag: (totals.pctAkrual || 0).toFixed(2) + '%', color: 'var(--blue)', bar: Math.min(100, totals.pctAkrual || 0).toFixed(1) + '%' },
         { label: 'Rata-rata Penyerapan', value: totals.avg.toFixed(2) + '%', sub: 'rata-rata antar komponen utama', tag: totals.avg >= 75 ? 'Aman' : (totals.avg >= 25 ? 'Waspada' : 'Kritis'), color: totals.avg >= 75 ? 'var(--green)' : (totals.avg >= 25 ? 'var(--amber)' : 'var(--red)'), bar: Math.min(100, totals.avg).toFixed(1) + '%' }
       ].map((k, i) => ({ ...k, onClick: () => this.setState({ kpi: i }) })),
 
@@ -1699,8 +1773,8 @@ class Component extends DCLogic {
       berkasSummary: (() => {
         const r = totals.ringkasButir || {};
         const tahap = ((this.ds && this.ds.STATUS_BUTIR) || []).map(t => ({ urut: String(t.urut), pendek: t.pendek, color: t.color, jumlah: r[t.key] || 0 }));
-        // Revisi ditampilkan terpisah: penanda kondisional, bukan tahap dalam alur.
-        tahap.push({ urut: '⚑', pendek: 'Perlu revisi', color: 'var(--red)', jumlah: r.REVISI || 0 });
+        // Perbaikan ditampilkan terpisah: penanda kondisional, bukan tahap dalam alur.
+        tahap.push({ urut: '⚑', pendek: 'Perlu perbaikan', color: 'var(--red)', jumlah: r.REVISI || 0 });
         const maxB = Math.max(1, ...tahap.map(t => t.jumlah));
         return tahap.map(t => ({ ...t, bar: (t.jumlah / maxB * 100) + '%' }));
       })(),
@@ -1749,7 +1823,7 @@ class Component extends DCLogic {
       toggleAllLabel: allOpen ? 'Tutup semua' : 'Buka semua',
       toggleAll: () => {
         const next = {};
-        if (!allOpen) utama.forEach(u => { next[u.id] = true; });
+        if (!allOpen) utama.forEach(u => { next[u.id] = true; (u.children || []).forEach(c => { next[c.id] = true; }); });
         this.setState({ expanded: next });
       },
       rows,
