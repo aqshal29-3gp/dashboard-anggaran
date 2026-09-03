@@ -49,6 +49,18 @@
       <div style="margin-top:5px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">{{ idHint }}</div>
     </div>
 
+    <sc-if value="{{ pakaiNama }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+        <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Nama Kegiatan <span style="color:var(--red)">*</span></label>
+        <span title="Subkomponen perjalanan dinas tidak dirinci sampai Detail Kegiatan — cukup sampai subkomponen. Tuliskan nama kegiatan/perjalanannya langsung." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+      </div>
+      <input type="text" value="{{ vNama }}" onInput="{{ onNama }}" placeholder="Contoh: Monitoring wilayah kerja Jawa Barat" style="width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+      <div style="margin-top:5px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">Perjalanan dinas dirinci cukup sampai subkomponen — tanpa Detail Kegiatan.</div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ pakaiDetail }}" hint-placeholder-val="{{ true }}">
     <div>
       <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
         <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Detail Kegiatan <span style="color:var(--red)">*</span></label>
@@ -62,6 +74,7 @@
       </select>
       <div style="margin-top:5px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">{{ detailHint }}</div>
     </div>
+    </sc-if>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px">
       <div>
@@ -123,10 +136,10 @@
       </div>
       <div>
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-          <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Link Berkas (PDF) <span style="color:var(--red)">*</span></label>
-          <span title="Wajib tautan FILE PDF, bukan folder Google Drive — agar previewnya bisa dibuka. Contoh: https://drive.google.com/file/d/XXXX/view (akses: siapa saja dengan tautan)." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+          <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Link Berkas (PDF) <span style="font-weight:600;text-transform:none;letter-spacing:0;opacity:.75">(isi &quot;-&quot; bila belum ada)</span></label>
+          <span title="Tautan FILE PDF, bukan folder Google Drive — agar previewnya bisa dibuka. Contoh: https://drive.google.com/file/d/XXXX/view (akses: siapa saja dengan tautan). Bila berkasnya belum ada, isi tanda &quot;-&quot; dan lengkapi nanti; tautan wajib ada sebelum tahap SP2D." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
         </div>
-        <input type="url" value="{{ vBerkas }}" onInput="{{ onBerkas }}" placeholder="https://drive.google.com/file/d/.../view" style="width:100%;height:44px;padding:0 13px;border-radius:10px;border:1px solid {{ berkasBorder }};background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:12.5px;outline:none" style-focus="border-color:var(--navy-3)">
+        <input type="text" value="{{ vBerkas }}" onInput="{{ onBerkas }}" placeholder="https://drive.google.com/file/d/.../view  atau  -" style="width:100%;height:44px;padding:0 13px;border-radius:10px;border:1px solid {{ berkasBorder }};background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:12.5px;outline:none" style-focus="border-color:var(--navy-3)">
         <sc-if value="{{ berkasSalah }}" hint-placeholder-val="{{ false }}">
           <div role="alert" style="margin-top:6px;display:flex;gap:7px;align-items:flex-start;padding:8px 10px;border-radius:9px;background:var(--amber-bg);border:1px solid var(--amber);font-size:11.5px;line-height:1.5;color:var(--ink-2);text-wrap:pretty"><span style="color:var(--amber);font-weight:800">!</span><span>{{ berkasHint }}</span></div>
         </sc-if>
@@ -158,7 +171,7 @@
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:620},&quot;komponenOptions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{value:string,label:string}[]&quot;},&quot;detailOptions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{value:string,label:string}[]&quot;},&quot;values&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;ButirForm&quot;},&quot;editingId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string | null&quot;},&quot;busy&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;error&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;seed&quot;,&quot;appscript&quot;,&quot;gviz&quot;],&quot;default&quot;:&quot;seed&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;judul&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Rekam Detail Kegiatan&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onField&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(field: string, value: string) =&gt; void&quot;},&quot;onSubmit&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onReset&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onCancel&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:620},&quot;komponenOptions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{value:string,label:string}[]&quot;},&quot;detailOptions&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{value:string,label:string}[]&quot;},&quot;tanpaDetail&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;values&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;ButirForm&quot;},&quot;editingId&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string | null&quot;},&quot;busy&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;error&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;seed&quot;,&quot;appscript&quot;,&quot;gviz&quot;],&quot;default&quot;:&quot;seed&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;judul&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Rekam Detail Kegiatan&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onField&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(field: string, value: string) =&gt; void&quot;},&quot;onSubmit&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onReset&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onCancel&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
 /**
  * AdminControls — form input & edit Butir Kegiatan (dipakai Admin/TU).
  *
@@ -184,7 +197,8 @@ const TAHAP_OPT = [
  */
 function cekBerkas(u) {
   const t = String(u || '').trim();
-  if (!t) return { ok: null, pesan: 'Contoh benar: https://drive.google.com/file/d/XXXX/view — pastikan aksesnya "siapa saja dengan tautan".' };
+  if (!t) return { ok: null, pesan: 'Contoh benar: https://drive.google.com/file/d/XXXX/view — pastikan aksesnya "siapa saja dengan tautan". Belum ada berkasnya? Isi tanda "-".' };
+  if (t === '-') return { ok: null, pesan: 'Ditandai belum ada berkas. Lengkapi tautannya setelah berkas tersedia — wajib sebelum tahap SP2D.' };
   if (/drive\.google\.com\/drive\/folders/.test(t) || /\/folders\//.test(t)) {
     return { ok: false, pesan: 'Tautan ini adalah FOLDER — ganti dengan tautan file PDF di dalamnya.' };
   }
@@ -260,7 +274,11 @@ class Component extends DCLogic {
         : (detOpt.length
             ? 'Nama detail kegiatan sudah baku dan tidak dapat diubah dari sini. Tambah/ubah daftarnya lewat sheet "Detail".'
             : 'Belum ada detail kegiatan pada subkomponen ini — tambahkan dahulu di sheet "Detail".'),
+      /* Perjalanan dinas: tanpa Detail Kegiatan — nama kegiatan diketik manual. */
+      pakaiDetail: !this.props.tanpaDetail,
+      pakaiNama: !!this.props.tanpaDetail,
       vNama: v.nama ?? '',
+      onNama: this.field('nama'),
       vNominal: v.nominal ?? '',
       vTanggal: v.tanggal ?? '',
       vStatus: v.status ?? 'TU',

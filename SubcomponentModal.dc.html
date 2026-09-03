@@ -276,8 +276,8 @@ class Component extends DCLogic {
             akrual: rp(d.akrual),
             pct: (d.pct || 0).toFixed(1) + '%',
             warna: this.warna(d.pct || 0),
-            judul: d.nama + ' — pagu ' + rp(d.pagu) + ' · akrual periode lalu ' + rp(d.akrualLalu) +
-                   ' · periode ini ' + rp(d.akrualIni) + ' · sisa ' + rp(d.pagu - d.akrual)
+            judul: d.nama + ' — pagu ' + rp(d.pagu) + ' · akrual (semua berkas direkam) ' + rp(d.akrual) +
+                   ' · realisasi SP2D ' + rp(d.realisasi || 0) + ' · sisa ' + rp(d.pagu - d.akrual)
           })),
           caption: 'Realisasi ' + rp(c.realisasi) + ' · sisa ' + rp(c.pagu - c.realisasi) +
                    ' · menampilkan ' + tampil.length + ' dari ' + semua.length + ' butir',

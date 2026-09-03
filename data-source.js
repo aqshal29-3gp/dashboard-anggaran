@@ -119,8 +119,10 @@ export const SEED_ANGGARAN = [
        Akrual_Lalu = Realisasi Periode Lalu (sebelum bulan laporan)
        Akrual_Ini  = Realisasi Periode Ini  (bulan laporan)
        Akrual s.d. = Akrual_Lalu + Akrual_Ini  (dihitung otomatis)
-     Akrual BUKAN realisasi kas/SP2D. Penyerapan kas tetap dihitung dari butir
-     berstatus SP2D; akrual dipakai sebagai pembanding basis akrual.
+     Angka ini hanya BASELINE data lama. Begitu subkomponen/detail sudah punya
+     butir di sheet Butir, AKRUAL dihitung dari butir tersebut:
+       AKRUAL    = jumlah nominal SEMUA butir yang direkam (semua tahapan)
+       REALISASI = jumlah nominal butir yang sudah SP2D (subset dari akrual)
 ----------------------------------------------------------------------------- */
 export const AKRUAL_PERIODE = { indeks: 8, label: 'September 2026' };
 
@@ -269,6 +271,54 @@ export function daftarAkun(d) { return postPublik({ action: 'daftar', ...d }); }
 export function updateProfil(d) { return postPublik({ action: 'updateProfil', token: (getSesi() || {}).token, ...d }); }
 export function gantiPassword(d) { return postPublik({ action: 'gantiPassword', token: (getSesi() || {}).token, ...d }); }
 export function tambahAkun(d) { return postPublik({ action: 'tambahAkun', token: (getSesi() || {}).token, ...d }); }
+
+/* ---- Foto profil & sesi login (live) ------------------------------------ */
+
+/** Simpan foto profil (data URL kecil) ke sheet Akun kolom M. */
+export function simpanFoto(dataUrl) {
+  return postPublik({ action: 'simpanFoto', token: (getSesi() || {}).token, foto: dataUrl || '' });
+}
+
+/**
+ * Kecilkan gambar pilihan pengguna jadi kotak 256 px JPEG agar aman disimpan
+ * dalam satu sel spreadsheet (batas 50.000 karakter).
+ */
+export function kecilkanFoto(file, sisi) {
+  const s = sisi || 256;
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error('Gagal membaca file gambar.'));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('File bukan gambar yang bisa dibaca.'));
+      img.onload = () => {
+        const k = Math.min(img.width, img.height) || 1;
+        const c = document.createElement('canvas');
+        c.width = s; c.height = s;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, (img.width - k) / 2, (img.height - k) / 2, k, k, 0, 0, s, s);
+        let out = c.toDataURL('image/jpeg', 0.72);
+        if (out.length > 44000) out = c.toDataURL('image/jpeg', 0.5);
+        resolve(out);
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/** Daftar akun + status login live (dipakai panel Sesi Pengguna). */
+export async function fetchSesiPengguna() {
+  if (CONFIG.MODE !== 'appscript') {
+    return [
+      { nama: 'Septian', email: 'septian@imipas.go.id', unit: 'Tim TU Pusdatin KP', peran: 'ADMIN', aktif: true, sejak: '08:12', terakhir: 'hari ini 08:12', foto: '', saya: true },
+      { nama: 'Aqshal', email: 'aqshal@imipas.go.id', unit: 'Tim Keuangan', peran: 'STAF', aktif: true, sejak: '09:04', terakhir: 'hari ini 09:04', foto: '', saya: false },
+      { nama: 'Hana', email: 'hana@imipas.go.id', unit: 'Tim TU Pusdatin KP', peran: 'STAF', aktif: false, sejak: '', terakhir: 'kemarin 16:40', foto: '', saya: false }
+    ];
+  }
+  const j = await postPublik({ action: 'daftarSesi', token: (getSesi() || {}).token });
+  return j.pengguna || [];
+}
 export async function fetchProfil() {
   const j = await postPublik({ action: 'getProfil', token: (getSesi() || {}).token });
   return j.profil || null;
@@ -276,7 +326,7 @@ export async function fetchProfil() {
 export function verifikasiEmail(d) { return postPublik({ action: 'verifikasiEmail', ...d }); }
 export async function loginAkun(d) {
   const j = await postPublik({ action: 'login', ...d });
-  setSesi({ token: j.token, nama: j.nama, email: j.email || d.email, peran: j.peran, kedaluwarsa: j.kedaluwarsa });
+  setSesi({ token: j.token, nama: j.nama, email: j.email || d.email, peran: j.peran, foto: j.foto || '', kedaluwarsa: j.kedaluwarsa });
   return j;
 }
 export async function logoutAkun() {
@@ -745,6 +795,27 @@ export function sudahSP2D(b) {
   return statusButir(b.status).key === 'SP2D';
 }
 
+/* -----------------------------------------------------------------------------
+   SUBKOMPONEN TANPA RINCIAN DETAIL KEGIATAN
+   Perjalanan dinas dirinci cukup sampai level subkomponen:
+     524111 Perjalanan Dinas Biasa
+     524113 Perjalanan Dinas Dalam Kota
+     524114 Perjalanan Dinas Paket Meeting Dalam Kota
+   Untuk subkomponen ini Detail Kegiatan tidak ditampilkan dan tidak wajib
+   dipilih saat merekam berkas — nama kegiatan diketik langsung.
+----------------------------------------------------------------------------- */
+export const KODE_TANPA_DETAIL = ['524111', '524113', '524114'];
+export function tanpaDetail(komponenId) {
+  const id = String(komponenId || '');
+  return KODE_TANPA_DETAIL.some(k => id.indexOf(k) >= 0);
+}
+
+/** Indeks bulan (0-11) dari tanggal 'YYYY-MM-DD'. -1 bila tidak terbaca. */
+function bulanDari(tgl) {
+  const m = /^(\d{4})-(\d{2})/.exec(String(tgl || ''));
+  return m ? Number(m[2]) - 1 : -1;
+}
+
 /** Admin: tambah Detail Kegiatan baru pada satu subkomponen. */
 export function addDetail(payload) {
   return postAksi('addDetail', payload, { id: payload.ID_Detail });
@@ -828,16 +899,32 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan, detail) {
       // DETAIL KEGIATAN milik subkomponen ini + butir yang menempel padanya.
       const rincian = (detailBy[s.id] || []).map(d => {
         const bd = items.filter(b => b.detailId === d.id);
+        // AKRUAL = seluruh butir yang direkam (semua tahapan), karena data yang
+        // diinput = beban akrual. Bila detail belum punya butir sama sekali,
+        // dipakai angka Laporan Ketersediaan Dana sebagai baseline data lama.
+        const akr = bd.length ? bd.reduce((t, x) => t + x.nominal, 0) : d.akrual;
+        const akrIni = bd.length
+          ? bd.filter(b => bulanDari(b.tanggal) === bulanKini).reduce((t, x) => t + x.nominal, 0)
+          : d.akrualIni;
+        // REALISASI (kas) = butir yang sudah SP2D — subset dari akrual.
         const kas = bd.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0);
-        const pk = d.pagu > 0 ? (d.akrual / d.pagu) * 100 : 0;
-        return { ...d, realisasi: kas, sisa: d.pagu - d.akrual, pct: pk, status: statusOf(pk),
+        const pk = d.pagu > 0 ? (akr / d.pagu) * 100 : 0;
+        return { ...d, akrual: akr, akrualIni: akrIni,
+                 akrualSumber: bd.length ? 'butir' : 'laporan',
+                 realisasi: kas, sisa: d.pagu - akr, pct: pk, status: statusOf(pk),
                  butir: bd, ringkas: ringkasButir(bd) };
       });
-      const akrual = rincian.reduce((t, d) => t + d.akrual, 0);
-      const akrualIni = rincian.reduce((t, d) => t + d.akrualIni, 0);
+      // Butir yang tidak menempel ke detail mana pun tetap masuk akrual.
+      const lepas = items.filter(b => !rincian.some(d => d.id === b.detailId));
+      const akrual = Math.max(
+        rincian.reduce((t, d) => t + d.akrual, 0) + lepas.reduce((t, x) => t + x.nominal, 0),
+        realisasi);
+      const akrualIni = rincian.reduce((t, d) => t + d.akrualIni, 0)
+        + lepas.filter(b => bulanDari(b.tanggal) === bulanKini).reduce((t, x) => t + x.nominal, 0);
+      const noDetail = tanpaDetail(s.id);
       return { ...s, realisasi, sisa: s.pagu - realisasi, pct, status: statusOf(pct), docs,
                butir: items, ringkas: ringkasButir(items),
-               detail: rincian, akrual, akrualIni,
+               tanpaDetail: noDetail, detail: noDetail ? [] : rincian, akrual, akrualIni,
                pctAkrual: s.pagu > 0 ? (akrual / s.pagu) * 100 : 0 };
     });
     const pagu = children.length ? children.reduce((t, c) => t + c.pagu, 0) : u.pagu;
@@ -847,7 +934,7 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan, detail) {
       : (items.length ? items.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0) : u.realisasi);
     const pct = pagu > 0 ? (realisasi / pagu) * 100 : 0;
     const docs = items.filter(sudahSP2D);
-    const akrual = children.reduce((t, c) => t + (c.akrual || 0), 0);
+    const akrual = Math.max(children.reduce((t, c) => t + (c.akrual || 0), 0), realisasi);
     const akrualIni = children.reduce((t, c) => t + (c.akrualIni || 0), 0);
     const nDetail = children.reduce((t, c) => t + (c.detail || []).length, 0);
 

@@ -413,7 +413,7 @@
 
       <div style="padding:12px 18px;border-top:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;background:var(--surface-2)">
         <span style="min-width:0;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-3)">{{ rowCountLabel }}</span>
-        <span style="min-width:0;flex:1 1 260px;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">Baris <strong>Detail Kegiatan</strong> memakai basis <strong>akrual</strong> (realisasi periode lalu + periode ini), bukan pencairan kas.</span>
+        <span style="min-width:0;flex:1 1 260px;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">Baris <strong>Detail Kegiatan</strong> memakai basis <strong>akrual</strong> — seluruh berkas yang direkam; <strong>Realisasi</strong> hanya berkas yang sudah SP2D.</span>
         <button type="button" onClick="{{ exportCsv }}" style="height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="border-color:var(--navy-3)">Unduh CSV</button>
       </div>
     </section>
@@ -1128,7 +1128,7 @@ class Component extends DCLogic {
    * Tabel rekap laporan — turun sampai DETAIL KEGIATAN.
    *   KOMPONEN (u) → SUBKOMPONEN (s) → DETAIL KEGIATAN (d)
    * Kolom Status dihapus; capaian dibaca dari kolom PERSEN yang diberi warna.
-   * Kolom Akrual s.d. berasal dari Laporan Ketersediaan Dana Detail (data baru).
+   * Kolom Akrual s.d. = jumlah nominal seluruh berkas yang direkam (semua tahapan).
    */
   barisTabel(list) {
     const fmt = this.ds.fmt;
@@ -1164,8 +1164,8 @@ class Component extends DCLogic {
       '<div class="cat"><b>Persen</b> = realisasi kas (butir berstatus SP2D) dibanding pagu; ' +
       'nilainya diberi warna hijau (≥75%), kuning (25–74%), merah (&lt;25% atau melampaui pagu). ' +
       'Baris ber-indentasi paling dalam adalah <b>Detail Kegiatan</b> — nama bakunya tetap, dan ' +
-      'angka <b>Akrual s.d.</b> diambil dari Laporan Ketersediaan Dana Detail (realisasi periode ' +
-      'lalu + periode ini), bukan dari pencairan kas.</div>';
+      'angka <b>Akrual s.d.</b> = seluruh berkas yang direkam (semua tahapan), sedangkan ' +
+      '<b>Realisasi</b> hanya berkas yang sudah SP2D.</div>';
   }
 
   cetakLaporan = () => {
@@ -1524,14 +1524,15 @@ class Component extends DCLogic {
           kode: d.id, nama: d.nama, tipeLabel: 'Detail Kegiatan · akrual', weight: '500', indent: '92px',
           rowBg: (tandai(d) || {}).bg || 'var(--surface-2)',
           rowAnim: (tandai(d) || {}).anim || 'none',
-          lambang: '·', lambangJudul: 'Detail kegiatan: ' + d.nama,
-          lambangUk: '20px', lambangFont: '11px',
-          lambangBg: 'transparent', lambangBorder: 'var(--line-2)',
+          // Lambang dikosongkan: caret di sebelahnya sudah menjadi penanda baris detail.
+          lambang: '', lambangJudul: 'Detail kegiatan: ' + d.nama,
+          lambangUk: '0px', lambangFont: '11px',
+          lambangBg: 'transparent', lambangBorder: 'transparent',
           caret: '·', caretBg: 'var(--surface)', caretColor: 'var(--ink-3)',
           caretBorder: 'var(--line-2)', caretCursor: 'default',
           onToggle: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
           onRowClick: () => this.openDocs(c, u),
-          rowTitle: 'Detail kegiatan ' + d.id + ' — realisasi memakai basis AKRUAL (Laporan Ketersediaan Dana Detail)',
+          rowTitle: 'Detail kegiatan ' + d.id + ' — basis AKRUAL: seluruh berkas yang direkam, termasuk yang belum SP2D',
           pagu: fmt(d.pagu), realisasi: fmt(d.akrual), sisa: fmt(d.pagu - d.akrual),
           pct: d.pct.toFixed(2) + '%', bar: Math.min(100, d.pct).toFixed(1) + '%',
           color: d.status.color, badgeBg: d.status.bg, statusLabel: d.status.label,
