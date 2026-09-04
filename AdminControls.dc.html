@@ -101,15 +101,30 @@
     <div style="padding:13px 15px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line-2)">
       <div style="display:flex;gap:6px;align-items:center">
         <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">PIC Kegiatan (penanggung jawab) <span style="color:var(--red)">*</span></span>
-        <span title="Nama dan nomor WA wajib diisi — dipakai untuk memberi tahu status berkas langsung dari daftar butir. NIP opsional bagi non-pegawai." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+        <span title="Pilih dari daftar PIC tersimpan agar tidak perlu mengetik ulang — NIP dan nomor WA terisi otomatis. Nama yang sudah ada tidak dapat diinput dua kali. Untuk PIC baru, pilih &quot;+ PIC baru&quot; lalu isi manual." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
       </div>
       <div style="margin-top:11px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
         <div>
-          <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">Nama PIC <span style="color:var(--red)">*</span></label>
-          <input type="text" value="{{ vPicNama }}" onInput="{{ onPicNama }}" placeholder="Nama lengkap" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+          <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">Nama PIC <span style="color:var(--red)">*</span> <span style="font-weight:600;text-transform:none;letter-spacing:0;opacity:.75">{{ picJumlahLabel }}</span></label>
+          <div style="position:relative">
+            <input type="text" value="{{ vPicNama }}" onInput="{{ onPicNama }}" onFocus="{{ onPicFokus }}" onBlur="{{ onPicBlur }}" autoComplete="off" placeholder="{{ picPlaceholder }}" style="width:100%;height:42px;padding:0 34px 0 12px;border-radius:10px;border:1px solid {{ picNamaBorder }};background:var(--surface);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+            <span style="position:absolute;right:11px;top:12px;font-size:13px;color:{{ picIkonInk }};pointer-events:none">{{ picIkon }}</span>
+            <sc-if value="{{ picBuka }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;left:0;right:0;top:100%;margin-top:5px;z-index:40;max-height:236px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg);padding:5px">
+                <div style="padding:6px 9px 5px;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)">{{ picListJudul }}</div>
+                <sc-for list="{{ picHasil }}" as="p" hint-placeholder-count="3">
+                  <button type="button" onMouseDown="{{ p.onPilih }}" style="display:block;width:100%;text-align:left;padding:9px;border:none;border-radius:9px;background:transparent;cursor:pointer;font-family:Manrope;font-size:12.5px;font-weight:700;color:var(--ink);overflow-wrap:anywhere" style-hover="background:var(--surface-2)">{{ p.nama }}</button>
+                </sc-for>
+                <sc-if value="{{ picKosong }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:9px;font-size:11.5px;line-height:1.5;color:var(--ink-3);text-wrap:pretty">{{ picKosongPesan }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+          <div style="margin-top:5px;font-size:11.5px;line-height:1.5;color:{{ picHintInk }};text-wrap:pretty">{{ picHint }}</div>
         </div>
         <div>
-          <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">NIP <span style="font-weight:600;text-transform:none;letter-spacing:0;opacity:.75">(opsional)</span></label>
+          <label style="display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:5px">NIP <span style="font-weight:600;text-transform:none;letter-spacing:0;opacity:.75">{{ picNipCatatan }}</span></label>
           <input type="text" inputmode="numeric" value="{{ vPicNip }}" onInput="{{ onPicNip }}" placeholder="19xxxxxxxxxxxxxxxx" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:12.5px;outline:none" style-focus="border-color:var(--navy-3)">
         </div>
         <div>
@@ -207,6 +222,11 @@ function cekBerkas(u) {
   return { ok: false, pesan: 'Belum terdeteksi sebagai file PDF. Gunakan tautan file (…/file/d/…/view) atau URL berakhiran .pdf.' };
 }
 
+/** Kunci pembanding nama PIC — abaikan besar-kecil huruf, gelar, dan spasi ganda. */
+function kunciPic(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
 function rapikanWa(v) {
   let t = String(v ?? '').replace(/[^0-9+]/g, '').replace(/^\+/, '');
   if (!t) return '';
@@ -216,6 +236,9 @@ function rapikanWa(v) {
 }
 
 class Component extends DCLogic {
+  state = { picBuka: false };
+  componentWillUnmount() { clearTimeout(this.picTutupTimer); }
+
   /* Opsi <select> disisipkan setelah commit — sinkronkan nilainya tiap render. */
   componentDidMount() { this.sinkron(); }
   componentDidUpdate() { this.sinkron(); }
@@ -238,6 +261,13 @@ class Component extends DCLogic {
     const mode = this.props.mode || 'seed';
     const live = mode === 'appscript';
     const detOpt = this.props.detailOptions || [];
+    const picOpt = this.props.picOptions || [];
+    const picTerpilih = !!v.picPilih && picOpt.some(p => p.key === v.picPilih);
+    // Nama yang sama tidak dibuat dua kali — rekaman menempel ke PIC yang sudah ada.
+    const picDobel = !picTerpilih && !!String(v.picNama || '').trim()
+      && picOpt.some(p => p.key === kunciPic(v.picNama));
+    const qPic = picTerpilih ? '' : kunciPic(v.picNama);
+    const picHasil = (qPic ? picOpt.filter(x => x.key.includes(qPic)) : picOpt).slice(0, 8);
     return {
       judul: editing ? 'Edit Detail Kegiatan · ' + this.props.editingId : (this.props.judul ?? 'Rekam Detail Kegiatan'),
       subjudul: editing
@@ -282,10 +312,48 @@ class Component extends DCLogic {
       vNominal: v.nominal ?? '',
       vTanggal: v.tanggal ?? '',
       vStatus: v.status ?? 'TU',
+      /* ---- Database PIC: ketik untuk mencari, pilih untuk mengisi otomatis ---- */
+      picJumlahLabel: picOpt.length ? '(' + picOpt.length + ' PIC tersimpan)' : '(database masih kosong)',
+      picPlaceholder: picOpt.length ? 'Ketik nama untuk mencari PIC…' : 'Nama lengkap',
+      picBuka: this.state.picBuka && (picHasil.length > 0 || !!qPic),
+      picHasil: picHasil.map(x => ({
+        nama: x.nama,
+        onPilih: (e) => {
+          if (e && e.preventDefault) e.preventDefault();   // dahului blur
+          clearTimeout(this.picTutupTimer);
+          this.setState({ picBuka: false });
+          if (this.props.onPilihPic) this.props.onPilihPic(x.key);
+        }
+      })),
+      picListJudul: qPic
+        ? picHasil.length + ' PIC cocok dengan "' + String(v.picNama).trim() + '"'
+        : picOpt.length + ' PIC di database — klik untuk mengisi otomatis',
+      picKosong: picHasil.length === 0,
+      picKosongPesan: 'Tidak ada PIC yang cocok. Nama ini akan disimpan sebagai PIC baru dan otomatis masuk database.',
+      picIkon: picTerpilih ? '✓' : '⌕',
+      picIkonInk: picTerpilih ? 'var(--green)' : 'var(--ink-3)',
+      onPicFokus: () => { clearTimeout(this.picTutupTimer); this.setState({ picBuka: true }); },
+      onPicBlur: () => {
+        this.picTutupTimer = setTimeout(() => this.setState({ picBuka: false }), 140);
+      },
+      picNamaBorder: picDobel ? 'var(--amber)' : 'var(--line)',
+      picNipCatatan: picTerpilih && !String(v.picNip || '').trim() ? '(belum ada — bisa dilengkapi)' : '(opsional)',
+      picHint: picTerpilih
+        ? '✓ Diambil dari database PIC. NIP dan nomor WA bisa dilengkapi atau dikoreksi — perbaikannya ikut tersimpan.'
+        : (picDobel
+            ? 'PIC ini sudah terdaftar — rekaman akan memakai data yang tersimpan, tidak dibuat dobel.'
+            : (picOpt.length
+                ? 'Ketik namanya lalu pilih dari daftar yang muncul — NIP dan nomor WA terisi sendiri.'
+                : 'PIC yang Anda simpan akan otomatis tersedia sebagai pilihan pada input berikutnya.')),
+      picHintInk: picTerpilih ? 'var(--green)' : (picDobel ? 'var(--amber)' : 'var(--ink-3)'),
       vPicNama: v.picNama ?? '',
       vPicNip: v.picNip ?? '',
       vPicWa: v.picWa ?? '',
-      onPicNama: this.field('picNama'),
+      onPicNama: (e) => {
+        clearTimeout(this.picTutupTimer);
+        if (!this.state.picBuka) this.setState({ picBuka: true });
+        if (this.props.onField) this.props.onField('picNama', e.target.value);
+      },
       onPicNip: this.field('picNip'),
       onPicWa: this.field('picWa'),
       adaWaHint: !!v.picWa,

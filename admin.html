@@ -111,7 +111,7 @@
 
       <sc-if value="{{ tabButir }}" hint-placeholder-val="{{ true }}">
         <div style="animation:fadeUp 280ms ease both">
-          <dc-import name="AdminControls" komponen-options="{{ subOptions }}" detail-options="{{ detailOptions }}" tanpa-detail="{{ butirTanpaDetail }}" values="{{ formButir }}" editing-id="{{ editingId }}" busy="{{ busyButir }}" error="{{ errButir }}" success="{{ okButir }}" mode="{{ mode }}" on-field="{{ onFieldButir }}" on-submit="{{ submitButir }}" on-reset="{{ resetButir }}" on-cancel="{{ cancelEdit }}" hint-size="100%,520px"></dc-import>
+          <dc-import name="AdminControls" komponen-options="{{ subOptions }}" detail-options="{{ detailOptions }}" tanpa-detail="{{ butirTanpaDetail }}" values="{{ formButir }}" editing-id="{{ editingId }}" busy="{{ busyButir }}" error="{{ errButir }}" success="{{ okButir }}" mode="{{ mode }}" pic-options="{{ picOptions }}" on-pilih-pic="{{ onPilihPic }}" on-field="{{ onFieldButir }}" on-submit="{{ submitButir }}" on-reset="{{ resetButir }}" on-cancel="{{ cancelEdit }}" hint-size="100%,520px"></dc-import>
         </div>
 
         <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;animation:fadeUp 320ms ease both">
@@ -660,7 +660,7 @@ const TAHAP_FALLBACK = [
   { key: 'SP2D', urut: 3, label: 'SP2D', pendek: 'SP2D', color: 'var(--green)', bg: 'var(--green-bg)' }
 ];
 const POLL_MS = 60000;
-const KOSONG = { id: '', komponen: '', detail: '', nama: '', nominal: '', tanggal: new Date().toISOString().slice(0, 10), status: 'TU', catatan: '', berkas: '', revisi: false, picNama: '', picNip: '', picWa: '' };
+const KOSONG = { id: '', komponen: '', detail: '', nama: '', nominal: '', tanggal: new Date().toISOString().slice(0, 10), status: 'TU', catatan: '', berkas: '', revisi: false, picPilih: '', picNama: '', picNip: '', picWa: '' };
 
 const nf = new Intl.NumberFormat('id-ID');
 
@@ -815,6 +815,42 @@ class Component extends DCLogic {
     return kids.length ? kids.reduce((t, k) => t + k.realisasi, 0) : row.realisasi;
   }
 
+  /* ----------------------------- Database PIC -----------------------------
+     Dibangun dari seluruh butir yang pernah diinput — nama, NIP, dan nomor WA
+     disatukan per orang (dibandingkan tanpa besar-kecil huruf) sehingga PIC
+     yang sama tidak perlu diketik ulang dan tidak bisa masuk dua kali.
+  ------------------------------------------------------------------------- */
+  kunciPic = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+  daftarPic() {
+    const map = new Map();
+    (this.state.butir || []).forEach(b => {
+      const nama = String(b.picNama || '').trim();
+      if (!nama) return;
+      const k = this.kunciPic(nama);
+      if (!k) return;
+      const nip = String(b.picNip || '').trim();
+      const wa = String(b.picWa || '').trim();
+      const ada = map.get(k);
+      if (!ada) { map.set(k, { key: k, nama, nip, wa, jumlah: 1 }); return; }
+      ada.jumlah++;
+      if (!ada.nip && nip) ada.nip = nip;      // lengkapi dari rekaman lain
+      if (!ada.wa && wa) ada.wa = wa;
+    });
+    return Array.from(map.values()).sort((x, y) => x.nama.localeCompare(y.nama, 'id'));
+  }
+
+  /** Pilih PIC dari database → nama, NIP, dan WA terisi sekaligus. */
+  onPilihPic = (key) => {
+    const pic = this.daftarPic().find(x => x.key === key);
+    this.setState(s => ({
+      errButir: '',
+      formButir: pic
+        ? { ...s.formButir, picPilih: pic.key, picNama: pic.nama, picNip: pic.nip, picWa: pic.wa }
+        : { ...s.formButir, picPilih: '', picNama: '', picNip: '', picWa: '' }
+    }));
+  };
+
   /* ------------------------- Butir Kegiatan (CRUD) ------------------------ */
   onFieldButir = (field, value) => {
     const v = field === 'nominal' ? this.rupiahInput(value) : value;   // 'revisi' datang sebagai boolean
@@ -822,6 +858,8 @@ class Component extends DCLogic {
       const f = { ...s.formButir, [field]: v };
       // Detail Kegiatan bergantung pada akun — ganti akun, pilihan direset.
       if (field === 'komponen') { f.detail = ''; f.nama = ''; }
+      // Nama PIC diketik ulang → lepas dari rekaman database sampai dipilih lagi.
+      if (field === 'picNama') f.picPilih = '';
       // Nama butir SELALU mengikuti nama baku detail kegiatan (tidak diketik manual).
       if (field === 'detail') {
         const d = (s.detail || []).find(x => x.id === v);
@@ -858,6 +896,12 @@ class Component extends DCLogic {
     if (!(f.picNama || '').trim()) return this.setState({ errButir: 'Nama PIC wajib diisi.', okButir: '' });
     if (!(f.picWa || '').trim()) return this.setState({ errButir: 'Nomor WhatsApp PIC wajib diisi.', okButir: '' });
     if (this.digits(f.picWa).length < 9) return this.setState({ errButir: 'Nomor WhatsApp PIC tidak valid.', okButir: '' });
+    // Anti-dobel: nama yang sudah terdaftar dipakai apa adanya (satu record PIC),
+    // bukan ditambahkan sebagai orang baru. NIP/WA kosong dilengkapi dari database.
+    const picDb = this.daftarPic().find(x => x.key === this.kunciPic(f.picNama)) || null;
+    const picNama = picDb ? picDb.nama : (f.picNama || '').trim();
+    const picNip = (f.picNip || '').trim() || (picDb ? picDb.nip : '');
+    const picWa = (f.picWa || '').trim() || (picDb ? picDb.wa : '');
     if (f.revisi && !f.catatan.trim()) return this.setState({ errButir: 'Detail kegiatan bertanda perbaikan wajib menyertakan alasan pada kolom Catatan.', okButir: '' });
 
     this.setState({ busyButir: true, errButir: '', okButir: '' });
@@ -866,7 +910,7 @@ class Component extends DCLogic {
       ID_Komponen: f.komponen, ID_Detail: f.detail || '', Nama_Butir: f.nama.trim(), Nominal: nominal,
       Tanggal_Terima: f.tanggal, Status: f.status, Catatan: f.catatan.trim(),
       Link_Berkas: f.berkas.trim(), Revisi: !!f.revisi,
-      PIC_Nama: (f.picNama || '').trim(), PIC_NIP: (f.picNip || '').trim(), PIC_WA: (f.picWa || '').trim()
+      PIC_Nama: picNama, PIC_NIP: picNip, PIC_WA: picWa
     };
     try {
       let pesan;
@@ -908,6 +952,7 @@ class Component extends DCLogic {
         status: String(b.status || 'TU').toUpperCase() === 'REVISI' ? 'TU' : (b.status || 'TU'),
         catatan: b.catatan || '', berkas: b.berkas || '',
         revisi: b.revisi === true || String(b.status || '').toUpperCase() === 'REVISI',
+        picPilih: (this.daftarPic().find(x => x.key === this.kunciPic(b.picNama)) || {}).key || '',
         picNama: b.picNama || '', picNip: b.picNip || '', picWa: b.picWa || ''
       }
     });
@@ -1663,6 +1708,8 @@ class Component extends DCLogic {
       busyButir: this.state.busyButir,
       errButir: this.state.errButir,
       okButir: this.state.okButir,
+      picOptions: this.daftarPic(),
+      onPilihPic: this.onPilihPic,
       onFieldButir: this.onFieldButir,
       submitButir: this.submitButir,
       resetButir: this.resetButir,
