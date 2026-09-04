@@ -53,9 +53,9 @@ export const CONFIG = {
 };
 
 /* -----------------------------------------------------------------------------
-   SHEET 1 — Anggaran & Komponen
+   SHEET 1 — Anggaran & Subkomponen
    Kolom: ID_Komponen | Tipe | Parent_ID | Nama_Kegiatan | Pagu_Anggaran | Total_Realisasi
-   Tipe: 'UTAMA' (Komponen Utama) atau 'SUB' (Subkomponen)
+   Tipe: 'UTAMA' (Subkomponen) atau 'SUB' (Akun)
    Sisa_Anggaran & % penyerapan dihitung otomatis (tidak perlu kolom manual).
    Data di bawah = hasil parsing "Laporan Ketersediaan Dana Detail TA 2026",
    Satker 694677 Sekretariat Jenderal, Program WA.7858.
@@ -106,20 +106,20 @@ export const SEED_ANGGARAN = [
 
 /* -----------------------------------------------------------------------------
    SHEET 5 — DETAIL KEGIATAN (level ke-3 struktur anggaran)
-   Urutan hierarki:  KOMPONEN  →  SUBKOMPONEN  →  DETAIL KEGIATAN
+   Urutan hierarki:  SUBKOMPONEN  →  AKUN  →  DETAIL KEGIATAN
    Kolom sheet: ID_Detail | ID_Komponen | Nama_Detail | Pagu | Akrual_Lalu | Akrual_Ini
 
    • ID_Detail   = kode item resmi pada Laporan Ketersediaan Dana Detail (6 digit).
-   • ID_Komponen = subkomponen induk (level SUB pada sheet Anggaran).
+   • ID_Komponen = akun induk (level SUB pada sheet Anggaran).
    • Nama_Detail = NAMA BAKU/FIXED. Nama ditulis UMUM, tanpa embel-embel lokasi
      atau satuan kerja: semua "Makan Rapat Biasa D.K.I. JAKARTA" cukup
      "Makan Rapat", semua "Transport Lokal" tetap "Transport Lokal", dst.
-     Sehingga item yang sama di subkomponen berbeda memakai nama yang sama.
+     Sehingga item yang sama di akun berbeda memakai nama yang sama.
    • AKRUAL — data baru dari Laporan Ketersediaan Dana Detail:
        Akrual_Lalu = Realisasi Periode Lalu (sebelum bulan laporan)
        Akrual_Ini  = Realisasi Periode Ini  (bulan laporan)
        Akrual s.d. = Akrual_Lalu + Akrual_Ini  (dihitung otomatis)
-     Angka ini hanya BASELINE data lama. Begitu subkomponen/detail sudah punya
+     Angka ini hanya BASELINE data lama. Begitu akun/detail sudah punya
      butir di sheet Butir, AKRUAL dihitung dari butir tersebut:
        AKRUAL    = jumlah nominal SEMUA butir yang direkam (semua tahapan)
        REALISASI = jumlah nominal butir yang sudah SP2D (subset dari akrual)
@@ -344,7 +344,7 @@ export function setToken(v) { try { sessionStorage.setItem(TOKEN_KEY, v); } catc
 export function clearToken() { try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
 
 /* -----------------------------------------------------------------------------
-   SHEET 3 — Butir Kegiatan (berkas pertanggungjawaban per subkomponen)
+   SHEET 3 — Butir Kegiatan (berkas pertanggungjawaban per akun)
    Kolom: ID_Butir | ID_Komponen | Nama_Butir | Nominal | Tanggal_Terima |
           Status | Catatan | Link_Berkas | Diperbarui | Revisi
    ID_Komponen berelasi ke Sheet 1 (biasanya level SUB).
@@ -419,7 +419,7 @@ export function adaRevisi(b) {
 }
 
 /* -----------------------------------------------------------------------------
-   SHEET 4 — RPD (Rencana Penarikan Dana) per Komponen Utama per bulan
+   SHEET 4 — RPD (Rencana Penarikan Dana) per Subkomponen per bulan
    Sumber: "RENCANA PENARIKAN DANA (RDP) PUSDATIN KP TA 2026".
    Kolom sheet: ID_Komponen | Jan | Feb | Mar | Apr | Mei | Jun | Jul | Ags | Sep | Okt | Nov | Des
    Angka RPD adalah RENCANA penarikan; realisasi dibandingkan terhadap RPD
@@ -796,12 +796,12 @@ export function sudahSP2D(b) {
 }
 
 /* -----------------------------------------------------------------------------
-   SUBKOMPONEN TANPA RINCIAN DETAIL KEGIATAN
-   Perjalanan dinas dirinci cukup sampai level subkomponen:
+   AKUN TANPA RINCIAN DETAIL KEGIATAN
+   Perjalanan dinas dirinci cukup sampai level akun:
      524111 Perjalanan Dinas Biasa
      524113 Perjalanan Dinas Dalam Kota
      524114 Perjalanan Dinas Paket Meeting Dalam Kota
-   Untuk subkomponen ini Detail Kegiatan tidak ditampilkan dan tidak wajib
+   Untuk akun ini Detail Kegiatan tidak ditampilkan dan tidak wajib
    dipilih saat merekam berkas — nama kegiatan diketik langsung.
 ----------------------------------------------------------------------------- */
 export const KODE_TANPA_DETAIL = ['524111', '524113', '524114'];
@@ -816,7 +816,7 @@ function bulanDari(tgl) {
   return m ? Number(m[2]) - 1 : -1;
 }
 
-/** Admin: tambah Detail Kegiatan baru pada satu subkomponen. */
+/** Admin: tambah Detail Kegiatan baru pada satu akun. */
 export function addDetail(payload) {
   return postAksi('addDetail', payload, { id: payload.ID_Detail });
 }
@@ -829,11 +829,11 @@ export function deleteDetail(id) {
   return postAksi('deleteDetail', { ID_Detail: id }, { id });
 }
 
-/** Admin: tambah komponen utama / subkomponen baru. */
+/** Admin: tambah subkomponen / akun baru. */
 export function addKomponen(payload) {
   return postAksi('addKomponen', payload, { id: payload.ID_Komponen });
 }
-/** Admin: hapus komponen (beserta subkomponennya bila komponen utama). */
+/** Admin: hapus subkomponen (beserta akunnya bila subkomponen). */
 export function deleteKomponen(id) {
   return postAksi('deleteKomponen', { ID_Komponen: id }, { id });
 }
@@ -847,11 +847,11 @@ export async function fetchLog(limit) {
   return j.log || [];
 }
 
-/** Admin: ubah nama / pagu komponen atau subkomponen (Revisi Pagu). */
+/** Admin: ubah nama / pagu subkomponen atau akun (Revisi Pagu). */
 export function updateAnggaran(payload) {
   return postAksi('updateAnggaran', payload, { id: payload.ID_Komponen });
 }
-/** Admin: ubah RPD satu komponen utama (array 12 bulan) — Revisi RPD. */
+/** Admin: ubah RPD satu subkomponen (array 12 bulan) — Revisi RPD. */
 export function updateRPD(payload) {
   return postAksi('updateRPD', payload, { id: payload.ID_Komponen });
 }
@@ -861,11 +861,11 @@ export function updateRPD(payload) {
  *
  * REALISASI berasal dari BUTIR KEGIATAN berstatus SP2D — tidak ada input
  * pencairan terpisah. Begitu Admin menetapkan sebuah butir ke tahap SP2D,
- * nominalnya otomatis masuk realisasi komponen tersebut.
+ * nominalnya otomatis masuk realisasi subkomponen tersebut.
  * Kolom Total_Realisasi di Sheet 1 hanya dipakai sebagai cadangan untuk
- * komponen yang belum punya butir sama sekali (data lama).
+ * subkomponen yang belum punya butir sama sekali (data lama).
  *
- * RPD (Rencana Penarikan Dana) dilampirkan per komponen utama, lengkap dengan
+ * RPD (Rencana Penarikan Dana) dilampirkan per subkomponen, lengkap dengan
  * nilai kumulatif s.d. bulan berjalan untuk mengukur on-track/tertinggal.
  */
 export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan, detail) {
@@ -880,7 +880,7 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan, detail) {
   });
   const rpdBy = {};
   (rpd && rpd.length ? rpd : SEED_RPD.map(rowRPD)).forEach(r => { rpdBy[r.komponenId] = r; });
-  // DETAIL KEGIATAN — level ke-3 (di bawah subkomponen).
+  // DETAIL KEGIATAN — level ke-3 (di bawah akun).
   const detailBy = {};
   (detail && detail.length ? detail : SEED_DETAIL.map(rowDetail)).forEach(d => {
     (detailBy[d.komponenId] = detailBy[d.komponenId] || []).push(d);
@@ -896,7 +896,7 @@ export function buildTree(anggaran, pencairan, butir, rpd, bulanAcuan, detail) {
       const realisasi = items.length ? items.filter(sudahSP2D).reduce((t, x) => t + x.nominal, 0) : s.realisasi;
       const pct = s.pagu > 0 ? (realisasi / s.pagu) * 100 : 0;
       const docs = items.filter(sudahSP2D);          // bukti pencairan = butir SP2D
-      // DETAIL KEGIATAN milik subkomponen ini + butir yang menempel padanya.
+      // DETAIL KEGIATAN milik akun ini + butir yang menempel padanya.
       const rincian = (detailBy[s.id] || []).map(d => {
         const bd = items.filter(b => b.detailId === d.id);
         // AKRUAL = seluruh butir yang direkam (semua tahapan), karena data yang

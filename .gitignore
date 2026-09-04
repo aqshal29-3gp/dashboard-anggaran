@@ -1,0 +1,3 @@
+# jangan commit konfigurasi berisi token asli
+# data-source.local.js
+.DS_Store

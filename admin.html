@@ -122,8 +122,8 @@
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <input type="search" value="{{ cari }}" onInput="{{ onCari }}" placeholder="Cari butir..." style="height:38px;width:180px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
-              <select value="{{ filterKomponen }}" onChange="{{ onFilterKomponen }}" aria-label="Filter subkomponen" style="height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;cursor:pointer;outline:none;max-width:230px">
-                <option value="ALL">Semua subkomponen</option>
+              <select value="{{ filterKomponen }}" onChange="{{ onFilterKomponen }}" aria-label="Filter akun" style="height:38px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;cursor:pointer;outline:none;max-width:230px">
+                <option value="ALL">Semua akun</option>
                 <sc-for list="{{ subOptions }}" as="k" hint-placeholder-count="5">
                   <option value="{{ k.value }}">{{ k.label }}</option>
                 </sc-for>
@@ -158,22 +158,22 @@
           <div style="padding:18px 20px;border-bottom:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
             <div style="min-width:0">
               <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Revisi Pagu Anggaran</h2>
-              <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty">Ubah nama dan besaran pagu komponen utama maupun subkomponen. Tersimpan ke sheet "Anggaran".</div>
+              <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty">Ubah nama dan besaran pagu subkomponen maupun akun. Tersimpan ke sheet "Anggaran".</div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <input type="search" value="{{ cariPagu }}" onInput="{{ onCariPagu }}" placeholder="Cari komponen..." style="height:40px;width:180px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
-              <button type="button" onClick="{{ toggleFormKomp }}" title="Tambah komponen atau subkomponen baru" style="height:40px;padding:0 14px;border-radius:10px;border:1px solid {{ tambahBorder }};background:{{ tambahBg }};color:{{ tambahInk }};font-family:Manrope;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap">{{ tambahLabel }}</button>
+              <input type="search" value="{{ cariPagu }}" onInput="{{ onCariPagu }}" placeholder="Cari subkomponen..." style="height:40px;width:180px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
+              <button type="button" onClick="{{ toggleFormKomp }}" title="Tambah subkomponen atau akun baru" style="height:40px;padding:0 14px;border-radius:10px;border:1px solid {{ tambahBorder }};background:{{ tambahBg }};color:{{ tambahInk }};font-family:Manrope;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap">{{ tambahLabel }}</button>
             </div>
           </div>
           <sc-if value="{{ formKompBuka }}" hint-placeholder-val="{{ false }}">
             <div style="padding:14px 16px;border-bottom:1px solid var(--line-2);background:var(--surface-2);animation:fadeUp 200ms ease both">
               <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
                 <div style="display:flex;gap:3px;padding:3px;border-radius:9px;background:var(--surface-3);border:1px solid var(--line-2);flex:0 0 auto">
-                  <button type="button" onClick="{{ setTipeUtama }}" style="height:34px;padding:0 12px;border-radius:7px;border:none;background:{{ kompTipeUtamaBg }};color:{{ kompTipeUtamaInk }};font-family:Manrope;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Komponen</button>
-                  <button type="button" onClick="{{ setTipeSub }}" style="height:34px;padding:0 12px;border-radius:7px;border:none;background:{{ kompTipeSubBg }};color:{{ kompTipeSubInk }};font-family:Manrope;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Subkomponen</button>
+                  <button type="button" onClick="{{ setTipeUtama }}" style="height:34px;padding:0 12px;border-radius:7px;border:none;background:{{ kompTipeUtamaBg }};color:{{ kompTipeUtamaInk }};font-family:Manrope;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Subkomponen</button>
+                  <button type="button" onClick="{{ setTipeSub }}" style="height:34px;padding:0 12px;border-radius:7px;border:none;background:{{ kompTipeSubBg }};color:{{ kompTipeSubInk }};font-family:Manrope;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Akun</button>
                 </div>
                 <sc-if value="{{ kompTipeSub }}" hint-placeholder-val="{{ true }}">
-                  <select value="{{ formKomp.parent }}" onChange="{{ onKompParent }}" aria-label="Komponen utama induk" style="flex:1 1 190px;min-width:0;height:40px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12.5px;cursor:pointer;outline:none">
+                  <select value="{{ formKomp.parent }}" onChange="{{ onKompParent }}" aria-label="Subkomponen induk" style="flex:1 1 190px;min-width:0;height:40px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:Manrope;font-size:12.5px;cursor:pointer;outline:none">
                     <option value="">Induk…</option>
                     <sc-for list="{{ utamaOptions }}" as="k" hint-placeholder-count="10">
                       <option value="{{ k.value }}">{{ k.label }}</option>
@@ -198,7 +198,7 @@
                 </div>
                 <div style="display:flex;gap:6px;flex:0 0 auto">
                   <button type="button" onClick="{{ r.onSimpan }}" disabled="{{ r.diam }}" style="height:42px;padding:0 14px;border-radius:9px;border:none;background:{{ r.btnBg }};color:{{ r.btnInk }};font-family:Manrope;font-size:12.5px;font-weight:700;cursor:{{ r.cursor }}">{{ r.btnLabel }}</button>
-                  <button type="button" onClick="{{ r.onHapus }}" title="Hapus komponen ini" style="height:42px;width:42px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--red);font-family:Manrope;font-size:13px;font-weight:700;cursor:pointer" style-hover="border-color:var(--red);background:var(--red-bg)">✕</button>
+                  <button type="button" onClick="{{ r.onHapus }}" title="Hapus subkomponen ini" style="height:42px;width:42px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--red);font-family:Manrope;font-size:13px;font-weight:700;cursor:pointer" style-hover="border-color:var(--red);background:var(--red-bg)">✕</button>
                 </div>
               </div>
             </sc-for>
@@ -215,13 +215,13 @@
         <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;animation:fadeUp 280ms ease both">
           <div style="padding:18px 20px;border-bottom:1px solid var(--line-2)">
             <h2 style="margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em">Revisi RPD (Rencana Penarikan Dana)</h2>
-            <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty">Rencana penarikan per bulan untuk tiap komponen utama. Dipakai dashboard sebagai pembanding penyerapan bulanan.</div>
+            <div style="margin-top:3px;font-size:12.5px;color:var(--ink-2);text-wrap:pretty">Rencana penarikan per bulan untuk tiap subkomponen. Dipakai dashboard sebagai pembanding penyerapan bulanan.</div>
           </div>
           <div style="padding:18px;display:grid;gap:16px">
             <div>
-              <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Komponen Utama</label>
+              <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Subkomponen</label>
               <select ref="{{ refRpdKomponen }}" value="{{ rpdKomponen }}" onChange="{{ onRpdKomponen }}" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;cursor:pointer;outline:none" style-focus="border-color:var(--navy-3)">
-                <option value="">— Pilih komponen utama —</option>
+                <option value="">— Pilih subkomponen —</option>
                 <sc-for list="{{ utamaOptions }}" as="k" hint-placeholder-count="10">
                   <option value="{{ k.value }}">{{ k.label }}</option>
                 </sc-for>
@@ -645,7 +645,7 @@
  * SP2D, nominalnya otomatis tercatat sebagai realisasi pada monitoring anggaran.
  * Tidak ada gerbang token: sistem internal, pembatasan dilakukan di level hosting.
  *
- * Komponen modular yang dipakai:
+ * Subkomponen modular yang dipakai:
  *   AdminControls.dc.html  → form input/edit butir
  *   ActivityTable.dc.html  → tabel butir + kontrol tahapan berkas
  *
@@ -820,7 +820,7 @@ class Component extends DCLogic {
     const v = field === 'nominal' ? this.rupiahInput(value) : value;   // 'revisi' datang sebagai boolean
     this.setState(s => {
       const f = { ...s.formButir, [field]: v };
-      // Detail Kegiatan bergantung pada subkomponen — ganti subkomponen, pilihan direset.
+      // Detail Kegiatan bergantung pada akun — ganti akun, pilihan direset.
       if (field === 'komponen') { f.detail = ''; f.nama = ''; }
       // Nama butir SELALU mengikuti nama baku detail kegiatan (tidak diketik manual).
       if (field === 'detail') {
@@ -831,9 +831,9 @@ class Component extends DCLogic {
     });
   };
 
-  /** Detail Kegiatan pada satu subkomponen (nama baku, urut kode). */
+  /** Detail Kegiatan pada satu akun (nama baku, urut kode). */
   detailDari(komponenId) {
-    if (this.ds && this.ds.tanpaDetail(komponenId)) return [];   // perjalanan dinas: cukup sampai subkomponen
+    if (this.ds && this.ds.tanpaDetail(komponenId)) return [];   // perjalanan dinas: cukup sampai akun
     return (this.state.detail || [])
       .filter(d => d.komponenId === komponenId)
       .slice().sort((a, b) => (a.id < b.id ? -1 : 1));
@@ -847,7 +847,7 @@ class Component extends DCLogic {
     if (!this.state.editingId && this.state.butir.some(b => b.id === nomor)) {
       return this.setState({ errButir: 'Nomor dokumen "' + nomor + '" sudah dipakai butir lain.', okButir: '' });
     }
-    if (!f.komponen) return this.setState({ errButir: 'Subkomponen wajib dipilih.', okButir: '' });
+    if (!f.komponen) return this.setState({ errButir: 'Akun wajib dipilih.', okButir: '' });
     const bebasDetail = this.ds.tanpaDetail(f.komponen);
     if (!bebasDetail && !f.detail) return this.setState({ errButir: 'Detail kegiatan wajib dipilih.', okButir: '' });
     if (!f.nama.trim()) return this.setState({ errButir: bebasDetail
@@ -1111,7 +1111,7 @@ class Component extends DCLogic {
       '<div class="kop"><img class="lg" src="' + (this.ds.LOGO_DATA || '') + '" alt=""><div><div class="u">Pusat Data, Informasi dan Komunikasi Publik</div>' +
       '<h1>Kementerian Imigrasi dan Pemasyarakatan</h1></div></div>' +
       '<h2>Rekapitulasi Pencairan (SP2D) TA 2026</h2>' +
-      '<table><thead><tr><th>No. Dokumen</th><th>Kegiatan</th><th>Komponen</th><th>PIC</th>' +
+      '<table><thead><tr><th>No. Dokumen</th><th>Kegiatan</th><th>Subkomponen</th><th>PIC</th>' +
       '<th class="n">Nominal</th><th class="n">Tanggal</th></tr></thead><tbody>' +
       rows.map(b => '<tr><td style="font-family:\'IBM Plex Mono\',monospace;font-size:8pt">' + b.id + '</td>' +
         '<td>' + b.nama + '</td><td style="font-size:8pt">' + (this.namaKomponen(b.komponenId) || b.komponenId) + '</td>' +
@@ -1142,7 +1142,7 @@ class Component extends DCLogic {
     }
   };
 
-  /* ------------------- Tambah / hapus komponen (Revisi Pagu) --------------- */
+  /* ------------------- Tambah / hapus subkomponen (Revisi Pagu) --------------- */
   onKompField = (field, value) => {
     const v = field === 'pagu' ? this.rupiahInput(value) : value;
     this.setState(s => ({ formKomp: { ...s.formKomp, [field]: v }, pesanPagu: '' }));
@@ -1152,10 +1152,10 @@ class Component extends DCLogic {
     const f = this.state.formKomp;
     const id = (f.id || '').trim();
     const pagu = Number(this.digits(f.pagu)) || 0;
-    if (!id) return this.setState({ pesanPagu: 'Kode komponen wajib diisi (mis. 051.0P atau 051.0A-521212).', pesanPaguOk: false });
+    if (!id) return this.setState({ pesanPagu: 'Kode subkomponen wajib diisi (mis. 051.0P atau 051.0A-521212).', pesanPaguOk: false });
     if (this.state.anggaran.some(r => r.id === id)) return this.setState({ pesanPagu: 'Kode "' + id + '" sudah dipakai.', pesanPaguOk: false });
     if (!(f.nama || '').trim()) return this.setState({ pesanPagu: 'Nama kegiatan wajib diisi.', pesanPaguOk: false });
-    if (f.tipe === 'SUB' && !f.parent) return this.setState({ pesanPagu: 'Pilih komponen utama induk untuk subkomponen.', pesanPaguOk: false });
+    if (f.tipe === 'SUB' && !f.parent) return this.setState({ pesanPagu: 'Pilih subkomponen induk untuk akun.', pesanPaguOk: false });
 
     this.setState({ busyKomp: true, pesanPagu: '' });
     try {
@@ -1167,7 +1167,7 @@ class Component extends DCLogic {
         busyKomp: false,
         anggaran: s.anggaran.concat([{ id, tipe: f.tipe, parent: f.tipe === 'SUB' ? f.parent : '', nama: f.nama.trim(), pagu, realisasi: 0 }]),
         formKomp: { id: '', tipe: f.tipe, parent: f.parent, nama: '', pagu: '' },
-        pesanPagu: (res.simulated ? 'Simulasi: ' : '') + 'Komponen ' + id + ' ditambahkan.',
+        pesanPagu: (res.simulated ? 'Simulasi: ' : '') + 'Subkomponen ' + id + ' ditambahkan.',
         pesanPaguOk: true
       }));
       if (!res.simulated) setTimeout(() => this.load(true), 1200);
@@ -1179,7 +1179,7 @@ class Component extends DCLogic {
   hapusKomponen = async (row) => {
     const anak = this.state.anggaran.filter(r => r.parent === row.id).length;
     const konfirm = 'Hapus ' + row.id + ' — ' + row.nama + '?' +
-      (anak ? '\n\n' + anak + ' subkomponen di bawahnya ikut terhapus.' : '');
+      (anak ? '\n\n' + anak + ' akun di bawahnya ikut terhapus.' : '');
     if (typeof window !== 'undefined' && !window.confirm(konfirm)) return;
     this.setState(s => ({ busyPagu: { ...s.busyPagu, [row.id]: true }, pesanPagu: '' }));
     try {
@@ -1187,7 +1187,7 @@ class Component extends DCLogic {
       this.setState(s => ({
         anggaran: s.anggaran.filter(r => r.id !== row.id && r.parent !== row.id),
         busyPagu: { ...s.busyPagu, [row.id]: false },
-        pesanPagu: (res.simulated ? 'Simulasi: ' : '') + 'Komponen ' + row.id + ' dihapus.',
+        pesanPagu: (res.simulated ? 'Simulasi: ' : '') + 'Subkomponen ' + row.id + ' dihapus.',
         pesanPaguOk: true
       }));
       if (!res.simulated) setTimeout(() => this.load(true), 1200);
@@ -1335,7 +1335,7 @@ class Component extends DCLogic {
     const sp2dCount = butirSP2D.length;
     const nominalSP2D = butirSP2D.reduce((t, b) => t + (b.nominal || 0), 0);
 
-    // ---- Revisi Pagu: daftar baris (utama + subkomponennya) ----
+    // ---- Revisi Pagu: daftar baris (utama + akunnya) ----
     const qp = this.state.cariPagu.trim().toLowerCase();
     const cocok = (r) => !qp || (r.nama || '').toLowerCase().includes(qp) || (r.id || '').toLowerCase().includes(qp);
     const barisPagu = [];
@@ -1487,7 +1487,7 @@ class Component extends DCLogic {
         return [
           { label: 'No. dokumen', nilai: b.id, weight: '700', font: "'IBM Plex Mono',monospace", warna: 'var(--navy-3)' },
           { label: 'Kegiatan', nilai: b.nama, weight: '700', font: 'Manrope', warna: 'var(--ink)' },
-          { label: 'Komponen', nilai: (this.namaKomponen(b.komponenId) || b.komponenId), weight: '600', font: 'Manrope', warna: 'var(--ink-2)' },
+          { label: 'Subkomponen', nilai: (this.namaKomponen(b.komponenId) || b.komponenId), weight: '600', font: 'Manrope', warna: 'var(--ink-2)' },
           { label: 'Nominal', nilai: 'Rp ' + nf.format(Math.round(b.nominal || 0)), weight: '700', font: "'IBM Plex Mono',monospace", warna: 'var(--green)' },
           { label: 'PIC', nilai: (b.picNama || 'belum dicatat') + (b.picNip ? ' · NIP ' + b.picNip : ''), weight: '600', font: 'Manrope', warna: 'var(--ink-2)' }
         ];
@@ -1654,7 +1654,7 @@ class Component extends DCLogic {
       detailOptions: this.detailDari(this.state.formButir.komponen).map(d => ({
         value: d.id, label: d.id + ' — ' + d.nama
       })),
-      /* Perjalanan dinas (524111/524113/524114): cukup sampai subkomponen. */
+      /* Perjalanan dinas (524111/524113/524114): cukup sampai akun. */
       butirTanpaDetail: !!(this.ds && this.ds.tanpaDetail(this.state.formButir.komponen)),
       tahapOptions: TAHAP.map(t => ({ value: t.key, label: t.urut + '. ' + t.label }))
         .concat([{ value: 'REVISI', label: '⚑ Perlu perbaikan (penanda)' }]),
@@ -1729,7 +1729,7 @@ class Component extends DCLogic {
       }),
       rpdStats: [
         { label: 'Total RPD setahun', value: 'Rp ' + fmt(totalRpd), color: 'var(--ink)' },
-        { label: 'Pagu komponen', value: 'Rp ' + fmt(paguRpd), color: 'var(--ink)' },
+        { label: 'Pagu subkomponen', value: 'Rp ' + fmt(paguRpd), color: 'var(--ink)' },
         { label: 'Selisih thd pagu', value: 'Rp ' + fmt(totalRpd - paguRpd), color: totalRpd === paguRpd ? 'var(--green)' : 'var(--amber)' },
         { label: 'RPD s.d. bulan ini', value: 'Rp ' + fmt(draftRpd.slice(0, bulanIni + 1).reduce((t, v) => t + (Number(this.digits(v)) || 0), 0)), color: 'var(--navy-3)' }
       ],
@@ -1747,7 +1747,7 @@ class Component extends DCLogic {
       formKomp: this.state.formKomp,
       formKompBuka: this.state.formKompBuka,
       toggleFormKomp: () => this.setState(s => ({ formKompBuka: !s.formKompBuka, pesanPagu: '' })),
-      tambahLabel: this.state.formKompBuka ? '✕ Tutup' : '+ Tambah komponen',
+      tambahLabel: this.state.formKompBuka ? '✕ Tutup' : '+ Tambah subkomponen',
       tambahBg: this.state.formKompBuka ? 'var(--surface-3)' : 'var(--navy)',
       tambahInk: this.state.formKompBuka ? 'var(--ink-2)' : '#fff',
       tambahBorder: this.state.formKompBuka ? 'var(--line)' : 'var(--navy)',
@@ -1760,7 +1760,7 @@ class Component extends DCLogic {
       setTipeUtama: () => this.onKompField('tipe', 'UTAMA'),
       setTipeSub: () => this.onKompField('tipe', 'SUB'),
       busyKomp: this.state.busyKomp,
-      labelKomp: this.state.busyKomp ? 'Menyimpan...' : '+ Tambah Komponen',
+      labelKomp: this.state.busyKomp ? 'Menyimpan...' : '+ Tambah Subkomponen',
       simpanKomponen: this.simpanKomponen,
       kompTipeUtamaBg: this.state.formKomp.tipe === 'UTAMA' ? 'var(--navy)' : 'var(--surface)',
       kompTipeUtamaInk: this.state.formKomp.tipe === 'UTAMA' ? '#fff' : 'var(--ink-2)',
@@ -1799,7 +1799,7 @@ class Component extends DCLogic {
         { n: '3', text: 'Bila ada kekurangan: klik "⚑ Tandai revisi" dan tulis alasannya. Berkas TETAP di tahap saat itu — revisi hanya penanda, bukan tahap yang wajib dilewati. Setelah diperbaiki, klik "✓ Selesai revisi".' },
         { n: '4', text: 'Begitu SP2D terbit, set tahap "SP2D" (kartu tersorot hijau). Nominalnya OTOMATIS masuk realisasi — tidak ada input pencairan terpisah.' },
         { n: '5', text: 'Perubahan nama/besaran anggaran lewat tab "Revisi Pagu"; rencana penarikan bulanan lewat tab "Revisi RPD".' },
-        { n: '6', text: 'Dashboard publik menampilkan semua status ini read-only pada popup tiap komponen.' }
+        { n: '6', text: 'Dashboard publik menampilkan semua status ini read-only pada popup tiap subkomponen.' }
       ]
     };
   }

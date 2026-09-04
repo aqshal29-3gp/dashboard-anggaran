@@ -34,9 +34,9 @@
   <div style="padding:18px;display:grid;gap:16px">
 
     <div>
-      <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Subkomponen <span style="color:var(--red)">*</span></label>
+      <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px">Akun <span style="color:var(--red)">*</span></label>
       <select ref="{{ refKomponen }}" value="{{ vKomponen }}" onChange="{{ onKomponen }}" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;cursor:pointer;outline:none" style-focus="border-color:var(--navy-3)">
-        <option value="">— Pilih subkomponen —</option>
+        <option value="">— Pilih akun —</option>
         <sc-for list="{{ komponenOptions }}" as="k" hint-placeholder-count="6">
           <option value="{{ k.value }}">{{ k.label }}</option>
         </sc-for>
@@ -53,10 +53,10 @@
     <div>
       <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
         <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Nama Kegiatan <span style="color:var(--red)">*</span></label>
-        <span title="Subkomponen perjalanan dinas tidak dirinci sampai Detail Kegiatan — cukup sampai subkomponen. Tuliskan nama kegiatan/perjalanannya langsung." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+        <span title="Akun perjalanan dinas tidak dirinci sampai Detail Kegiatan — cukup sampai akun. Tuliskan nama kegiatan/perjalanannya langsung." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
       </div>
       <input type="text" value="{{ vNama }}" onInput="{{ onNama }}" placeholder="Contoh: Monitoring wilayah kerja Jawa Barat" style="width:100%;height:42px;padding:0 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-family:Manrope;font-size:13px;outline:none" style-focus="border-color:var(--navy-3)">
-      <div style="margin-top:5px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">Perjalanan dinas dirinci cukup sampai subkomponen — tanpa Detail Kegiatan.</div>
+      <div style="margin-top:5px;font-size:11.5px;color:var(--ink-3);text-wrap:pretty">Perjalanan dinas dirinci cukup sampai akun — tanpa Detail Kegiatan.</div>
     </div>
     </sc-if>
 
@@ -64,7 +64,7 @@
     <div>
       <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
         <label style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Detail Kegiatan <span style="color:var(--red)">*</span></label>
-        <span title="Nama detail kegiatan bersifat BAKU — sudah ditetapkan pada sheet Detail dan tidak diubah di sini. Pilih subkomponen terlebih dahulu, lalu pilih detail kegiatan yang dibiayai." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
+        <span title="Nama detail kegiatan bersifat BAKU — sudah ditetapkan pada sheet Detail dan tidak diubah di sini. Pilih akun terlebih dahulu, lalu pilih detail kegiatan yang dibiayai." style="width:17px;height:17px;flex:0 0 auto;border-radius:50%;background:var(--surface-3);border:1px solid var(--line);color:var(--ink-3);display:grid;place-items:center;font-size:10px;font-weight:800;cursor:help" style-hover="background:var(--navy);color:#fff;border-color:var(--navy)">i</span>
       </div>
       <select ref="{{ refDetail }}" value="{{ vDetail }}" onChange="{{ onDetail }}" disabled="{{ detailKunci }}" style="width:100%;height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:{{ detailBg }};color:var(--ink);font-family:Manrope;font-size:13px;cursor:pointer;outline:none" style-focus="border-color:var(--navy-3)">
         <option value="">{{ detailKosongLabel }}</option>
@@ -176,7 +176,7 @@
  * AdminControls — form input & edit Butir Kegiatan (dipakai Admin/TU).
  *
  * Presentational: seluruh nilai & handler dikirim dari parent (Admin Panel),
- * sehingga komponen ini bisa dipasang di halaman lain tanpa membawa state.
+ * sehingga subkomponen ini bisa dipasang di halaman lain tanpa membawa state.
  *
  * Props: komponenOptions[], values{komponen,nama,nominal,tanggal,status,catatan,berkas},
  *        onField(field, value), onSubmit(), onReset(), onCancel(),
@@ -242,7 +242,7 @@ class Component extends DCLogic {
       judul: editing ? 'Edit Detail Kegiatan · ' + this.props.editingId : (this.props.judul ?? 'Rekam Detail Kegiatan'),
       subjudul: editing
         ? 'Perbarui isi rekaman, lalu simpan. Tahapan berkas juga bisa diubah langsung dari tabel.'
-        : 'Urutan struktur anggaran: Komponen → Subkomponen → Detail Kegiatan. Pilih subkomponen, lalu detail kegiatan yang dibiayai berkas ini.',
+        : 'Urutan struktur anggaran: Subkomponen → Akun → Detail Kegiatan. Pilih akun, lalu detail kegiatan yang dibiayai berkas ini.',
       modeLabel: live ? 'TERSAMBUNG · Google Sheets' : 'MODE ' + mode.toUpperCase() + ' · simulasi lokal',
       modeColor: live ? 'var(--green)' : 'var(--amber)',
       modeBg: live ? 'var(--green-bg)' : 'var(--amber-bg)',
@@ -260,20 +260,20 @@ class Component extends DCLogic {
       refDetail: (el) => { this.elDetail = el; if (el && el.options.length) el.value = v.detail ?? ''; },
       refStatus: (el) => { this.elStatus = el; if (el && el.options.length) el.value = v.status ?? 'TU'; },
       vKomponen: v.komponen ?? '',
-      /* Detail Kegiatan — nama baku, dipilih (tidak diketik) dan tergantung subkomponen. */
+      /* Detail Kegiatan — nama baku, dipilih (tidak diketik) dan tergantung akun. */
       detailOptions: detOpt,
       vDetail: v.detail ?? '',
       onDetail: this.field('detail'),
       detailKunci: !v.komponen,
       detailBg: v.komponen ? 'var(--surface-2)' : 'var(--surface-3)',
       detailKosongLabel: v.komponen
-        ? (detOpt.length ? '— Pilih detail kegiatan —' : '— Subkomponen ini belum punya detail kegiatan —')
-        : '— Pilih subkomponen dahulu —',
+        ? (detOpt.length ? '— Pilih detail kegiatan —' : '— Akun ini belum punya detail kegiatan —')
+        : '— Pilih akun dahulu —',
       detailHint: !v.komponen
-        ? 'Daftar detail kegiatan muncul setelah subkomponen dipilih.'
+        ? 'Daftar detail kegiatan muncul setelah akun dipilih.'
         : (detOpt.length
             ? 'Nama detail kegiatan sudah baku dan tidak dapat diubah dari sini. Tambah/ubah daftarnya lewat sheet "Detail".'
-            : 'Belum ada detail kegiatan pada subkomponen ini — tambahkan dahulu di sheet "Detail".'),
+            : 'Belum ada detail kegiatan pada akun ini — tambahkan dahulu di sheet "Detail".'),
       /* Perjalanan dinas: tanpa Detail Kegiatan — nama kegiatan diketik manual. */
       pakaiDetail: !this.props.tanpaDetail,
       pakaiNama: !!this.props.tanpaDetail,
