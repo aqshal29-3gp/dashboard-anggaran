@@ -8,13 +8,32 @@ API Apps Script, dashboard publik, dan panel admin.
 
 | File | Peran | Perlu diedit? |
 |---|---|---|
-| `Code.gs` | Backend/API di Google Apps Script (GET + POST) | Ya — 1 baris token |
+| `Code.gs` | Backend/API di Google Apps Script (GET + POST + seeder) | Opsional — 1 baris token |
 | `data-source.js` | **Satu-satunya tempat konfigurasi** frontend + data contoh | Ya — blok `CONFIG` |
 | `Dashboard Penyerapan Anggaran.dc.html` | Dashboard publik / pimpinan | Tidak |
-| `Admin Panel.dc.html` | Form input pencairan untuk admin | Tidak |
+| `Admin Panel.dc.html` | Panel Admin/TU: kelola butir kegiatan & pencairan | Tidak |
+| `SubcomponentModal.dc.html` | Subkomponen: popup rincian akun (bar penyerapan + butir kegiatan) | Tidak |
+| `image-slot.js` | Slot logo instansi (drag-and-drop) | Tidak |
+| `ActivityTable.dc.html` | Subkomponen: tabel butir kegiatan + tahapan berkas | Tidak |
+| `AdminControls.dc.html` | Subkomponen: form input/edit butir kegiatan | Tidak |
 | `index.html` | Pengalih ke dashboard (wajib untuk GitHub Pages) | Tidak |
 | `support.js` | Runtime — wajib diunggah bersama, tanpa ini halaman kosong | Tidak |
 | `Dashboard Penyerapan Anggaran v1.dc.html` | Versi lama (1 sheet, tanpa hierarki) — arsip | Tidak |
+
+### Struktur subkomponen (untuk integrasi ke codebase)
+
+```
+Dashboard (publik)                       Admin Panel (internal)
+│                                        │
+├─ KPI + Chart.js (% penyerapan)         ├─ AdminControls   ← form input/edit butir
+├─ Tree table (subkomponen → akun)   └─ ActivityTable   ← editable: dropdown tahapan,
+└─ SubcomponentModal   ← popup              tombol Naikkan / Edit / Hapus
+   └─ ActivityTable    ← read-only
+```
+
+Semua subkomponen bersifat presentational: data dan handler dikirim dari halaman induk,
+sehingga bisa dipasang ulang di halaman lain. Titik sambung API ditandai komentar
+`⚡ REAL-TIME` dan `⚡ INTEGRASI API` di dalam masing-masing file.
 
 ### Arsitektur
 
@@ -29,8 +48,8 @@ Google Sheets (database)                Apps Script (API)            Frontend (s
 
 Relasi: `Pencairan.ID_Komponen` → `Anggaran.ID_Komponen`.
 Setiap POST menambah 1 baris di `Pencairan`, lalu `Total_Realisasi` &
-`Sisa_Anggaran` pada `Anggaran` dihitung ulang otomatis — untuk subkomponen
-maupun komponen utama induknya.
+`Sisa_Anggaran` pada `Anggaran` dihitung ulang otomatis — untuk akun
+maupun subkomponen induknya.
 
 ---
 
@@ -60,7 +79,7 @@ Tidak perlu copy-paste manual. Cukup jalankan satu fungsi:
    Go to (nama project) → Allow**. (Wajar; script hanya mengakses spreadsheet Anda sendiri.)
 3. Selesai. Hasilnya:
    - Tab **`Anggaran`** & **`Pencairan`** dibuat lengkap dengan header dan baris judul dibekukan
-   - **32 baris** anggaran (10 komponen utama + 22 subkomponen) terisi beserta pagu
+   - **32 baris** anggaran (10 subkomponen + 22 akun) terisi beserta pagu
    - **22 baris** contoh pencairan terisi
    - `Total_Realisasi` & `Sisa_Anggaran` dihitung otomatis
    - Format angka & lebar kolom dirapikan sendiri
@@ -94,7 +113,7 @@ langkah A3 sudah membuat semuanya.
 
 | Kol | Header | Isi | Contoh |
 |---|---|---|---|
-| A | `ID_Komponen` | Kode unik. Untuk subkomponen gunakan pola `INDUK-AKUN` | `051.0M` / `051.0M-522141` |
+| A | `ID_Komponen` | Kode unik. Untuk akun gunakan pola `INDUK-AKUN` | `051.0M` / `051.0M-522141` |
 | B | `Tipe` | `UTAMA` atau `SUB` | `UTAMA` |
 | C | `Parent_ID` | Kode induk (kosongkan untuk `UTAMA`) | `051.0M` |
 | D | `Nama_Kegiatan` | Uraian | `Pengamanan dan Pemeliharaan TI` |
@@ -105,8 +124,8 @@ langkah A3 sudah membuat semuanya.
 Aturan:
 - Kolom E–G harus **format Angka**, bukan teks (jangan pakai `Rp` / titik ribuan).
 - `ID_Komponen` harus unik. Karena kode akun (mis. `521211`) muncul di banyak
-  komponen, **wajib** memakai pola `INDUK-AKUN` agar tidak bentrok.
-- Baris `UTAMA` tidak perlu diisi realisasinya — nilainya = jumlah subkomponen.
+  subkomponen, **wajib** memakai pola `INDUK-AKUN` agar tidak bentrok.
+- Baris `UTAMA` tidak perlu diisi realisasinya — nilainya = jumlah akun.
 
 Contoh 6 baris pertama (sesuai laporan TA 2026 Satker 694677):
 
@@ -135,7 +154,98 @@ ID_Komponen       Tipe   Parent_ID  Nama_Kegiatan                          Pagu_
 | F | `Link_Dokumen_Bukti` | URL Google Drive / PDF | `https://drive.google.com/file/d/.../view` |
 | G | `Dicatat_Pada` | Timestamp otomatis | — |
 
+### Sheet 3 — `Butir` (butir kegiatan / berkas pertanggungjawaban)
+
+Dibuat **otomatis** oleh `Code.gs` saat pertama dipakai — tidak perlu dibuat manual.
+
+| Kol | Header | Isi | Contoh |
+|---|---|---|---|
+| A | `ID_Butir` | **Diisi manual** dengan nomor dokumen/surat resmi. Harus unik | `DIK-KU.03.01-23` |
+| B | `ID_Komponen` | **Relasi ke Sheet 1** (biasanya akun) | `051.0J-522131` |
+| C | `Nama_Butir` | Uraian berkas/kegiatan | `Audit keamanan informasi tahap II` |
+| D | `Nominal` | Angka murni | `45000000` |
+| E | `Tanggal_Terima` | `YYYY-MM-DD` (berkas diterima TU) | `2026-08-14` |
+| F | `Status` | `TU` / `KEUANGAN` / `REVISI` / `SP2D` | `REVISI` |
+| G | `Catatan` | Alasan revisi / keterangan | `Lampiran SPK belum ditandatangani` |
+| H | `Link_Berkas` | URL Drive/PDF | `https://drive.google.com/...` |
+| I | `Diperbarui` | Timestamp otomatis | — |
+| J | `Revisi` | `YA` bila berkas sedang dikembalikan untuk diperbaiki; kosongkan bila tidak | `YA` |
+
+**Alur berkas — 3 tahap wajib, revisi bersifat kondisional:**
+
+```
+1 Verifikasi Tim TU Pusdatin KP  →  2 Verifikasi Tim Keuangan  →  3 SP2D
+            ⚑ Revisi (opsional, dapat terjadi di tahap 1 atau 2)
+```
+
+| Nilai | Kolom | Arti | Tampilan |
+|---|---|---|---|
+| `TU` | F Status | Verifikasi Tim TU Pusdatin KP | biru |
+| `KEUANGAN` | F Status | Verifikasi Tim Keuangan | navy |
+| `SP2D` | F Status | SP2D terbit | **kartu hijau** |
+| `YA` | J Revisi | Berkas dikembalikan untuk diperbaiki | **kartu merah, bendera ⚑** |
+
+Poin penting: **revisi bukan tahap yang harus dilewati.** Berkas yang lancar berjalan
+langsung TU → Keuangan → SP2D tanpa pernah bertanda revisi. Bila ada kekurangan,
+berkas **tetap berada pada tahapnya** dan hanya diberi penanda ⚑ beserta alasannya di
+kolom `Catatan`; setelah diperbaiki penanda dilepas dan berkas melanjutkan ke tahap
+berikutnya.
+
+Kompatibilitas: baris lama yang memakai `Status = REVISI` otomatis dibaca sebagai
+tahap `TU` + penanda revisi. Kolom J ditambahkan sendiri oleh `Code.gs` pada sheet
+yang sudah ada — tidak perlu migrasi manual.
+
+Di dashboard publik status ini **read-only**; hanya Panel Admin yang dapat mengubahnya.
+
+### Kontak Tim TU (tombol "Hubungi TU")
+
+Di `data-source.js` bagian `CONFIG`, isi nomor WhatsApp TU:
+
+```js
+WA_TU: '628123456789',            // format internasional, tanpa + dan tanpa spasi
+WA_TU_NAMA: 'Tim TU Pusdatin KP',
+```
+
+Tombol **✆ Hubungi TU** muncul di popup rincian subkomponen pada dashboard publik,
+lengkap dengan pesan otomatis berisi kode subkomponen, pagu, realisasi, dan sisa.
+
+### Kolom PIC pada sheet `Butir`
+
+Ditambahkan otomatis oleh `Code.gs`:
+
+| Kol | Header | Isi |
+|---|---|---|
+| K | `PIC_Nama` | Nama penanggung jawab kegiatan |
+| L | `PIC_NIP` | NIP |
+| M | `PIC_WA` | Nomor WA (boleh `08…`, disimpan sebagai `62…`) |
+
+Pada daftar butir di Panel Admin muncul tombol **✆ Beri tahu** — sekali klik membuka
+WhatsApp dengan pesan berisi nomor dokumen, kegiatan, nominal, tahap saat ini, dan
+alasan revisi bila ada.
+
+### Sheet 4 — `RPD` (Rencana Penarikan Dana)
+
+Dibuat **otomatis** oleh `Code.gs`. Satu baris per **subkomponen**, 12 kolom bulan.
+
+| Kol | Header | Isi |
+|---|---|---|
+| A | `ID_Komponen` | Subkomponen, mis. `051.0A` |
+| B–M | `Jan` … `Des` | Rencana penarikan bulan itu (angka murni) |
+
+Isi cepat: jalankan fungsi **`seedRPD`** di Apps Script — angka dari dokumen
+"RENCANA PENARIKAN DANA (RDP) PUSDATIN KP TA 2026" langsung masuk. Selanjutnya
+revisi dilakukan lewat **Panel Admin → tab Revisi RPD**.
+
+Dashboard memakai RPD sebagai pembanding alternatif: tombol **Terhadap RPD** pada
+grafik batang menghitung % realisasi terhadap RPD **kumulatif s.d. bulan** yang dipilih.
+
 ## A5. Deploy sebagai Web App
+
+> **Sudah pernah deploy? WAJIB deploy versi baru.** Endpoint `verifyToken`
+> (verifikasi login admin) ditambahkan pada revisi terbaru `Code.gs`. Bila Web App
+> masih versi lama, login admin akan selalu gagal. Caranya: tempel ulang seluruh
+> `Code.gs` → **Deploy → Manage deployments → Edit (pensil) → Version: New version
+> → Deploy**. URL tidak berubah.
 
 1. Di editor Apps Script: **Deploy → New deployment**.
 2. Klik ikon gerigi → **Web app**.
@@ -182,7 +292,8 @@ Endpoint lain yang tersedia:
 |---|---|
 | `?action=getAll` | Anggaran + Pencairan (dipakai dashboard) |
 | `?action=getAnggaran` | Hanya Sheet 1 |
-| `?action=getPencairan&komponen=051.0M-522141` | Riwayat 1 komponen |
+| `?action=getPencairan&subkomponen=051.0M-522141` | Riwayat 1 subkomponen |
+| `POST {action:'verifyToken', token}` | Verifikasi login admin (dipakai Panel Admin) |
 | `POST {action:'addPencairan', token, ...}` | Tambah pencairan (dipakai Admin Panel) |
 | `POST {action:'deletePencairan', token, ID_Pencairan}` | Hapus + hitung ulang |
 | `POST {action:'recalc', token}` | Hitung ulang seluruh agregat |
@@ -211,10 +322,16 @@ Buka `data-source.js`, ubah blok `CONFIG` di bagian paling atas:
 export const CONFIG = {
   MODE: 'appscript',                                   // ← dari 'seed'
   APPSCRIPT_URL: 'https://script.google.com/macros/s/AKfycb....../exec',
-  ADMIN_TOKEN: 'TOKEN_YANG_SAMA_DENGAN_CODE_GS',       // ← wajib sama
+  ADMIN_TOKEN: '',                                     // ← BIARKAN KOSONG di produksi
   REFRESH_MS: 5 * 60 * 1000
 };
 ```
+
+Mengapa `ADMIN_TOKEN` dikosongkan: pada MODE `appscript`, admin mengetik token saat
+login, token diverifikasi oleh `Code.gs`, dan nilainya hanya hidup di `sessionStorage`
+tab tersebut. Tidak ada nilai rahasia di dalam repositori — aman untuk GitHub publik.
+Isi `ADMIN_TOKEN` **hanya** bila memakai MODE `seed`/`gviz` untuk demo offline
+(tanpa server tidak ada yang bisa memverifikasi, dan login akan ditolak bila kosong).
 
 Tiga mode yang tersedia:
 
@@ -255,9 +372,9 @@ ke Apps Script akan diblokir browser bila halaman diakses lewat HTTP.
 ## B3. Checklist setelah deploy
 
 - [ ] Dashboard tampil, KPI tidak nol, badge sumber = Apps Script
-- [ ] Klik baris komponen utama → subkomponen mengembang
+- [ ] Klik baris subkomponen → akun mengembang
 - [ ] Klik **Data Dukung** → modal muncul, tautan bukti terbuka di tab baru
-- [ ] Panel Admin bisa dibuka dengan token, dropdown komponen terisi
+- [ ] Panel Admin bisa dibuka dengan token, dropdown subkomponen terisi
 - [ ] Uji simpan 1 pencairan → cek baris baru di Sheet `Pencairan` dan
       `Total_Realisasi` di Sheet `Anggaran` ikut berubah
 - [ ] Buka di HP: kartu menumpuk rapi, tabel bisa di-scroll horizontal
@@ -445,7 +562,7 @@ Buka `https://<user>.github.io/<repo>/` dan periksa berurutan:
 | 1 | Halaman tidak putih/kosong | `support.js` belum terunggah — lihat GH-6 |
 | 2 | KPI menampilkan angka, badge sumber = *Google Apps Script Web App* | `CONFIG.MODE` masih `seed`, atau URL Apps Script salah |
 | 3 | Grafik batang & donat muncul | Chart.js diblokir jaringan instansi — lihat GH-6 |
-| 4 | Klik baris komponen utama → subkomponen mengembang | — |
+| 4 | Klik baris subkomponen → akun mengembang | — |
 | 5 | Klik **Data Dukung** → modal + tautan bukti terbuka | — |
 | 6 | Buka di HP: kartu menumpuk, tabel scroll horizontal | — |
 | 7 | Tekan **F12 → Console**: tidak ada error merah | catat pesannya, cocokkan di GH-6 |
@@ -491,20 +608,85 @@ cukup edit Google Sheets atau input lewat Panel Admin.
 
 ---
 
-## C1. Alur harian admin (jalur normal — via Panel Admin)
+## C1. Alur harian: Butir Kegiatan (berkas dari Tim Kerja)
+
+1. Tim Kerja menyerahkan berkas pertanggungjawaban ke TU.
+2. Buka **Panel Admin → tab "Butir Kegiatan & Berkas"**.
+3. Isi form: **nomor dokumen/surat** (mis. `DIK-KU.03.01-23` — dipakai sebagai ID butir dan harus unik), pilih **akun**, nama butir, nominal, tanggal terima, tahapan awal
+   `1. Verifikasi Tim TU Pusdatin KP`, catatan, dan link berkas Drive → **Simpan**.
+4. Setelah berkas lengkap, pada daftar di bawahnya klik **→ Verifikasi Keuangan**
+   (atau pilih tahap langsung dari dropdown).
+5. Bila ada kekurangan: klik **⚑ Tandai revisi** lalu tulis alasannya. Berkas **tetap
+   berada pada tahapnya** — revisi hanya penanda. Kartu tersorot merah di dashboard
+   maupun panel admin. Setelah diperbaiki, klik **✓ Selesai revisi** dan lanjutkan
+   ke tahap berikutnya.
+6. Begitu SP2D terbit: set tahapan **SP2D** (baris tersorot hijau).
+7. Lanjut ke tab **"Catat Pencairan"** untuk mencatat nominal SP2D tersebut, agar
+   `Total_Realisasi` dan KPI dashboard ikut bergerak.
+
+Panel kanan **"Antrian Berkas per Tahapan"** menunjukkan jumlah berkas yang menunggu
+di tiap tahapan — klik salah satunya untuk memfilter tabel.
+
+## C2. Realisasi otomatis dari SP2D
+
+**Tidak ada input pencairan terpisah.** Begitu sebuah butir kegiatan ditetapkan ke
+tahap **SP2D**, nominalnya langsung dihitung sebagai realisasi subkomponen tersebut —
+KPI, grafik, dan tabel dashboard ikut bergerak tanpa entri tambahan.
+
+- Realisasi akun = jumlah nominal butir berstatus SP2D pada akun itu.
+- Realisasi subkomponen = jumlah realisasi akunnya.
+- "Bukti pencairan" pada ringkasan = daftar butir yang sudah SP2D.
+- Subkomponen yang belum punya butir sama sekali memakai `Total_Realisasi` lama
+  sebagai cadangan, sehingga data lama tidak hilang.
+
+**Migrasi data lama:** jalankan fungsi **`migrasiPencairanKeButir`** sekali di Apps
+Script — setiap baris sheet `Pencairan` diubah menjadi butir berstatus SP2D. Setelah
+itu sheet `Pencairan` hanya berfungsi sebagai arsip.
+
+## C3. Revisi Pagu & Revisi RPD
+
+- **Revisi Pagu** — Panel Admin → tab *Revisi Pagu*. Ubah nama kegiatan dan/atau
+  besaran pagu subkomponen maupun akun, lalu klik **Simpan** pada baris itu.
+  `Sisa_Anggaran` dihitung ulang otomatis.
+- **Tambah subkomponen** — kotak bergaris putus-putus di atas daftar: pilih
+  *Subkomponen* atau *Akun* (akun wajib memilih induk), isi kode,
+  nama, dan pagu.
+- **Hapus subkomponen** — tombol ✕ pada baris. Menghapus subkomponen ikut menghapus
+  akunnya. Ditolak bila masih ada butir kegiatan yang menempel — hapus atau
+  pindahkan butirnya lebih dulu.
+- **Revisi RPD** — Panel Admin → tab *Revisi RPD*. Pilih subkomponen, isi 12 angka
+  bulanan. Panel menampilkan total RPD setahun vs pagu subkomponen sebagai kontrol
+  (idealnya selisih Rp 0).
+
+## C3b. Kunci sel & pembaruan otomatis
+
+Dua pengaman agar isian tidak hilang saat mengetik:
+
+1. **Kunci per bulan (RPD)** — ikon 🔓/🔒 di atas tiap kotak bulan. Bulan yang dikunci
+   menjadi read-only, jadi tidak ikut berubah saat Anda mengedit bulan lain.
+2. **Jeda pembaruan otomatis** — begitu ada isian yang belum disimpan (butir, pagu,
+   RPD, atau form subkomponen), auto-refresh 1 menit **berhenti** dan muncul pita
+   "Pembaruan otomatis dijeda". Data di layar tidak akan tertimpa server sampai Anda
+   menyimpan atau membersihkan isian.
+
+**Riwayat Perubahan** — panel di kolom kanan Panel Admin membaca sheet `Log`
+(40 catatan terakhir): waktu, jenis aksi, detail, dan akun pelakunya. Setiap
+tambah/ubah/hapus butir, pagu, RPD, dan subkomponen tercatat di sana.
+
+## C4. Alur lama: Pencairan (arsip)
 
 1. **Siapkan bukti.** Unggah SPM/SP2D/kuitansi ke folder Drive instansi
    (mis. `Bukti Pencairan 2026/Agustus`). Klik kanan file → **Share** →
    *Anyone with the link → Viewer* → **Copy link**.
-2. Buka **Panel Admin** → masukkan token admin.
-3. **Pilih komponen.** Selalu pilih **subkomponen** (baris menjorok), bukan
-   komponen utama, agar rincian akurat. Kartu ringkasan akan menampilkan pagu,
-   realisasi, dan sisa komponen tersebut.
+2. Buka **Panel Admin → tab "Catat Pencairan"**.
+3. **Pilih subkomponen.** Selalu pilih **akun** (baris menjorok), bukan
+   subkomponen, agar rincian akurat. Kartu ringkasan akan menampilkan pagu,
+   realisasi, dan sisa subkomponen tersebut.
 4. Isi **Tanggal Cair** (tanggal SP2D), **Nominal** (angka saja — pemisah ribuan
    otomatis), **Keterangan** singkat, dan tempel **Link Dokumen Bukti**.
 5. Klik **Simpan Pencairan**. Sistem menolak bila nominal melampaui sisa anggaran
    (validasi ganda: di browser dan di `Code.gs`).
-6. Verifikasi di dashboard: buka modal **Data Dukung** komponen tersebut —
+6. Verifikasi di dashboard: buka modal **Data Dukung** subkomponen tersebut —
    entri baru harus muncul paling atas dengan tautan bukti aktif.
 
 Frekuensi disarankan: **setiap kali SP2D terbit**, jangan menumpuk akhir bulan.
@@ -526,12 +708,12 @@ Dipakai bila Panel Admin tidak dapat diakses atau input massal (backlog).
 
 ## C3. Perubahan pagu (revisi DIPA/POK)
 
-1. Edit kolom `Pagu_Anggaran` pada Sheet `Anggaran` untuk baris **subkomponen**.
+1. Edit kolom `Pagu_Anggaran` pada Sheet `Anggaran` untuk baris **akun**.
 2. Sesuaikan pagu baris `UTAMA` bila perlu (dashboard menghitung induk dari jumlah anak).
 3. Jalankan `recalcAll` agar `Sisa_Anggaran` diperbarui.
 4. Catat nomor/tanggal revisi di kolom `Keterangan` sheet `Log` bila diperlukan audit.
 
-## C4. Menambah komponen/subkomponen baru
+## C4. Menambah subkomponen/akun baru
 
 Tambah baris di Sheet `Anggaran` dengan `ID_Komponen` unik, `Tipe` (`UTAMA`/`SUB`),
 `Parent_ID` yang benar, dan `Pagu_Anggaran`. Dropdown di Panel Admin serta grafik
@@ -545,28 +727,261 @@ dashboard mengikuti otomatis — tidak ada kode yang perlu diubah.
 - Backup: **File → Version history** pada spreadsheet, atau salin spreadsheet tiap
   akhir bulan (`DB Anggaran 2026 - Backup Agustus`).
 
-## C6. Mengelola hak akses
+## C5b. Akun staf TU: pendaftaran, verifikasi, dan login
 
-Tiga lapis, sebaiknya dipakai bersama:
+Panel Admin kini punya gerbang login. Data akun disimpan di sheet **`Akun`**
+(dibuat otomatis), sesi aktif di sheet **`Sesi`**.
+
+### Kolom sheet `Akun`
+
+| Kol | Header | Isi |
+|---|---|---|
+| A | `Email` | Email dinas (unik) |
+| B | `Nama` | Nama lengkap |
+| C | `Unit` | Tim kerja |
+| D | `Hash` | SHA-256 dari salt + password — **password asli tidak pernah disimpan** |
+| E | `Salt` | Garam acak per akun |
+| F | `Peran` | `ADMIN` atau `STAF` |
+| G | `Status` | `MENUNGGU_EMAIL` → `MENUNGGU_PERSETUJUAN` → `AKTIF` (atau `NONAKTIF`) |
+| H | `Kode_Verifikasi` | Kode 6 digit sementara |
+| I–J | `Dibuat`, `Terakhir_Login` | Otomatis |
+
+### Bagaimana verifikasinya? — dua lapis
+
+Pertanyaannya bagus: siapa pun bisa membuka halaman daftar, jadi pendaftaran saja
+tidak cukup. Solusi yang dipakai:
+
+1. **Verifikasi kepemilikan email.** Saat mendaftar, Apps Script mengirim **kode 6
+   digit** ke alamat itu lewat `MailApp` (kuota gratis 100 email/hari). Pendaftar
+   harus memasukkan kode → membuktikan email benar miliknya.
+2. **Pembatasan domain.** Di `Code.gs`:
+   ```js
+   var DOMAIN_SAH = ['imipas.go.id', 'kemenimipas.go.id'];
+   ```
+   Email di luar domain itu ditolak sejak awal. **Sesuaikan dengan domain instansi Anda.**
+3. **Persetujuan admin.** Setelah kode benar, status menjadi `MENUNGGU_PERSETUJUAN`
+   dan pemilik spreadsheet menerima email berisi tombol **"Setujui akun ini"**.
+   Baru setelah diklik, status menjadi `AKTIF` dan akun bisa login.
+   Alternatif darurat: ubah kolom `Status` menjadi `AKTIF` langsung di sheet.
+
+Jadi pendaftaran mandiri tetap terbuka, tetapi tidak ada akun yang bisa masuk tanpa
+(a) memegang email domain instansi dan (b) disetujui admin.
+
+### Akun pertama
+
+Sebelum ada admin, jalankan fungsi **`buatAkunPertama`** di Apps Script. Password acak
+akan ditampilkan sekali — catat lalu segera ganti. (Ganti password: hapus baris akun
+di sheet `Akun`, lalu daftar ulang.)
+
+### Login & sesi
+
+- Login mengembalikan **token sesi** berlaku **12 jam** (`SESI_JAM` di `Code.gs`).
+- Token disimpan di `sessionStorage` — hilang saat tab ditutup, tidak dibagi ke tab lain.
+- Semua permintaan tulis (butir, pagu, RPD, subkomponen) wajib membawa token yang sah;
+  bila kedaluwarsa, server menolak dengan pesan minta login ulang.
+- Kolom **Pengguna** di sheet `Log` kini terisi email staf yang melakukan perubahan.
+
+### Menonaktifkan akun
+
+Ubah kolom `Status` menjadi `NONAKTIF`. Untuk memutus sesi yang sedang berjalan,
+hapus barisnya di sheet `Sesi`.
+
+### Batas yang perlu diketahui
+
+Endpoint Apps Script tetap publik (`Anyone`) agar dashboard bisa membaca data tanpa
+login Google. Artinya pengamanan ini setara **kunci pintu kantor**, bukan SSO instansi:
+cukup untuk mencegah orang luar mengubah data, tetapi bila datanya sensitif, tambahkan
+proteksi di level hosting (Netlify Password / Cloudflare Access) di atasnya.
+
+## C5c. Pengaturan akun (menu profil di header)
+
+Klik nama Anda di kanan atas Panel Admin:
+
+- **Data Diri** — ubah nama, unit, NIP (opsional), dan nomor WA. NIP & WA tersimpan
+  di kolom **K** dan **L** sheet `Akun` (dibuat otomatis).
+- **Ubah Password** — wajib memasukkan password lama; hash & salt diperbarui.
+- **Tambah Pengguna** — hanya untuk peran `ADMIN`. Akun yang dibuat admin langsung
+  `AKTIF` (tidak perlu verifikasi email), dan password sementaranya dikirim ke
+  email pengguna.
+
+## C5d. Tab "Pencairan (SP2D)" & sidebar "Perlu Diperhatikan"
+
+- **Pencairan (SP2D)** — daftar butir yang sudah SP2D; inilah bukti pencairan yang
+  terakumulasi ke realisasi. Tidak ada input manual. Tombol **Rekap PDF** mencetak
+  rekapitulasi lengkap.
+- **Perlu Diperhatikan** (sidebar kanan) — butir yang belum SP2D dan **diam ≥ N hari**
+  sejak berkas diterima, urut dari yang paling lama. Ambang bisa diubah (3 / 7 / 14 hari);
+  ≥ 21 hari ditandai merah. Klik kartunya untuk memuat butir ke form; klik ikon ✆
+  untuk mengingatkan PIC lewat WhatsApp.
+
+## C5e. Konfirmasi SP2D + preview dokumen
+
+Memindahkan tahapan ke **SP2D** kini memunculkan dialog konfirmasi
+*"Yakin dokumen sudah lengkap dan bisa dipertanggungjawabkan?"* berisi rincian butir
+dan **preview PDF** dokumen buktinya.
+
+Agar preview tampil, **Link Berkas wajib tautan file PDF, bukan folder Drive**:
+
+- Benar: `https://drive.google.com/file/d/XXXX/view` (akses "siapa saja dengan tautan")
+- Benar: URL langsung berakhiran `.pdf`
+- **Salah**: `https://drive.google.com/drive/folders/...`
+
+Form input memvalidasi ini dan memberi peringatan kuning bila tautannya folder.
+
+## C5f. Nomor dokumen butir kegiatan
+
+Nomor butir bukan lagi `BK-0001`, melainkan **nomor dokumen/surat resmi** yang
+diketik admin, contoh: `DIK-KU.01.02-12` atau `DIK-KU.03.01-23`.
+
+**Mengubah data lama di spreadsheet:** buka Apps Script → pilih fungsi
+**`renomorButir`** → **Run**. Semua baris berformat `BK-xxxx` / `PC-xxxx`
+diubah menjadi `DIK-KU.<bulan>.<urut bulan>-<urut tahun>`; baris yang sudah
+berformat baru dilewati. Jalankan sekali saja.
+
+Setelah itu, setiap butir baru diberi nomor manual oleh admin di kolom
+**Nomor Dokumen / Surat** pada form. Nomor harus unik.
+
+## C5g. Laporan PDF
+
+- **Keseluruhan** — seluruh subkomponen + rekap tahapan berkas.
+- **Bulanan (vs RPD)** — tabel 12 bulan berisi target RPD, realisasi, capaian, dan
+  **deviasi** tiap bulan, plus rincian per subkomponen dan baris kumulatif.
+- **Subkomponen tertentu** — centang sendiri.
+
+Semua tabel bernomor, bergaris tegas, berbaris JUMLAH, dan **tanpa blok tanda tangan**.
+
+**Ketentuan deviasi** yang dipakai dashboard maupun laporan:
+
+| Deviasi | Penilaian |
+|---|---|
+| −5% s.d. +5% | Baik (dalam toleransi) |
+| di luar ±5% s.d. ±10% | Perlu perhatian |
+| lebih dari ±10% | Bermasalah (overbudget / terlambat) |
+
+Deviasi negatif = realisasi tertinggal dari target RPD; positif = melampaui target.
+
+## C5h. Definisi deviasi RPD (satu definisi untuk seluruh sistem)
+
+Deviasi dihitung **bulanan**: realisasi bulan itu dibandingkan target RPD bulan
+yang sama.
+
+```
+deviasi(bulan) = ( realisasi(bulan) / target_RPD(bulan) − 1 ) × 100%
+```
+
+Contoh nyata **Agustus 2026**: target RPD Rp 8.192.566.800, realisasi
+Rp 7.723.352.992 → **deviasi −5,73%**.
+
+### Ketentuan penilaian
+
+| Deviasi | Penilaian |
+|---|---|
+| −5% s.d. +5% | Baik (dalam toleransi) |
+| di luar ±5% s.d. ±10% | Perlu perhatian |
+| lebih dari ±10% | Bermasalah (overbudget / terlambat) |
+
+Deviasi negatif = realisasi tertinggal dari rencana; positif = melampaui rencana.
+
+### Pelaksanaan dimulai Juli 2026
+
+Pusdatin KP baru memulai pelaksanaan pada **Juli 2026**, sehingga Januari–Juni
+memang tidak memiliki target RPD maupun realisasi. Bulan-bulan itu **tidak
+digambar** dan diberi keterangan *"Belum ada pelaksanaan — program dimulai Juli
+2026"* — bukan deviasi 0%.
+
+### Cara membaca grafiknya
+
+- Bar berpusat di 0 — ke atas melampaui target, ke bawah tertinggal.
+- Dua garis putus-putus hijau = pita toleransi **±5%**.
+- Warna: hijau ≤5%, kuning ≤10%, merah >10%.
+- Bulan tak-ternilai tidak digambar; labelnya diberi tanda ▪.
+- Batas sumbu menyesuaikan data (15/30/60/100%). Bar yang melampaui batas dipotong
+  dan diberi **garis tepi tebal**; nilai aslinya tetap disebut di tooltip.
+- Klik bar untuk memilih bulan acuan.
+- **Kartu donat** di sebelahnya memakai angka **kumulatif** s.d. bulan acuan
+  (rincian kumulatif juga muncul di dalam tooltip bar).
+
+### Realisasi TA 2026 (per laporan SP2D 27/28/29)
+
+| Periode | Realisasi bulan | Kumulatif | % Pagu |
+|---|---|---|---|
+| Juli | 154.100.000 | 154.100.000 | 0,73% |
+| Agustus | 7.723.352.992 | 7.877.452.992 | 37,07% |
+| September | 184.608.000 | 8.062.060.992 | 37,94% |
+
+Sisa anggaran **Rp 13.185.543.008** dari pagu Rp 21.247.604.000. Lonjakan Agustus
+berasal dari Belanja Sewa pemeliharaan TI (051.0M) sebesar Rp 7,42 Miliar.
+
+## C5h-2. Memperbaiki data Juli–September di spreadsheet
+
+Bila sheet Anda masih berisi data lama (mis. pencairan Januari–Juni yang
+sebenarnya tidak ada), jalankan sekali:
+
+1. Google Sheets → **Extensions → Apps Script**
+2. Tempel ulang `Code.gs` terbaru → **Save**
+3. Pilih fungsi **`perbaikiDataJuliSeptember`** → **Run**
+4. Muat ulang dashboard dengan **Ctrl+Shift+R**
+
+Fungsi itu mengosongkan sheet `Pencairan` dan `Butir`, mengisinya ulang dengan
+16 pencairan SP2D + 8 butir yang masih diproses sesuai laporan 27/28/29, lalu
+menghitung ulang `Total_Realisasi` dan `Sisa_Anggaran`. Sheet `Anggaran` (pagu)
+dan `RPD` tidak disentuh.
+
+> **Peringatan:** riwayat pencairan & butir lama akan hilang. Buat salinan dulu
+> (File → Buat salinan) bila masih dibutuhkan.
+
+### Bila muncul peringatan kuning di atas grafik
+
+Artinya ada bulan **setelah program dimulai** yang punya realisasi tercatat tetapi
+tanpa target RPD di sheet `RPD`. Lengkapi target bulan tersebut agar deviasinya
+dapat dinilai.
+
+## C5i. Apresiasi papan peringkat
+
+Setiap kartu peringkat punya tombol 👍. Klik sekali menambah apresiasi (ikon berubah
+👏), klik lagi membatalkan. Nilainya disimpan di **localStorage perangkat pengunjung**
+(kunci `anggaran_apresiasi`), jadi bertahan setelah halaman ditutup namun terhitung
+per perangkat.
+
+Untuk hitungan lintas-pengguna, tambahkan sheet `Apresiasi` dan satu action
+`apresiasi` di `Code.gs`, lalu ganti `beriApresiasi` agar memanggilnya.
+
+## C5j. Kontak WhatsApp
+
+Satu sumber di `data-source.js`:
+
+```js
+WA_TU: '6282240281981',        // tombol "Hubungi TU" di dashboard
+```
+
+Nomor admin pada halaman login diatur di `AuthGate.dc.html`:
+
+```js
+const WA_ADMIN = '6282240281981';
+```
+
+## C5k. Logo pada laporan cetak
+
+Jendela cetak tidak dapat memuat `logo.png` (file relatif), sehingga logo di-embed
+sebagai data URI pada konstanta **`LOGO_DATA`** di `data-source.js`.
+
+**Bila logo diganti:** timpa `logo.png`, lalu perbarui `LOGO_DATA` — ubah gambar ke
+base64 (mis. di <https://www.base64-image.de>) dan tempel hasilnya sebagai
+`data:image/png;base64,...`.
+
+## C6. Mengelola hak akses (sistem internal)
+
+Gerbang token pada Panel Admin **sudah dihapus** — sistem ini internal, dan
+pembatasannya dilakukan di level hosting, bukan di dalam halaman:
 
 | Lapis | Cara | Menahan apa |
 |---|---|---|
-| **1. Token API** | `ADMIN_TOKEN` di `Code.gs`; frontend tidak menyimpannya (admin mengetik saat login). POST tanpa token yang benar ditolak. | Orang luar menulis ke sheet lewat endpoint |
-| **2. Proteksi halaman admin** | Netlify: *Site settings → Access control → Password protection*. Cloudflare Access / Vercel Password juga bisa. Alternatif: taruh `Admin Panel.dc.html` di deployment terpisah yang di-password. | Orang luar membuka form admin |
-| **3. Hak akses spreadsheet** | Sheet **tidak** dibagikan publik. Beri akses *Editor* hanya ke 1–2 operator, *Viewer* ke pimpinan. Dashboard tetap jalan karena Apps Script berjalan sebagai pemilik (`Execute as: Me`). | Perubahan data langsung oleh yang tidak berwenang |
+| **1. Proteksi halaman** | Netlify: *Site settings → Access control → Password protection*; atau Cloudflare Access; atau host `admin.html` hanya di intranet | Orang luar membuka Panel Admin |
+| **2. Hak akses spreadsheet** | Sheet tidak dibagikan publik; *Editor* hanya untuk 1–2 operator. Dashboard tetap jalan karena Apps Script berjalan sebagai pemilik | Perubahan data langsung |
+| **3. (Opsional) Token API** | Isi `var ADMIN_TOKEN = '...'` di `Code.gs` → semua POST wajib menyertakan token, dan isi nilai yang sama pada `CONFIG.ADMIN_TOKEN`. Biarkan `''` untuk mematikan pemeriksaan | Penulisan via endpoint dari luar |
 
-Yang **tidak** boleh dilakukan:
-- Menaruh token di repositori publik. Untuk GitHub publik, pakai lapis 2
-  (password hosting) dan ganti token secara berkala.
-- Memakai MODE `gviz` untuk data yang tidak boleh dibaca publik — mode itu
-  mengharuskan sheet dibagikan ke siapa pun.
-
-Rotasi token: ubah nilai di `Code.gs` → **Deploy → Manage deployments → New version**.
-Token lama langsung mati; beri tahu operator token barunya. Tidak ada perubahan di
-frontend karena token tidak tersimpan di kode.
-
-> Gerbang token pada Panel Admin adalah lapis kenyamanan (menyembunyikan form),
-> bukan pengaman kriptografis. Pengaman nyata = lapis 1 dan 2 di tabel atas.
+`Code.gs` mencatat setiap perubahan (tambah/ubah/hapus butir & pencairan) beserta
+email pelakunya di sheet **`Log`** — cukup untuk audit internal.
 
 ---
 
@@ -577,11 +992,13 @@ frontend karena token tidak tersimpan di kode.
 | Badge sumber tetap "Data contoh" | `CONFIG.MODE` masih `seed` | Ubah ke `appscript` |
 | Banner merah "Gagal memuat data" | URL salah / belum deploy versi baru | Uji `?action=getAll` di browser |
 | Endpoint mengembalikan HTML login | *Who has access* bukan **Anyone** | Deploy ulang dengan akses Anyone |
-| POST gagal: "Token tidak valid" | Token beda antara `Code.gs` dan `data-source.js` | Samakan, deploy ulang Web App |
+| POST gagal: "Token tidak valid" | Token yang diketik tidak sama dengan `ADMIN_TOKEN` di `Code.gs` | Login ulang dengan token yang benar |
+| Login admin selalu "Token salah" padahal benar | Web App masih versi lama (belum kenal `verifyToken`) | Tempel ulang `Code.gs` → Deploy → Manage deployments → New version |
+| Panel admin terkunci lagi tiap kali menyimpan | `ADMIN_TOKEN` di `data-source.js` tidak kosong pada MODE `appscript` | Kosongkan `ADMIN_TOKEN: ''` |
 | POST gagal CORS / `Failed to fetch` | Halaman diakses via HTTP, atau URL bukan `/exec` | Pakai HTTPS; pastikan URL berakhiran `/exec` |
 | Nilai jadi 0 semua | Kolom E/F Sheet 1 bertipe teks | Format sebagai Number, hapus `Rp`/titik |
 | Grafik kosong | Tidak ada baris `Tipe = UTAMA` | Isi kolom B dengan `UTAMA` pada baris induk |
-| Subkomponen tidak muncul saat baris dibuka | `Parent_ID` tidak sama persis dengan `ID_Komponen` induk | Copy-paste kode induk, jangan diketik |
+| Akun tidak muncul saat baris dibuka | `Parent_ID` tidak sama persis dengan `ID_Komponen` induk | Copy-paste kode induk, jangan diketik |
 | Realisasi tidak berubah setelah input manual | `recalcAll` belum dijalankan | Apps Script → Run `recalcAll` |
 | Error "Realisasi melampaui pagu" | Pagu belum direvisi di sheet | Perbaiki pagu, atau longgarkan validasi di `addPencairan()` |
 
@@ -598,3 +1015,33 @@ frontend karena token tidak tersimpan di kode.
 | Interval auto-refresh | `CONFIG.REFRESH_MS` |
 | Logo instansi | Ganti kotak berlabel `IP` di header dengan `<img src="logo.png">` |
 | Validasi over-budget (izinkan) | Fungsi `addPencairan()` di `Code.gs` — ubah `throw` menjadi log |
+
+
+## X. Pembaruan September 2026 — sesi live, foto profil, tombol tahapan
+
+**WAJIB deploy versi baru Code.gs.** Tiga endpoint baru dipakai panel admin:
+
+| Action | Guna |
+|---|---|
+| `daftarSesi` | Daftar akun + status login live (panel **Sesi** di header, polling 20 detik) |
+| `simpanFoto` | Simpan foto profil (data URL ≤45.000 karakter) ke sheet `Akun` kolom **M** |
+| `getProfil` | Kini mengembalikan `foto` juga |
+
+Sheet `Akun` mendapat kolom tambahan otomatis: **K** `NIP`, **L** `WA`, **M** `Foto`.
+Foto dipotong persegi 256 px JPEG di browser sebelum dikirim, jadi aman untuk
+batas 50.000 karakter per sel.
+
+Perubahan perilaku lain:
+
+- **Tahapan berkas diubah lewat tombol**, bukan dropdown. Tombol **⚠ Tetapkan SP2D**
+  dipisah, diberi bingkai merah + peringatan karena bersifat final.
+- **Dialog konfirmasi SP2D** punya kolom *Berkas SP2D*: tempel tautan PDF di sana
+  dan langsung tersimpan ke butir (tidak perlu keluar ke tombol Edit).
+- **Link Berkas boleh diisi `-`** bila berkasnya belum ada; validasi server ikut
+  menerima `-`. Tautan tetap wajib sebelum tahap SP2D.
+- **Tambah Pengguna** hanya tampil untuk akun berperan `ADMIN`.
+- Akun perjalanan dinas (`524111`, `524113`, `524114`) tidak dirinci ke
+  Detail Kegiatan — formulir menampilkan input *Nama Kegiatan* sebagai gantinya.
+- **AKRUAL kini dihitung dari butir**: semua butir yang direkam = akrual;
+  butir berstatus SP2D = realisasi kas. Angka Laporan Ketersediaan Dana pada
+  sheet `Detail` hanya baseline bila akun/detail belum punya butir.
